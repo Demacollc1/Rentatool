@@ -51,6 +51,11 @@ class CatalogRepository {
     double b87Qty = 0,
     bool published = false,
     String? notes,
+    String? ratCode,
+    String? canonicalCode,
+    String? canonicalName,
+    String? variant,
+    String? supplierId,
   }) async {
     final rowId = id ?? const Uuid().v4();
     await _db.into(_db.toolModels).insertOnConflictUpdate(
@@ -71,11 +76,31 @@ class CatalogRepository {
             b87Qty: Value(b87Qty),
             published: Value(published),
             notes: Value(notes),
+            ratCode: Value(ratCode),
+            canonicalCode: Value(canonicalCode),
+            canonicalName: Value(canonicalName),
+            variant: Value(variant),
+            supplierId: Value(supplierId),
             updatedAt: Value(DateTime.now()),
           ),
         );
     await _enqueueModel(rowId);
     return rowId;
+  }
+
+  /// Siguiente código Rent a Tool para un canónico: AAQ-001, AAQ-002…
+  Future<String> nextRatCode(String canonicalCode) async {
+    final like = '$canonicalCode-%';
+    final rows = await (_db.select(_db.toolModels)
+          ..where((m) => m.ratCode.like(like)))
+        .get();
+    var maxSeq = 0;
+    for (final m in rows) {
+      final parts = m.ratCode?.split('-');
+      final n = parts == null ? null : int.tryParse(parts.last);
+      if (n != null && n > maxSeq) maxSeq = n;
+    }
+    return '$canonicalCode-${(maxSeq + 1).toString().padLeft(3, '0')}';
   }
 
   Future<void> _enqueueModel(String id) async {
@@ -99,6 +124,11 @@ class CatalogRepository {
       'b87_qty': m.b87Qty,
       'published': m.published,
       'notes': m.notes,
+      'rat_code': m.ratCode,
+      'canonical_code': m.canonicalCode,
+      'canonical_name': m.canonicalName,
+      'variant': m.variant,
+      'supplier_id': m.supplierId,
       'updated_at': isoTs(m.updatedAt),
       'deleted_at': isoTsN(m.deletedAt),
     });
@@ -136,6 +166,8 @@ class CatalogRepository {
     DateTime? purchaseDate,
     String condition = 'new',
     String? notes,
+    String? supplierId,
+    String? invoiceNumber,
   }) async {
     final rowId = const Uuid().v4();
     await _db.into(_db.assets).insert(AssetsCompanion.insert(
@@ -148,6 +180,8 @@ class CatalogRepository {
           purchaseDate: Value(purchaseDate),
           condition: Value(condition),
           notes: Value(notes),
+          supplierId: Value(supplierId),
+          invoiceNumber: Value(invoiceNumber),
           updatedAt: Value(DateTime.now()),
         ));
     await _enqueueAsset(rowId);
@@ -217,6 +251,8 @@ class CatalogRepository {
       'purchase_date': a.purchaseDate?.toUtc().toIso8601String(),
       'purchase_cost': a.purchaseCost,
       'notes': a.notes,
+      'supplier_id': a.supplierId,
+      'invoice_number': a.invoiceNumber,
       'updated_at': isoTs(a.updatedAt),
       'deleted_at': isoTsN(a.deletedAt),
     });
@@ -245,6 +281,8 @@ class CatalogRepository {
     double stock = 0,
     double minStock = 0,
     String? locationId,
+    String? canonicalCode,
+    String? supplierId,
   }) async {
     final rowId = id ?? const Uuid().v4();
     await _db.into(_db.consumables).insertOnConflictUpdate(
@@ -258,6 +296,8 @@ class CatalogRepository {
             stock: Value(stock),
             minStock: Value(minStock),
             locationId: Value(locationId),
+            canonicalCode: Value(canonicalCode),
+            supplierId: Value(supplierId),
             updatedAt: Value(DateTime.now()),
           ),
         );
@@ -275,6 +315,8 @@ class CatalogRepository {
       'stock': c.stock,
       'min_stock': c.minStock,
       'location_id': c.locationId,
+      'canonical_code': c.canonicalCode,
+      'supplier_id': c.supplierId,
       'updated_at': isoTs(c.updatedAt),
       'deleted_at': isoTsN(c.deletedAt),
     });

@@ -811,6 +811,501 @@ class LocationsCompanion extends UpdateCompanion<Location> {
   }
 }
 
+class $SuppliersTable extends Suppliers
+    with TableInfo<$SuppliersTable, Supplier> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SuppliersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _rucMeta = const VerificationMeta('ruc');
+  @override
+  late final GeneratedColumn<String> ruc = GeneratedColumn<String>(
+    'ruc',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _phoneMeta = const VerificationMeta('phone');
+  @override
+  late final GeneratedColumn<String> phone = GeneratedColumn<String>(
+    'phone',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _emailMeta = const VerificationMeta('email');
+  @override
+  late final GeneratedColumn<String> email = GeneratedColumn<String>(
+    'email',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    updatedAt,
+    deletedAt,
+    name,
+    ruc,
+    phone,
+    email,
+    notes,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'suppliers';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Supplier> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('ruc')) {
+      context.handle(
+        _rucMeta,
+        ruc.isAcceptableOrUnknown(data['ruc']!, _rucMeta),
+      );
+    }
+    if (data.containsKey('phone')) {
+      context.handle(
+        _phoneMeta,
+        phone.isAcceptableOrUnknown(data['phone']!, _phoneMeta),
+      );
+    }
+    if (data.containsKey('email')) {
+      context.handle(
+        _emailMeta,
+        email.isAcceptableOrUnknown(data['email']!, _emailMeta),
+      );
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Supplier map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Supplier(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      ruc: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ruc'],
+      ),
+      phone: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}phone'],
+      ),
+      email: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}email'],
+      ),
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
+    );
+  }
+
+  @override
+  $SuppliersTable createAlias(String alias) {
+    return $SuppliersTable(attachedDatabase, alias);
+  }
+}
+
+class Supplier extends DataClass implements Insertable<Supplier> {
+  final String id;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final String name;
+  final String? ruc;
+  final String? phone;
+  final String? email;
+  final String? notes;
+  const Supplier({
+    required this.id,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.name,
+    this.ruc,
+    this.phone,
+    this.email,
+    this.notes,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || ruc != null) {
+      map['ruc'] = Variable<String>(ruc);
+    }
+    if (!nullToAbsent || phone != null) {
+      map['phone'] = Variable<String>(phone);
+    }
+    if (!nullToAbsent || email != null) {
+      map['email'] = Variable<String>(email);
+    }
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    return map;
+  }
+
+  SuppliersCompanion toCompanion(bool nullToAbsent) {
+    return SuppliersCompanion(
+      id: Value(id),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      name: Value(name),
+      ruc: ruc == null && nullToAbsent ? const Value.absent() : Value(ruc),
+      phone: phone == null && nullToAbsent
+          ? const Value.absent()
+          : Value(phone),
+      email: email == null && nullToAbsent
+          ? const Value.absent()
+          : Value(email),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
+    );
+  }
+
+  factory Supplier.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Supplier(
+      id: serializer.fromJson<String>(json['id']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      name: serializer.fromJson<String>(json['name']),
+      ruc: serializer.fromJson<String?>(json['ruc']),
+      phone: serializer.fromJson<String?>(json['phone']),
+      email: serializer.fromJson<String?>(json['email']),
+      notes: serializer.fromJson<String?>(json['notes']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'name': serializer.toJson<String>(name),
+      'ruc': serializer.toJson<String?>(ruc),
+      'phone': serializer.toJson<String?>(phone),
+      'email': serializer.toJson<String?>(email),
+      'notes': serializer.toJson<String?>(notes),
+    };
+  }
+
+  Supplier copyWith({
+    String? id,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    String? name,
+    Value<String?> ruc = const Value.absent(),
+    Value<String?> phone = const Value.absent(),
+    Value<String?> email = const Value.absent(),
+    Value<String?> notes = const Value.absent(),
+  }) => Supplier(
+    id: id ?? this.id,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    name: name ?? this.name,
+    ruc: ruc.present ? ruc.value : this.ruc,
+    phone: phone.present ? phone.value : this.phone,
+    email: email.present ? email.value : this.email,
+    notes: notes.present ? notes.value : this.notes,
+  );
+  Supplier copyWithCompanion(SuppliersCompanion data) {
+    return Supplier(
+      id: data.id.present ? data.id.value : this.id,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      name: data.name.present ? data.name.value : this.name,
+      ruc: data.ruc.present ? data.ruc.value : this.ruc,
+      phone: data.phone.present ? data.phone.value : this.phone,
+      email: data.email.present ? data.email.value : this.email,
+      notes: data.notes.present ? data.notes.value : this.notes,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Supplier(')
+          ..write('id: $id, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('name: $name, ')
+          ..write('ruc: $ruc, ')
+          ..write('phone: $phone, ')
+          ..write('email: $email, ')
+          ..write('notes: $notes')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, updatedAt, deletedAt, name, ruc, phone, email, notes);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Supplier &&
+          other.id == this.id &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.name == this.name &&
+          other.ruc == this.ruc &&
+          other.phone == this.phone &&
+          other.email == this.email &&
+          other.notes == this.notes);
+}
+
+class SuppliersCompanion extends UpdateCompanion<Supplier> {
+  final Value<String> id;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String> name;
+  final Value<String?> ruc;
+  final Value<String?> phone;
+  final Value<String?> email;
+  final Value<String?> notes;
+  final Value<int> rowid;
+  const SuppliersCompanion({
+    this.id = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.name = const Value.absent(),
+    this.ruc = const Value.absent(),
+    this.phone = const Value.absent(),
+    this.email = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SuppliersCompanion.insert({
+    required String id,
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    required String name,
+    this.ruc = const Value.absent(),
+    this.phone = const Value.absent(),
+    this.email = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       name = Value(name);
+  static Insertable<Supplier> custom({
+    Expression<String>? id,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? name,
+    Expression<String>? ruc,
+    Expression<String>? phone,
+    Expression<String>? email,
+    Expression<String>? notes,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (name != null) 'name': name,
+      if (ruc != null) 'ruc': ruc,
+      if (phone != null) 'phone': phone,
+      if (email != null) 'email': email,
+      if (notes != null) 'notes': notes,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SuppliersCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<String>? name,
+    Value<String?>? ruc,
+    Value<String?>? phone,
+    Value<String?>? email,
+    Value<String?>? notes,
+    Value<int>? rowid,
+  }) {
+    return SuppliersCompanion(
+      id: id ?? this.id,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      name: name ?? this.name,
+      ruc: ruc ?? this.ruc,
+      phone: phone ?? this.phone,
+      email: email ?? this.email,
+      notes: notes ?? this.notes,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (ruc.present) {
+      map['ruc'] = Variable<String>(ruc.value);
+    }
+    if (phone.present) {
+      map['phone'] = Variable<String>(phone.value);
+    }
+    if (email.present) {
+      map['email'] = Variable<String>(email.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SuppliersCompanion(')
+          ..write('id: $id, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('name: $name, ')
+          ..write('ruc: $ruc, ')
+          ..write('phone: $phone, ')
+          ..write('email: $email, ')
+          ..write('notes: $notes, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $ToolModelsTable extends ToolModels
     with TableInfo<$ToolModelsTable, ToolModel> {
   @override
@@ -1020,6 +1515,61 @@ class $ToolModelsTable extends ToolModels
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _ratCodeMeta = const VerificationMeta(
+    'ratCode',
+  );
+  @override
+  late final GeneratedColumn<String> ratCode = GeneratedColumn<String>(
+    'rat_code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _canonicalCodeMeta = const VerificationMeta(
+    'canonicalCode',
+  );
+  @override
+  late final GeneratedColumn<String> canonicalCode = GeneratedColumn<String>(
+    'canonical_code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _canonicalNameMeta = const VerificationMeta(
+    'canonicalName',
+  );
+  @override
+  late final GeneratedColumn<String> canonicalName = GeneratedColumn<String>(
+    'canonical_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _variantMeta = const VerificationMeta(
+    'variant',
+  );
+  @override
+  late final GeneratedColumn<String> variant = GeneratedColumn<String>(
+    'variant',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _supplierIdMeta = const VerificationMeta(
+    'supplierId',
+  );
+  @override
+  late final GeneratedColumn<String> supplierId = GeneratedColumn<String>(
+    'supplier_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1041,6 +1591,11 @@ class $ToolModelsTable extends ToolModels
     published,
     photoPath,
     notes,
+    ratCode,
+    canonicalCode,
+    canonicalName,
+    variant,
+    supplierId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1178,6 +1733,42 @@ class $ToolModelsTable extends ToolModels
         notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
       );
     }
+    if (data.containsKey('rat_code')) {
+      context.handle(
+        _ratCodeMeta,
+        ratCode.isAcceptableOrUnknown(data['rat_code']!, _ratCodeMeta),
+      );
+    }
+    if (data.containsKey('canonical_code')) {
+      context.handle(
+        _canonicalCodeMeta,
+        canonicalCode.isAcceptableOrUnknown(
+          data['canonical_code']!,
+          _canonicalCodeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('canonical_name')) {
+      context.handle(
+        _canonicalNameMeta,
+        canonicalName.isAcceptableOrUnknown(
+          data['canonical_name']!,
+          _canonicalNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('variant')) {
+      context.handle(
+        _variantMeta,
+        variant.isAcceptableOrUnknown(data['variant']!, _variantMeta),
+      );
+    }
+    if (data.containsKey('supplier_id')) {
+      context.handle(
+        _supplierIdMeta,
+        supplierId.isAcceptableOrUnknown(data['supplier_id']!, _supplierIdMeta),
+      );
+    }
     return context;
   }
 
@@ -1263,6 +1854,26 @@ class $ToolModelsTable extends ToolModels
         DriftSqlType.string,
         data['${effectivePrefix}notes'],
       ),
+      ratCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}rat_code'],
+      ),
+      canonicalCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}canonical_code'],
+      ),
+      canonicalName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}canonical_name'],
+      ),
+      variant: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}variant'],
+      ),
+      supplierId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}supplier_id'],
+      ),
     );
   }
 
@@ -1300,6 +1911,17 @@ class ToolModel extends DataClass implements Insertable<ToolModel> {
   final bool published;
   final String? photoPath;
   final String? notes;
+
+  /// Código propio Rent a Tool: canónico + secuencial (ej. AAQ-003).
+  final String? ratCode;
+
+  /// Subgrupo canónico del ERP Demaco (ej. AAQ) y su nombre completo.
+  final String? canonicalCode;
+  final String? canonicalName;
+
+  /// Variación dentro del mismo producto (ej. "kit 2 baterías").
+  final String? variant;
+  final String? supplierId;
   const ToolModel({
     required this.id,
     required this.updatedAt,
@@ -1320,6 +1942,11 @@ class ToolModel extends DataClass implements Insertable<ToolModel> {
     required this.published,
     this.photoPath,
     this.notes,
+    this.ratCode,
+    this.canonicalCode,
+    this.canonicalName,
+    this.variant,
+    this.supplierId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1367,6 +1994,21 @@ class ToolModel extends DataClass implements Insertable<ToolModel> {
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
     }
+    if (!nullToAbsent || ratCode != null) {
+      map['rat_code'] = Variable<String>(ratCode);
+    }
+    if (!nullToAbsent || canonicalCode != null) {
+      map['canonical_code'] = Variable<String>(canonicalCode);
+    }
+    if (!nullToAbsent || canonicalName != null) {
+      map['canonical_name'] = Variable<String>(canonicalName);
+    }
+    if (!nullToAbsent || variant != null) {
+      map['variant'] = Variable<String>(variant);
+    }
+    if (!nullToAbsent || supplierId != null) {
+      map['supplier_id'] = Variable<String>(supplierId);
+    }
     return map;
   }
 
@@ -1413,6 +2055,21 @@ class ToolModel extends DataClass implements Insertable<ToolModel> {
       notes: notes == null && nullToAbsent
           ? const Value.absent()
           : Value(notes),
+      ratCode: ratCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ratCode),
+      canonicalCode: canonicalCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(canonicalCode),
+      canonicalName: canonicalName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(canonicalName),
+      variant: variant == null && nullToAbsent
+          ? const Value.absent()
+          : Value(variant),
+      supplierId: supplierId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(supplierId),
     );
   }
 
@@ -1441,6 +2098,11 @@ class ToolModel extends DataClass implements Insertable<ToolModel> {
       published: serializer.fromJson<bool>(json['published']),
       photoPath: serializer.fromJson<String?>(json['photoPath']),
       notes: serializer.fromJson<String?>(json['notes']),
+      ratCode: serializer.fromJson<String?>(json['ratCode']),
+      canonicalCode: serializer.fromJson<String?>(json['canonicalCode']),
+      canonicalName: serializer.fromJson<String?>(json['canonicalName']),
+      variant: serializer.fromJson<String?>(json['variant']),
+      supplierId: serializer.fromJson<String?>(json['supplierId']),
     );
   }
   @override
@@ -1466,6 +2128,11 @@ class ToolModel extends DataClass implements Insertable<ToolModel> {
       'published': serializer.toJson<bool>(published),
       'photoPath': serializer.toJson<String?>(photoPath),
       'notes': serializer.toJson<String?>(notes),
+      'ratCode': serializer.toJson<String?>(ratCode),
+      'canonicalCode': serializer.toJson<String?>(canonicalCode),
+      'canonicalName': serializer.toJson<String?>(canonicalName),
+      'variant': serializer.toJson<String?>(variant),
+      'supplierId': serializer.toJson<String?>(supplierId),
     };
   }
 
@@ -1489,6 +2156,11 @@ class ToolModel extends DataClass implements Insertable<ToolModel> {
     bool? published,
     Value<String?> photoPath = const Value.absent(),
     Value<String?> notes = const Value.absent(),
+    Value<String?> ratCode = const Value.absent(),
+    Value<String?> canonicalCode = const Value.absent(),
+    Value<String?> canonicalName = const Value.absent(),
+    Value<String?> variant = const Value.absent(),
+    Value<String?> supplierId = const Value.absent(),
   }) => ToolModel(
     id: id ?? this.id,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -1509,6 +2181,15 @@ class ToolModel extends DataClass implements Insertable<ToolModel> {
     published: published ?? this.published,
     photoPath: photoPath.present ? photoPath.value : this.photoPath,
     notes: notes.present ? notes.value : this.notes,
+    ratCode: ratCode.present ? ratCode.value : this.ratCode,
+    canonicalCode: canonicalCode.present
+        ? canonicalCode.value
+        : this.canonicalCode,
+    canonicalName: canonicalName.present
+        ? canonicalName.value
+        : this.canonicalName,
+    variant: variant.present ? variant.value : this.variant,
+    supplierId: supplierId.present ? supplierId.value : this.supplierId,
   );
   ToolModel copyWithCompanion(ToolModelsCompanion data) {
     return ToolModel(
@@ -1539,6 +2220,17 @@ class ToolModel extends DataClass implements Insertable<ToolModel> {
       published: data.published.present ? data.published.value : this.published,
       photoPath: data.photoPath.present ? data.photoPath.value : this.photoPath,
       notes: data.notes.present ? data.notes.value : this.notes,
+      ratCode: data.ratCode.present ? data.ratCode.value : this.ratCode,
+      canonicalCode: data.canonicalCode.present
+          ? data.canonicalCode.value
+          : this.canonicalCode,
+      canonicalName: data.canonicalName.present
+          ? data.canonicalName.value
+          : this.canonicalName,
+      variant: data.variant.present ? data.variant.value : this.variant,
+      supplierId: data.supplierId.present
+          ? data.supplierId.value
+          : this.supplierId,
     );
   }
 
@@ -1563,13 +2255,18 @@ class ToolModel extends DataClass implements Insertable<ToolModel> {
           ..write('b87Qty: $b87Qty, ')
           ..write('published: $published, ')
           ..write('photoPath: $photoPath, ')
-          ..write('notes: $notes')
+          ..write('notes: $notes, ')
+          ..write('ratCode: $ratCode, ')
+          ..write('canonicalCode: $canonicalCode, ')
+          ..write('canonicalName: $canonicalName, ')
+          ..write('variant: $variant, ')
+          ..write('supplierId: $supplierId')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     updatedAt,
     deletedAt,
@@ -1589,7 +2286,12 @@ class ToolModel extends DataClass implements Insertable<ToolModel> {
     published,
     photoPath,
     notes,
-  );
+    ratCode,
+    canonicalCode,
+    canonicalName,
+    variant,
+    supplierId,
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1612,7 +2314,12 @@ class ToolModel extends DataClass implements Insertable<ToolModel> {
           other.b87Qty == this.b87Qty &&
           other.published == this.published &&
           other.photoPath == this.photoPath &&
-          other.notes == this.notes);
+          other.notes == this.notes &&
+          other.ratCode == this.ratCode &&
+          other.canonicalCode == this.canonicalCode &&
+          other.canonicalName == this.canonicalName &&
+          other.variant == this.variant &&
+          other.supplierId == this.supplierId);
 }
 
 class ToolModelsCompanion extends UpdateCompanion<ToolModel> {
@@ -1635,6 +2342,11 @@ class ToolModelsCompanion extends UpdateCompanion<ToolModel> {
   final Value<bool> published;
   final Value<String?> photoPath;
   final Value<String?> notes;
+  final Value<String?> ratCode;
+  final Value<String?> canonicalCode;
+  final Value<String?> canonicalName;
+  final Value<String?> variant;
+  final Value<String?> supplierId;
   final Value<int> rowid;
   const ToolModelsCompanion({
     this.id = const Value.absent(),
@@ -1656,6 +2368,11 @@ class ToolModelsCompanion extends UpdateCompanion<ToolModel> {
     this.published = const Value.absent(),
     this.photoPath = const Value.absent(),
     this.notes = const Value.absent(),
+    this.ratCode = const Value.absent(),
+    this.canonicalCode = const Value.absent(),
+    this.canonicalName = const Value.absent(),
+    this.variant = const Value.absent(),
+    this.supplierId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ToolModelsCompanion.insert({
@@ -1678,6 +2395,11 @@ class ToolModelsCompanion extends UpdateCompanion<ToolModel> {
     this.published = const Value.absent(),
     this.photoPath = const Value.absent(),
     this.notes = const Value.absent(),
+    this.ratCode = const Value.absent(),
+    this.canonicalCode = const Value.absent(),
+    this.canonicalName = const Value.absent(),
+    this.variant = const Value.absent(),
+    this.supplierId = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        name = Value(name);
@@ -1701,6 +2423,11 @@ class ToolModelsCompanion extends UpdateCompanion<ToolModel> {
     Expression<bool>? published,
     Expression<String>? photoPath,
     Expression<String>? notes,
+    Expression<String>? ratCode,
+    Expression<String>? canonicalCode,
+    Expression<String>? canonicalName,
+    Expression<String>? variant,
+    Expression<String>? supplierId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1723,6 +2450,11 @@ class ToolModelsCompanion extends UpdateCompanion<ToolModel> {
       if (published != null) 'published': published,
       if (photoPath != null) 'photo_path': photoPath,
       if (notes != null) 'notes': notes,
+      if (ratCode != null) 'rat_code': ratCode,
+      if (canonicalCode != null) 'canonical_code': canonicalCode,
+      if (canonicalName != null) 'canonical_name': canonicalName,
+      if (variant != null) 'variant': variant,
+      if (supplierId != null) 'supplier_id': supplierId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1747,6 +2479,11 @@ class ToolModelsCompanion extends UpdateCompanion<ToolModel> {
     Value<bool>? published,
     Value<String?>? photoPath,
     Value<String?>? notes,
+    Value<String?>? ratCode,
+    Value<String?>? canonicalCode,
+    Value<String?>? canonicalName,
+    Value<String?>? variant,
+    Value<String?>? supplierId,
     Value<int>? rowid,
   }) {
     return ToolModelsCompanion(
@@ -1769,6 +2506,11 @@ class ToolModelsCompanion extends UpdateCompanion<ToolModel> {
       published: published ?? this.published,
       photoPath: photoPath ?? this.photoPath,
       notes: notes ?? this.notes,
+      ratCode: ratCode ?? this.ratCode,
+      canonicalCode: canonicalCode ?? this.canonicalCode,
+      canonicalName: canonicalName ?? this.canonicalName,
+      variant: variant ?? this.variant,
+      supplierId: supplierId ?? this.supplierId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1833,6 +2575,21 @@ class ToolModelsCompanion extends UpdateCompanion<ToolModel> {
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
     }
+    if (ratCode.present) {
+      map['rat_code'] = Variable<String>(ratCode.value);
+    }
+    if (canonicalCode.present) {
+      map['canonical_code'] = Variable<String>(canonicalCode.value);
+    }
+    if (canonicalName.present) {
+      map['canonical_name'] = Variable<String>(canonicalName.value);
+    }
+    if (variant.present) {
+      map['variant'] = Variable<String>(variant.value);
+    }
+    if (supplierId.present) {
+      map['supplier_id'] = Variable<String>(supplierId.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1861,6 +2618,11 @@ class ToolModelsCompanion extends UpdateCompanion<ToolModel> {
           ..write('published: $published, ')
           ..write('photoPath: $photoPath, ')
           ..write('notes: $notes, ')
+          ..write('ratCode: $ratCode, ')
+          ..write('canonicalCode: $canonicalCode, ')
+          ..write('canonicalName: $canonicalName, ')
+          ..write('variant: $variant, ')
+          ..write('supplierId: $supplierId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2000,6 +2762,28 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _supplierIdMeta = const VerificationMeta(
+    'supplierId',
+  );
+  @override
+  late final GeneratedColumn<String> supplierId = GeneratedColumn<String>(
+    'supplier_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _invoiceNumberMeta = const VerificationMeta(
+    'invoiceNumber',
+  );
+  @override
+  late final GeneratedColumn<String> invoiceNumber = GeneratedColumn<String>(
+    'invoice_number',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2014,6 +2798,8 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
     purchaseDate,
     purchaseCost,
     notes,
+    supplierId,
+    invoiceNumber,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2111,6 +2897,21 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
         notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
       );
     }
+    if (data.containsKey('supplier_id')) {
+      context.handle(
+        _supplierIdMeta,
+        supplierId.isAcceptableOrUnknown(data['supplier_id']!, _supplierIdMeta),
+      );
+    }
+    if (data.containsKey('invoice_number')) {
+      context.handle(
+        _invoiceNumberMeta,
+        invoiceNumber.isAcceptableOrUnknown(
+          data['invoice_number']!,
+          _invoiceNumberMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -2168,6 +2969,14 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
         DriftSqlType.string,
         data['${effectivePrefix}notes'],
       ),
+      supplierId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}supplier_id'],
+      ),
+      invoiceNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}invoice_number'],
+      ),
     );
   }
 
@@ -2192,6 +3001,10 @@ class Asset extends DataClass implements Insertable<Asset> {
   final DateTime? purchaseDate;
   final double purchaseCost;
   final String? notes;
+
+  /// Compra: proveedor y número de factura.
+  final String? supplierId;
+  final String? invoiceNumber;
   const Asset({
     required this.id,
     required this.updatedAt,
@@ -2205,6 +3018,8 @@ class Asset extends DataClass implements Insertable<Asset> {
     this.purchaseDate,
     required this.purchaseCost,
     this.notes,
+    this.supplierId,
+    this.invoiceNumber,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2230,6 +3045,12 @@ class Asset extends DataClass implements Insertable<Asset> {
     map['purchase_cost'] = Variable<double>(purchaseCost);
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
+    }
+    if (!nullToAbsent || supplierId != null) {
+      map['supplier_id'] = Variable<String>(supplierId);
+    }
+    if (!nullToAbsent || invoiceNumber != null) {
+      map['invoice_number'] = Variable<String>(invoiceNumber);
     }
     return map;
   }
@@ -2258,6 +3079,12 @@ class Asset extends DataClass implements Insertable<Asset> {
       notes: notes == null && nullToAbsent
           ? const Value.absent()
           : Value(notes),
+      supplierId: supplierId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(supplierId),
+      invoiceNumber: invoiceNumber == null && nullToAbsent
+          ? const Value.absent()
+          : Value(invoiceNumber),
     );
   }
 
@@ -2279,6 +3106,8 @@ class Asset extends DataClass implements Insertable<Asset> {
       purchaseDate: serializer.fromJson<DateTime?>(json['purchaseDate']),
       purchaseCost: serializer.fromJson<double>(json['purchaseCost']),
       notes: serializer.fromJson<String?>(json['notes']),
+      supplierId: serializer.fromJson<String?>(json['supplierId']),
+      invoiceNumber: serializer.fromJson<String?>(json['invoiceNumber']),
     );
   }
   @override
@@ -2297,6 +3126,8 @@ class Asset extends DataClass implements Insertable<Asset> {
       'purchaseDate': serializer.toJson<DateTime?>(purchaseDate),
       'purchaseCost': serializer.toJson<double>(purchaseCost),
       'notes': serializer.toJson<String?>(notes),
+      'supplierId': serializer.toJson<String?>(supplierId),
+      'invoiceNumber': serializer.toJson<String?>(invoiceNumber),
     };
   }
 
@@ -2313,6 +3144,8 @@ class Asset extends DataClass implements Insertable<Asset> {
     Value<DateTime?> purchaseDate = const Value.absent(),
     double? purchaseCost,
     Value<String?> notes = const Value.absent(),
+    Value<String?> supplierId = const Value.absent(),
+    Value<String?> invoiceNumber = const Value.absent(),
   }) => Asset(
     id: id ?? this.id,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -2326,6 +3159,10 @@ class Asset extends DataClass implements Insertable<Asset> {
     purchaseDate: purchaseDate.present ? purchaseDate.value : this.purchaseDate,
     purchaseCost: purchaseCost ?? this.purchaseCost,
     notes: notes.present ? notes.value : this.notes,
+    supplierId: supplierId.present ? supplierId.value : this.supplierId,
+    invoiceNumber: invoiceNumber.present
+        ? invoiceNumber.value
+        : this.invoiceNumber,
   );
   Asset copyWithCompanion(AssetsCompanion data) {
     return Asset(
@@ -2349,6 +3186,12 @@ class Asset extends DataClass implements Insertable<Asset> {
           ? data.purchaseCost.value
           : this.purchaseCost,
       notes: data.notes.present ? data.notes.value : this.notes,
+      supplierId: data.supplierId.present
+          ? data.supplierId.value
+          : this.supplierId,
+      invoiceNumber: data.invoiceNumber.present
+          ? data.invoiceNumber.value
+          : this.invoiceNumber,
     );
   }
 
@@ -2366,7 +3209,9 @@ class Asset extends DataClass implements Insertable<Asset> {
           ..write('locationId: $locationId, ')
           ..write('purchaseDate: $purchaseDate, ')
           ..write('purchaseCost: $purchaseCost, ')
-          ..write('notes: $notes')
+          ..write('notes: $notes, ')
+          ..write('supplierId: $supplierId, ')
+          ..write('invoiceNumber: $invoiceNumber')
           ..write(')'))
         .toString();
   }
@@ -2385,6 +3230,8 @@ class Asset extends DataClass implements Insertable<Asset> {
     purchaseDate,
     purchaseCost,
     notes,
+    supplierId,
+    invoiceNumber,
   );
   @override
   bool operator ==(Object other) =>
@@ -2401,7 +3248,9 @@ class Asset extends DataClass implements Insertable<Asset> {
           other.locationId == this.locationId &&
           other.purchaseDate == this.purchaseDate &&
           other.purchaseCost == this.purchaseCost &&
-          other.notes == this.notes);
+          other.notes == this.notes &&
+          other.supplierId == this.supplierId &&
+          other.invoiceNumber == this.invoiceNumber);
 }
 
 class AssetsCompanion extends UpdateCompanion<Asset> {
@@ -2417,6 +3266,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
   final Value<DateTime?> purchaseDate;
   final Value<double> purchaseCost;
   final Value<String?> notes;
+  final Value<String?> supplierId;
+  final Value<String?> invoiceNumber;
   final Value<int> rowid;
   const AssetsCompanion({
     this.id = const Value.absent(),
@@ -2431,6 +3282,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     this.purchaseDate = const Value.absent(),
     this.purchaseCost = const Value.absent(),
     this.notes = const Value.absent(),
+    this.supplierId = const Value.absent(),
+    this.invoiceNumber = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   AssetsCompanion.insert({
@@ -2446,6 +3299,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     this.purchaseDate = const Value.absent(),
     this.purchaseCost = const Value.absent(),
     this.notes = const Value.absent(),
+    this.supplierId = const Value.absent(),
+    this.invoiceNumber = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        toolModelId = Value(toolModelId),
@@ -2463,6 +3318,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     Expression<DateTime>? purchaseDate,
     Expression<double>? purchaseCost,
     Expression<String>? notes,
+    Expression<String>? supplierId,
+    Expression<String>? invoiceNumber,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2478,6 +3335,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
       if (purchaseDate != null) 'purchase_date': purchaseDate,
       if (purchaseCost != null) 'purchase_cost': purchaseCost,
       if (notes != null) 'notes': notes,
+      if (supplierId != null) 'supplier_id': supplierId,
+      if (invoiceNumber != null) 'invoice_number': invoiceNumber,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2495,6 +3354,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     Value<DateTime?>? purchaseDate,
     Value<double>? purchaseCost,
     Value<String?>? notes,
+    Value<String?>? supplierId,
+    Value<String?>? invoiceNumber,
     Value<int>? rowid,
   }) {
     return AssetsCompanion(
@@ -2510,6 +3371,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
       purchaseDate: purchaseDate ?? this.purchaseDate,
       purchaseCost: purchaseCost ?? this.purchaseCost,
       notes: notes ?? this.notes,
+      supplierId: supplierId ?? this.supplierId,
+      invoiceNumber: invoiceNumber ?? this.invoiceNumber,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2553,6 +3416,12 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
     }
+    if (supplierId.present) {
+      map['supplier_id'] = Variable<String>(supplierId.value);
+    }
+    if (invoiceNumber.present) {
+      map['invoice_number'] = Variable<String>(invoiceNumber.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2574,6 +3443,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
           ..write('purchaseDate: $purchaseDate, ')
           ..write('purchaseCost: $purchaseCost, ')
           ..write('notes: $notes, ')
+          ..write('supplierId: $supplierId, ')
+          ..write('invoiceNumber: $invoiceNumber, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2701,6 +3572,28 @@ class $ConsumablesTable extends Consumables
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _canonicalCodeMeta = const VerificationMeta(
+    'canonicalCode',
+  );
+  @override
+  late final GeneratedColumn<String> canonicalCode = GeneratedColumn<String>(
+    'canonical_code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _supplierIdMeta = const VerificationMeta(
+    'supplierId',
+  );
+  @override
+  late final GeneratedColumn<String> supplierId = GeneratedColumn<String>(
+    'supplier_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2714,6 +3607,8 @@ class $ConsumablesTable extends Consumables
     stock,
     minStock,
     locationId,
+    canonicalCode,
+    supplierId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2794,6 +3689,21 @@ class $ConsumablesTable extends Consumables
         locationId.isAcceptableOrUnknown(data['location_id']!, _locationIdMeta),
       );
     }
+    if (data.containsKey('canonical_code')) {
+      context.handle(
+        _canonicalCodeMeta,
+        canonicalCode.isAcceptableOrUnknown(
+          data['canonical_code']!,
+          _canonicalCodeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('supplier_id')) {
+      context.handle(
+        _supplierIdMeta,
+        supplierId.isAcceptableOrUnknown(data['supplier_id']!, _supplierIdMeta),
+      );
+    }
     return context;
   }
 
@@ -2847,6 +3757,14 @@ class $ConsumablesTable extends Consumables
         DriftSqlType.string,
         data['${effectivePrefix}location_id'],
       ),
+      canonicalCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}canonical_code'],
+      ),
+      supplierId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}supplier_id'],
+      ),
     );
   }
 
@@ -2868,6 +3786,8 @@ class Consumable extends DataClass implements Insertable<Consumable> {
   final double stock;
   final double minStock;
   final String? locationId;
+  final String? canonicalCode;
+  final String? supplierId;
   const Consumable({
     required this.id,
     required this.updatedAt,
@@ -2880,6 +3800,8 @@ class Consumable extends DataClass implements Insertable<Consumable> {
     required this.stock,
     required this.minStock,
     this.locationId,
+    this.canonicalCode,
+    this.supplierId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2901,6 +3823,12 @@ class Consumable extends DataClass implements Insertable<Consumable> {
     if (!nullToAbsent || locationId != null) {
       map['location_id'] = Variable<String>(locationId);
     }
+    if (!nullToAbsent || canonicalCode != null) {
+      map['canonical_code'] = Variable<String>(canonicalCode);
+    }
+    if (!nullToAbsent || supplierId != null) {
+      map['supplier_id'] = Variable<String>(supplierId);
+    }
     return map;
   }
 
@@ -2921,6 +3849,12 @@ class Consumable extends DataClass implements Insertable<Consumable> {
       locationId: locationId == null && nullToAbsent
           ? const Value.absent()
           : Value(locationId),
+      canonicalCode: canonicalCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(canonicalCode),
+      supplierId: supplierId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(supplierId),
     );
   }
 
@@ -2941,6 +3875,8 @@ class Consumable extends DataClass implements Insertable<Consumable> {
       stock: serializer.fromJson<double>(json['stock']),
       minStock: serializer.fromJson<double>(json['minStock']),
       locationId: serializer.fromJson<String?>(json['locationId']),
+      canonicalCode: serializer.fromJson<String?>(json['canonicalCode']),
+      supplierId: serializer.fromJson<String?>(json['supplierId']),
     );
   }
   @override
@@ -2958,6 +3894,8 @@ class Consumable extends DataClass implements Insertable<Consumable> {
       'stock': serializer.toJson<double>(stock),
       'minStock': serializer.toJson<double>(minStock),
       'locationId': serializer.toJson<String?>(locationId),
+      'canonicalCode': serializer.toJson<String?>(canonicalCode),
+      'supplierId': serializer.toJson<String?>(supplierId),
     };
   }
 
@@ -2973,6 +3911,8 @@ class Consumable extends DataClass implements Insertable<Consumable> {
     double? stock,
     double? minStock,
     Value<String?> locationId = const Value.absent(),
+    Value<String?> canonicalCode = const Value.absent(),
+    Value<String?> supplierId = const Value.absent(),
   }) => Consumable(
     id: id ?? this.id,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -2985,6 +3925,10 @@ class Consumable extends DataClass implements Insertable<Consumable> {
     stock: stock ?? this.stock,
     minStock: minStock ?? this.minStock,
     locationId: locationId.present ? locationId.value : this.locationId,
+    canonicalCode: canonicalCode.present
+        ? canonicalCode.value
+        : this.canonicalCode,
+    supplierId: supplierId.present ? supplierId.value : this.supplierId,
   );
   Consumable copyWithCompanion(ConsumablesCompanion data) {
     return Consumable(
@@ -3001,6 +3945,12 @@ class Consumable extends DataClass implements Insertable<Consumable> {
       locationId: data.locationId.present
           ? data.locationId.value
           : this.locationId,
+      canonicalCode: data.canonicalCode.present
+          ? data.canonicalCode.value
+          : this.canonicalCode,
+      supplierId: data.supplierId.present
+          ? data.supplierId.value
+          : this.supplierId,
     );
   }
 
@@ -3017,7 +3967,9 @@ class Consumable extends DataClass implements Insertable<Consumable> {
           ..write('salePrice: $salePrice, ')
           ..write('stock: $stock, ')
           ..write('minStock: $minStock, ')
-          ..write('locationId: $locationId')
+          ..write('locationId: $locationId, ')
+          ..write('canonicalCode: $canonicalCode, ')
+          ..write('supplierId: $supplierId')
           ..write(')'))
         .toString();
   }
@@ -3035,6 +3987,8 @@ class Consumable extends DataClass implements Insertable<Consumable> {
     stock,
     minStock,
     locationId,
+    canonicalCode,
+    supplierId,
   );
   @override
   bool operator ==(Object other) =>
@@ -3050,7 +4004,9 @@ class Consumable extends DataClass implements Insertable<Consumable> {
           other.salePrice == this.salePrice &&
           other.stock == this.stock &&
           other.minStock == this.minStock &&
-          other.locationId == this.locationId);
+          other.locationId == this.locationId &&
+          other.canonicalCode == this.canonicalCode &&
+          other.supplierId == this.supplierId);
 }
 
 class ConsumablesCompanion extends UpdateCompanion<Consumable> {
@@ -3065,6 +4021,8 @@ class ConsumablesCompanion extends UpdateCompanion<Consumable> {
   final Value<double> stock;
   final Value<double> minStock;
   final Value<String?> locationId;
+  final Value<String?> canonicalCode;
+  final Value<String?> supplierId;
   final Value<int> rowid;
   const ConsumablesCompanion({
     this.id = const Value.absent(),
@@ -3078,6 +4036,8 @@ class ConsumablesCompanion extends UpdateCompanion<Consumable> {
     this.stock = const Value.absent(),
     this.minStock = const Value.absent(),
     this.locationId = const Value.absent(),
+    this.canonicalCode = const Value.absent(),
+    this.supplierId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ConsumablesCompanion.insert({
@@ -3092,6 +4052,8 @@ class ConsumablesCompanion extends UpdateCompanion<Consumable> {
     this.stock = const Value.absent(),
     this.minStock = const Value.absent(),
     this.locationId = const Value.absent(),
+    this.canonicalCode = const Value.absent(),
+    this.supplierId = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        name = Value(name);
@@ -3107,6 +4069,8 @@ class ConsumablesCompanion extends UpdateCompanion<Consumable> {
     Expression<double>? stock,
     Expression<double>? minStock,
     Expression<String>? locationId,
+    Expression<String>? canonicalCode,
+    Expression<String>? supplierId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -3121,6 +4085,8 @@ class ConsumablesCompanion extends UpdateCompanion<Consumable> {
       if (stock != null) 'stock': stock,
       if (minStock != null) 'min_stock': minStock,
       if (locationId != null) 'location_id': locationId,
+      if (canonicalCode != null) 'canonical_code': canonicalCode,
+      if (supplierId != null) 'supplier_id': supplierId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3137,6 +4103,8 @@ class ConsumablesCompanion extends UpdateCompanion<Consumable> {
     Value<double>? stock,
     Value<double>? minStock,
     Value<String?>? locationId,
+    Value<String?>? canonicalCode,
+    Value<String?>? supplierId,
     Value<int>? rowid,
   }) {
     return ConsumablesCompanion(
@@ -3151,6 +4119,8 @@ class ConsumablesCompanion extends UpdateCompanion<Consumable> {
       stock: stock ?? this.stock,
       minStock: minStock ?? this.minStock,
       locationId: locationId ?? this.locationId,
+      canonicalCode: canonicalCode ?? this.canonicalCode,
+      supplierId: supplierId ?? this.supplierId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3191,6 +4161,12 @@ class ConsumablesCompanion extends UpdateCompanion<Consumable> {
     if (locationId.present) {
       map['location_id'] = Variable<String>(locationId.value);
     }
+    if (canonicalCode.present) {
+      map['canonical_code'] = Variable<String>(canonicalCode.value);
+    }
+    if (supplierId.present) {
+      map['supplier_id'] = Variable<String>(supplierId.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -3211,6 +4187,8 @@ class ConsumablesCompanion extends UpdateCompanion<Consumable> {
           ..write('stock: $stock, ')
           ..write('minStock: $minStock, ')
           ..write('locationId: $locationId, ')
+          ..write('canonicalCode: $canonicalCode, ')
+          ..write('supplierId: $supplierId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4975,6 +5953,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $CategoriesTable categories = $CategoriesTable(this);
   late final $LocationsTable locations = $LocationsTable(this);
+  late final $SuppliersTable suppliers = $SuppliersTable(this);
   late final $ToolModelsTable toolModels = $ToolModelsTable(this);
   late final $AssetsTable assets = $AssetsTable(this);
   late final $ConsumablesTable consumables = $ConsumablesTable(this);
@@ -4991,6 +5970,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     categories,
     locations,
+    suppliers,
     toolModels,
     assets,
     consumables,
@@ -5445,6 +6425,266 @@ typedef $$LocationsTableProcessedTableManager =
       Location,
       PrefetchHooks Function()
     >;
+typedef $$SuppliersTableCreateCompanionBuilder =
+    SuppliersCompanion Function({
+      required String id,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      required String name,
+      Value<String?> ruc,
+      Value<String?> phone,
+      Value<String?> email,
+      Value<String?> notes,
+      Value<int> rowid,
+    });
+typedef $$SuppliersTableUpdateCompanionBuilder =
+    SuppliersCompanion Function({
+      Value<String> id,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<String> name,
+      Value<String?> ruc,
+      Value<String?> phone,
+      Value<String?> email,
+      Value<String?> notes,
+      Value<int> rowid,
+    });
+
+class $$SuppliersTableFilterComposer
+    extends Composer<_$AppDatabase, $SuppliersTable> {
+  $$SuppliersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ruc => $composableBuilder(
+    column: $table.ruc,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get phone => $composableBuilder(
+    column: $table.phone,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SuppliersTableOrderingComposer
+    extends Composer<_$AppDatabase, $SuppliersTable> {
+  $$SuppliersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ruc => $composableBuilder(
+    column: $table.ruc,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get phone => $composableBuilder(
+    column: $table.phone,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SuppliersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SuppliersTable> {
+  $$SuppliersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get ruc =>
+      $composableBuilder(column: $table.ruc, builder: (column) => column);
+
+  GeneratedColumn<String> get phone =>
+      $composableBuilder(column: $table.phone, builder: (column) => column);
+
+  GeneratedColumn<String> get email =>
+      $composableBuilder(column: $table.email, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+}
+
+class $$SuppliersTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SuppliersTable,
+          Supplier,
+          $$SuppliersTableFilterComposer,
+          $$SuppliersTableOrderingComposer,
+          $$SuppliersTableAnnotationComposer,
+          $$SuppliersTableCreateCompanionBuilder,
+          $$SuppliersTableUpdateCompanionBuilder,
+          (Supplier, BaseReferences<_$AppDatabase, $SuppliersTable, Supplier>),
+          Supplier,
+          PrefetchHooks Function()
+        > {
+  $$SuppliersTableTableManager(_$AppDatabase db, $SuppliersTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SuppliersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SuppliersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SuppliersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String?> ruc = const Value.absent(),
+                Value<String?> phone = const Value.absent(),
+                Value<String?> email = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SuppliersCompanion(
+                id: id,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                name: name,
+                ruc: ruc,
+                phone: phone,
+                email: email,
+                notes: notes,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required String name,
+                Value<String?> ruc = const Value.absent(),
+                Value<String?> phone = const Value.absent(),
+                Value<String?> email = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SuppliersCompanion.insert(
+                id: id,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                name: name,
+                ruc: ruc,
+                phone: phone,
+                email: email,
+                notes: notes,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SuppliersTable, Supplier>(table),
+                  BaseReferences<_$AppDatabase, $SuppliersTable, Supplier>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SuppliersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SuppliersTable,
+      Supplier,
+      $$SuppliersTableFilterComposer,
+      $$SuppliersTableOrderingComposer,
+      $$SuppliersTableAnnotationComposer,
+      $$SuppliersTableCreateCompanionBuilder,
+      $$SuppliersTableUpdateCompanionBuilder,
+      (Supplier, BaseReferences<_$AppDatabase, $SuppliersTable, Supplier>),
+      Supplier,
+      PrefetchHooks Function()
+    >;
 typedef $$ToolModelsTableCreateCompanionBuilder =
     ToolModelsCompanion Function({
       required String id,
@@ -5466,6 +6706,11 @@ typedef $$ToolModelsTableCreateCompanionBuilder =
       Value<bool> published,
       Value<String?> photoPath,
       Value<String?> notes,
+      Value<String?> ratCode,
+      Value<String?> canonicalCode,
+      Value<String?> canonicalName,
+      Value<String?> variant,
+      Value<String?> supplierId,
       Value<int> rowid,
     });
 typedef $$ToolModelsTableUpdateCompanionBuilder =
@@ -5489,6 +6734,11 @@ typedef $$ToolModelsTableUpdateCompanionBuilder =
       Value<bool> published,
       Value<String?> photoPath,
       Value<String?> notes,
+      Value<String?> ratCode,
+      Value<String?> canonicalCode,
+      Value<String?> canonicalName,
+      Value<String?> variant,
+      Value<String?> supplierId,
       Value<int> rowid,
     });
 
@@ -5593,6 +6843,31 @@ class $$ToolModelsTableFilterComposer
 
   ColumnFilters<String> get notes => $composableBuilder(
     column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ratCode => $composableBuilder(
+    column: $table.ratCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get canonicalCode => $composableBuilder(
+    column: $table.canonicalCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get canonicalName => $composableBuilder(
+    column: $table.canonicalName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get variant => $composableBuilder(
+    column: $table.variant,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get supplierId => $composableBuilder(
+    column: $table.supplierId,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -5700,6 +6975,31 @@ class $$ToolModelsTableOrderingComposer
     column: $table.notes,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get ratCode => $composableBuilder(
+    column: $table.ratCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get canonicalCode => $composableBuilder(
+    column: $table.canonicalCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get canonicalName => $composableBuilder(
+    column: $table.canonicalName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get variant => $composableBuilder(
+    column: $table.variant,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get supplierId => $composableBuilder(
+    column: $table.supplierId,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ToolModelsTableAnnotationComposer
@@ -5775,6 +7075,27 @@ class $$ToolModelsTableAnnotationComposer
 
   GeneratedColumn<String> get notes =>
       $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<String> get ratCode =>
+      $composableBuilder(column: $table.ratCode, builder: (column) => column);
+
+  GeneratedColumn<String> get canonicalCode => $composableBuilder(
+    column: $table.canonicalCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get canonicalName => $composableBuilder(
+    column: $table.canonicalName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get variant =>
+      $composableBuilder(column: $table.variant, builder: (column) => column);
+
+  GeneratedColumn<String> get supplierId => $composableBuilder(
+    column: $table.supplierId,
+    builder: (column) => column,
+  );
 }
 
 class $$ToolModelsTableTableManager
@@ -5827,6 +7148,11 @@ class $$ToolModelsTableTableManager
                 Value<bool> published = const Value.absent(),
                 Value<String?> photoPath = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
+                Value<String?> ratCode = const Value.absent(),
+                Value<String?> canonicalCode = const Value.absent(),
+                Value<String?> canonicalName = const Value.absent(),
+                Value<String?> variant = const Value.absent(),
+                Value<String?> supplierId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ToolModelsCompanion(
                 id: id,
@@ -5848,6 +7174,11 @@ class $$ToolModelsTableTableManager
                 published: published,
                 photoPath: photoPath,
                 notes: notes,
+                ratCode: ratCode,
+                canonicalCode: canonicalCode,
+                canonicalName: canonicalName,
+                variant: variant,
+                supplierId: supplierId,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -5871,6 +7202,11 @@ class $$ToolModelsTableTableManager
                 Value<bool> published = const Value.absent(),
                 Value<String?> photoPath = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
+                Value<String?> ratCode = const Value.absent(),
+                Value<String?> canonicalCode = const Value.absent(),
+                Value<String?> canonicalName = const Value.absent(),
+                Value<String?> variant = const Value.absent(),
+                Value<String?> supplierId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ToolModelsCompanion.insert(
                 id: id,
@@ -5892,6 +7228,11 @@ class $$ToolModelsTableTableManager
                 published: published,
                 photoPath: photoPath,
                 notes: notes,
+                ratCode: ratCode,
+                canonicalCode: canonicalCode,
+                canonicalName: canonicalName,
+                variant: variant,
+                supplierId: supplierId,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -5939,6 +7280,8 @@ typedef $$AssetsTableCreateCompanionBuilder =
       Value<DateTime?> purchaseDate,
       Value<double> purchaseCost,
       Value<String?> notes,
+      Value<String?> supplierId,
+      Value<String?> invoiceNumber,
       Value<int> rowid,
     });
 typedef $$AssetsTableUpdateCompanionBuilder =
@@ -5955,6 +7298,8 @@ typedef $$AssetsTableUpdateCompanionBuilder =
       Value<DateTime?> purchaseDate,
       Value<double> purchaseCost,
       Value<String?> notes,
+      Value<String?> supplierId,
+      Value<String?> invoiceNumber,
       Value<int> rowid,
     });
 
@@ -6024,6 +7369,16 @@ class $$AssetsTableFilterComposer
 
   ColumnFilters<String> get notes => $composableBuilder(
     column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get supplierId => $composableBuilder(
+    column: $table.supplierId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get invoiceNumber => $composableBuilder(
+    column: $table.invoiceNumber,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -6096,6 +7451,16 @@ class $$AssetsTableOrderingComposer
     column: $table.notes,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get supplierId => $composableBuilder(
+    column: $table.supplierId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get invoiceNumber => $composableBuilder(
+    column: $table.invoiceNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$AssetsTableAnnotationComposer
@@ -6150,6 +7515,16 @@ class $$AssetsTableAnnotationComposer
 
   GeneratedColumn<String> get notes =>
       $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<String> get supplierId => $composableBuilder(
+    column: $table.supplierId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get invoiceNumber => $composableBuilder(
+    column: $table.invoiceNumber,
+    builder: (column) => column,
+  );
 }
 
 class $$AssetsTableTableManager
@@ -6192,6 +7567,8 @@ class $$AssetsTableTableManager
                 Value<DateTime?> purchaseDate = const Value.absent(),
                 Value<double> purchaseCost = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
+                Value<String?> supplierId = const Value.absent(),
+                Value<String?> invoiceNumber = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => AssetsCompanion(
                 id: id,
@@ -6206,6 +7583,8 @@ class $$AssetsTableTableManager
                 purchaseDate: purchaseDate,
                 purchaseCost: purchaseCost,
                 notes: notes,
+                supplierId: supplierId,
+                invoiceNumber: invoiceNumber,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -6222,6 +7601,8 @@ class $$AssetsTableTableManager
                 Value<DateTime?> purchaseDate = const Value.absent(),
                 Value<double> purchaseCost = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
+                Value<String?> supplierId = const Value.absent(),
+                Value<String?> invoiceNumber = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => AssetsCompanion.insert(
                 id: id,
@@ -6236,6 +7617,8 @@ class $$AssetsTableTableManager
                 purchaseDate: purchaseDate,
                 purchaseCost: purchaseCost,
                 notes: notes,
+                supplierId: supplierId,
+                invoiceNumber: invoiceNumber,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -6282,6 +7665,8 @@ typedef $$ConsumablesTableCreateCompanionBuilder =
       Value<double> stock,
       Value<double> minStock,
       Value<String?> locationId,
+      Value<String?> canonicalCode,
+      Value<String?> supplierId,
       Value<int> rowid,
     });
 typedef $$ConsumablesTableUpdateCompanionBuilder =
@@ -6297,6 +7682,8 @@ typedef $$ConsumablesTableUpdateCompanionBuilder =
       Value<double> stock,
       Value<double> minStock,
       Value<String?> locationId,
+      Value<String?> canonicalCode,
+      Value<String?> supplierId,
       Value<int> rowid,
     });
 
@@ -6361,6 +7748,16 @@ class $$ConsumablesTableFilterComposer
 
   ColumnFilters<String> get locationId => $composableBuilder(
     column: $table.locationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get canonicalCode => $composableBuilder(
+    column: $table.canonicalCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get supplierId => $composableBuilder(
+    column: $table.supplierId,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -6428,6 +7825,16 @@ class $$ConsumablesTableOrderingComposer
     column: $table.locationId,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get canonicalCode => $composableBuilder(
+    column: $table.canonicalCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get supplierId => $composableBuilder(
+    column: $table.supplierId,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ConsumablesTableAnnotationComposer
@@ -6471,6 +7878,16 @@ class $$ConsumablesTableAnnotationComposer
 
   GeneratedColumn<String> get locationId => $composableBuilder(
     column: $table.locationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get canonicalCode => $composableBuilder(
+    column: $table.canonicalCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get supplierId => $composableBuilder(
+    column: $table.supplierId,
     builder: (column) => column,
   );
 }
@@ -6517,6 +7934,8 @@ class $$ConsumablesTableTableManager
                 Value<double> stock = const Value.absent(),
                 Value<double> minStock = const Value.absent(),
                 Value<String?> locationId = const Value.absent(),
+                Value<String?> canonicalCode = const Value.absent(),
+                Value<String?> supplierId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ConsumablesCompanion(
                 id: id,
@@ -6530,6 +7949,8 @@ class $$ConsumablesTableTableManager
                 stock: stock,
                 minStock: minStock,
                 locationId: locationId,
+                canonicalCode: canonicalCode,
+                supplierId: supplierId,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -6545,6 +7966,8 @@ class $$ConsumablesTableTableManager
                 Value<double> stock = const Value.absent(),
                 Value<double> minStock = const Value.absent(),
                 Value<String?> locationId = const Value.absent(),
+                Value<String?> canonicalCode = const Value.absent(),
+                Value<String?> supplierId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ConsumablesCompanion.insert(
                 id: id,
@@ -6558,6 +7981,8 @@ class $$ConsumablesTableTableManager
                 stock: stock,
                 minStock: minStock,
                 locationId: locationId,
+                canonicalCode: canonicalCode,
+                supplierId: supplierId,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -7587,6 +9012,8 @@ class $AppDatabaseManager {
       $$CategoriesTableTableManager(_db, _db.categories);
   $$LocationsTableTableManager get locations =>
       $$LocationsTableTableManager(_db, _db.locations);
+  $$SuppliersTableTableManager get suppliers =>
+      $$SuppliersTableTableManager(_db, _db.suppliers);
   $$ToolModelsTableTableManager get toolModels =>
       $$ToolModelsTableTableManager(_db, _db.toolModels);
   $$AssetsTableTableManager get assets =>

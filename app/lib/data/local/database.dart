@@ -34,6 +34,15 @@ class Locations extends Table with SyncColumns {
   IntColumn get level => integer().withDefault(const Constant(0))();
 }
 
+/// Proveedores de equipos y consumibles (con RUC).
+class Suppliers extends Table with SyncColumns {
+  TextColumn get name => text()();
+  TextColumn get ruc => text().nullable()();
+  TextColumn get phone => text().nullable()();
+  TextColumn get email => text().nullable()();
+  TextColumn get notes => text().nullable()();
+}
+
 /// Modelo de herramienta del catálogo (una fila por línea ind/diy).
 class ToolModels extends Table with SyncColumns {
   TextColumn get name => text()();
@@ -60,6 +69,17 @@ class ToolModels extends Table with SyncColumns {
   BoolColumn get published => boolean().withDefault(const Constant(false))();
   TextColumn get photoPath => text().nullable()();
   TextColumn get notes => text().nullable()();
+
+  /// Código propio Rent a Tool: canónico + secuencial (ej. AAQ-003).
+  TextColumn get ratCode => text().nullable()();
+
+  /// Subgrupo canónico del ERP Demaco (ej. AAQ) y su nombre completo.
+  TextColumn get canonicalCode => text().nullable()();
+  TextColumn get canonicalName => text().nullable()();
+
+  /// Variación dentro del mismo producto (ej. "kit 2 baterías").
+  TextColumn get variant => text().nullable()();
+  TextColumn get supplierId => text().nullable()();
 }
 
 /// Unidad física rentable (un equipo concreto con etiqueta QR).
@@ -76,6 +96,10 @@ class Assets extends Table with SyncColumns {
   DateTimeColumn get purchaseDate => dateTime().nullable()();
   RealColumn get purchaseCost => real().withDefault(const Constant(0))();
   TextColumn get notes => text().nullable()();
+
+  /// Compra: proveedor y número de factura.
+  TextColumn get supplierId => text().nullable()();
+  TextColumn get invoiceNumber => text().nullable()();
 }
 
 /// Consumibles y accesorios (stock por cantidad).
@@ -88,6 +112,8 @@ class Consumables extends Table with SyncColumns {
   RealColumn get stock => real().withDefault(const Constant(0))();
   RealColumn get minStock => real().withDefault(const Constant(0))();
   TextColumn get locationId => text().nullable()();
+  TextColumn get canonicalCode => text().nullable()();
+  TextColumn get supplierId => text().nullable()();
 }
 
 /// n:m modelo ↔ consumible (el mismo disco sirve a varias sierras).
@@ -135,6 +161,7 @@ class SyncState extends Table {
 @DriftDatabase(tables: [
   Categories,
   Locations,
+  Suppliers,
   ToolModels,
   Assets,
   Consumables,
@@ -148,11 +175,25 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) => m.createAll(),
+        onUpgrade: (m, from, to) async {
+          await m.createAll();
+          if (from < 2) {
+            await m.addColumn(toolModels, toolModels.ratCode);
+            await m.addColumn(toolModels, toolModels.canonicalCode);
+            await m.addColumn(toolModels, toolModels.canonicalName);
+            await m.addColumn(toolModels, toolModels.variant);
+            await m.addColumn(toolModels, toolModels.supplierId);
+            await m.addColumn(assets, assets.supplierId);
+            await m.addColumn(assets, assets.invoiceNumber);
+            await m.addColumn(consumables, consumables.canonicalCode);
+            await m.addColumn(consumables, consumables.supplierId);
+          }
+        },
       );
 
   static LazyDatabase _open() => LazyDatabase(() async {

@@ -5,9 +5,11 @@ import 'package:share_plus/share_plus.dart';
 import '../../data/local/database.dart';
 import '../../data/repositories/catalog_repository.dart';
 import '../../data/repositories/location_repository.dart';
+import '../../data/repositories/supplier_repository.dart';
 import '../dashboard/dashboard_screen.dart' show statusLabels;
 import '../labels/qr_labels_pdf.dart';
 import '../locations/location_picker.dart';
+import 'product_sheet.dart';
 
 class ModelDetailScreen extends ConsumerWidget {
   const ModelDetailScreen({super.key, required this.modelId});
@@ -30,7 +32,21 @@ class ModelDetailScreen extends ConsumerWidget {
               body: Center(child: Text('Modelo no encontrado')));
         }
         return Scaffold(
-          appBar: AppBar(title: Text(m.name)),
+          appBar: AppBar(
+            title: Text(m.ratCode == null ? m.name : '${m.ratCode} · ${m.name}'),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.edit),
+                tooltip: 'Editar producto',
+                onPressed: () => showModalBottomSheet<void>(
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (_) => ProductSheet(existing: m),
+                ).then((_) =>
+                    ref.invalidate(toolModelProvider(modelId))),
+              ),
+            ],
+          ),
           floatingActionButton: FloatingActionButton.extended(
             onPressed: () => showModalBottomSheet<void>(
               context: context,
@@ -58,9 +74,16 @@ class ModelDetailScreen extends ConsumerWidget {
                                 ? 'Línea industrial'
                                 : 'Línea DIY',
                             if (m.brand != null) m.brand!,
-                            if (m.supplierCode != null) m.supplierCode!,
+                            if (m.supplierCode != null)
+                              'Cód. proveedor: ${m.supplierCode}',
+                            if (m.variant != null) m.variant!,
                           ].join(' · '),
                           style: const TextStyle(fontSize: 12)),
+                      if (m.canonicalCode != null)
+                        Text(
+                            'Canónico ${m.canonicalCode} — '
+                            '${m.canonicalName ?? ''}',
+                            style: const TextStyle(fontSize: 11)),
                       if (m.spec?.isNotEmpty ?? false)
                         Padding(
                           padding: const EdgeInsets.only(top: 6),
@@ -353,10 +376,13 @@ class AssetSheet extends ConsumerStatefulWidget {
 
 class _AssetSheetState extends ConsumerState<AssetSheet> {
   final _serial = TextEditingController();
+  final _invoice = TextEditingController();
   late final TextEditingController _cost = TextEditingController(
       text: widget.model.listCost.toStringAsFixed(2));
   String? _locationId;
   String? _locationPath;
+  String? _supplierId;
+  String? _supplierName;
   bool _busy = false;
 
   @override
@@ -387,6 +413,32 @@ class _AssetSheetState extends ConsumerState<AssetSheet> {
                   labelText: 'Costo de compra (\$)'),
             ),
             const SizedBox(height: 8),
+            TextField(
+              controller: _invoice,
+              decoration: const InputDecoration(
+                  labelText: 'N° de factura de compra (opcional)'),
+            ),
+            const SizedBox(height: 8),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.business_outlined),
+              title: Text(_supplierName ?? 'Sin proveedor'),
+              trailing: TextButton(
+                onPressed: () async {
+                  final id = await pickSupplier(context, ref);
+                  if (id != null && mounted) {
+                    final s = await ref
+                        .read(supplierRepositoryProvider)
+                        .getById(id);
+                    setState(() {
+                      _supplierId = id;
+                      _supplierName = s?.name;
+                    });
+                  }
+                },
+                child: const Text('Elegir'),
+              ),
+            ),
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.place_outlined),
@@ -433,6 +485,9 @@ class _AssetSheetState extends ConsumerState<AssetSheet> {
         purchaseCost:
             double.tryParse(_cost.text.replaceAll(',', '.')) ?? 0,
         purchaseDate: DateTime.now(),
+        supplierId: _supplierId,
+        invoiceNumber:
+            _invoice.text.trim().isEmpty ? null : _invoice.text.trim(),
       );
       final pdf = await buildQrLabelsPdf(
         title: widget.model.name,

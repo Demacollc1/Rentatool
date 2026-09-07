@@ -176,4 +176,19 @@ void main() {
       await db.close();
     });
   });
+
+  group('codigos y proveedores', () {
+    test('nextRatCode secuencial por canónico', () async {
+      final db = _db();
+      final sync = SyncService(db, buildSyncAdapters());
+      final catalog = CatalogRepository(db, sync);
+      expect(await catalog.nextRatCode('AAQ'), 'AAQ-001');
+      await catalog.saveModel(
+          name: 'Anclaje químico', ratCode: 'AAQ-001',
+          canonicalCode: 'AAQ');
+      expect(await catalog.nextRatCode('AAQ'), 'AAQ-002');
+      expect(await catalog.nextRatCode('SIE'), 'SIE-001');
+      await db.close();
+    });
+  });
 }

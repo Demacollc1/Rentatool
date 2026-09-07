@@ -52,6 +52,29 @@ List<TableSyncAdapter> buildSyncAdapters() => [
         },
       ),
       TableSyncAdapter(
+        remoteTable: 'suppliers',
+        mergeRemote: (db, r) async {
+          final local = await (db.select(db.suppliers)
+                ..where((x) => x.id.equals(r['id'] as String)))
+              .getSingleOrNull();
+          final remoteUpdated = ts(r['updated_at']);
+          if (!newer(local?.updatedAt, remoteUpdated)) return false;
+          await db.into(db.suppliers).insertOnConflictUpdate(
+                SuppliersCompanion(
+                  id: Value(r['id'] as String),
+                  name: Value(r['name'] as String),
+                  ruc: Value(r['ruc'] as String?),
+                  phone: Value(r['phone'] as String?),
+                  email: Value(r['email'] as String?),
+                  notes: Value(r['notes'] as String?),
+                  updatedAt: Value(remoteUpdated),
+                  deletedAt: Value(tsN(r['deleted_at'])),
+                ),
+              );
+          return true;
+        },
+      ),
+      TableSyncAdapter(
         remoteTable: 'tool_models',
         mergeRemote: (db, r) async {
           final local = await (db.select(db.toolModels)
@@ -78,6 +101,11 @@ List<TableSyncAdapter> buildSyncAdapters() => [
                   published: Value((r['published'] ?? false) as bool),
                   photoPath: Value(r['photo_path'] as String?),
                   notes: Value(r['notes'] as String?),
+                  ratCode: Value(r['rat_code'] as String?),
+                  canonicalCode: Value(r['canonical_code'] as String?),
+                  canonicalName: Value(r['canonical_name'] as String?),
+                  variant: Value(r['variant'] as String?),
+                  supplierId: Value(r['supplier_id'] as String?),
                   updatedAt: Value(remoteUpdated),
                   deletedAt: Value(tsN(r['deleted_at'])),
                 ),
@@ -104,6 +132,8 @@ List<TableSyncAdapter> buildSyncAdapters() => [
                   stock: Value(_d(r['stock'])),
                   minStock: Value(_d(r['min_stock'])),
                   locationId: Value(r['location_id'] as String?),
+                  canonicalCode: Value(r['canonical_code'] as String?),
+                  supplierId: Value(r['supplier_id'] as String?),
                   updatedAt: Value(remoteUpdated),
                   deletedAt: Value(tsN(r['deleted_at'])),
                 ),
@@ -151,6 +181,8 @@ List<TableSyncAdapter> buildSyncAdapters() => [
                   purchaseDate: Value(tsN(r['purchase_date'])),
                   purchaseCost: Value(_d(r['purchase_cost'])),
                   notes: Value(r['notes'] as String?),
+                  supplierId: Value(r['supplier_id'] as String?),
+                  invoiceNumber: Value(r['invoice_number'] as String?),
                   updatedAt: Value(remoteUpdated),
                   deletedAt: Value(tsN(r['deleted_at'])),
                 ),

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../data/local/database.dart';
 import '../../data/repositories/catalog_repository.dart';
 import '../../data/repositories/category_repository.dart';
+import 'product_sheet.dart';
 
 /// Catálogo agrupado oficio → grupo, con búsqueda.
 class CatalogScreen extends ConsumerStatefulWidget {
@@ -25,6 +26,15 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Catálogo de renta')),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => showModalBottomSheet<void>(
+          context: context,
+          isScrollControlled: true,
+          builder: (_) => const ProductSheet(),
+        ),
+        icon: const Icon(Icons.add),
+        label: const Text('Producto'),
+      ),
       body: Column(children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
@@ -121,6 +131,7 @@ class _ModelTile extends StatelessWidget {
       title: Text('${model.name} — ${model.brand ?? ''}'),
       subtitle: Text(
         [
+          if (model.ratCode != null) model.ratCode!,
           if (model.supplierCode != null) model.supplierCode!,
           if (model.rateDay != null)
             '\$${model.rateDay!.toStringAsFixed(2)}/día',
