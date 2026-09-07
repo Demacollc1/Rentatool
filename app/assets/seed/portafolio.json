@@ -1,0 +1,2045 @@
+{
+ "CARPINTERIA": [
+  {
+   "tool": "Sierra circular inalámbrica",
+   "spec": "Discos de 7-1/4\" (185 mm) es el estándar; también 6-1/2\" (165 mm) en modelos compactos y 8",
+   "ind": {
+    "code": "DCS575T2",
+    "desc": "SIERRA CIRCULAR IN 7 1/4\" 60V 1600W 5800RPM MAX LION KIT DW",
+    "cost": 415.23,
+    "b87": 0,
+    "brand": "DeWalt",
+    "n": 1
+   },
+   "diy": {
+    "code": "CMCS500B",
+    "desc": "SIERRA CIRCULAR IN 6 1/2\" 20V MAX 4000RPM SIN BAT",
+    "cost": 64.68,
+    "b87": 10.0,
+    "brand": "Craftsman",
+    "n": 2
+   },
+   "status": "ok",
+   "sub": null,
+   "grupo": "Herramientas eléctricas",
+   "cons_codes": [
+    {
+     "code": "DWA271424",
+     "label": "DISCO CORTE SIERRA CIRCULA",
+     "cost": 8.04
+    }
+   ],
+   "cons": ""
+  },
+  {
+   "tool": "Sierra circular eléctrica",
+   "spec": "Discos de 7-1/4\" (185 mm) es el estándar; también 6-1/2\" (165 mm) en modelos compactos y 8",
+   "ind": {
+    "code": "DWE575K",
+    "desc": "SIERRA CIRCULAR 7 1/4\" 1800W 5800RPM 15A DEWALT",
+    "cost": 124.92,
+    "b87": 0,
+    "brand": "DeWalt",
+    "n": 2
+   },
+   "diy": {
+    "code": "CMES500",
+    "desc": "SIERRA CIRCULAR 7 1/4\" 1560W 13A 120V CRF",
+    "cost": 68.19,
+    "b87": 0,
+    "brand": "Craftsman",
+    "n": 3
+   },
+   "status": "ok",
+   "sub": null,
+   "grupo": "Herramientas eléctricas",
+   "cons_codes": [
+    {
+     "code": "DWA271424",
+     "label": "DISCO CORTE SIERRA CIRCULA",
+     "cost": 8.04
+    }
+   ],
+   "cons": ""
+  },
+  {
+   "tool": "Sierra de mesa",
+   "spec": "Discos de 10\" (254 mm) es lo más usado en obra; algunos modelos usan 8-1/4\" (210 mm). Eje ",
+   "ind": {
+    "code": "DWE7470-B3",
+    "desc": "SIERRA BANCO 10\" 1800W 5000RPM 15A 120V DW",
+    "cost": 335.83,
+    "b87": 0,
+    "n": 1
+   },
+   "diy": {
+    "code": "SST1801-B3",
+    "desc": "SIERRA BANCO 10\" 1800W MOVIL 4800RPM 15A 120V ST",
+    "cost": 167.97,
+    "b87": 111.0,
+    "n": 1,
+    "brand": "Stanley"
+   },
+   "status": "ok",
+   "grupo": "Herramientas eléctricas",
+   "cons": "Discos de corte, guía angular (miter gauge), empujador (push stick), extensión de mesa",
+   "cons_codes": [
+    {
+     "code": "DWA271424",
+     "label": "DISCO CORTE SIERRA CIRCULA",
+     "cost": 8.04
+    }
+   ]
+  },
+  {
+   "tool": "Sierra ingletadora inalámbrica",
+   "spec": "Discos de 10\" o 12\" (254-305 mm), eje de 5/8\" o 1\"",
+   "ind": {
+    "code": "DHS790AT2",
+    "desc": "SIERRA INGLETEADORA IN 12\" BRU (305MM) TELES 2X60V LION FLXBL",
+    "cost": 872.27,
+    "b87": 0,
+    "brand": "DeWalt",
+    "n": 2
+   },
+   "diy": {
+    "code": "CMCS714M1",
+    "desc": "SIERRA INGLETEADORA IN 7 1/4\" (184MM) TELESC 20V LION CF MAX",
+    "cost": 298.77,
+    "b87": 6.0,
+    "brand": "Craftsman",
+    "n": 1
+   },
+   "status": "ok",
+   "sub": null,
+   "grupo": "Herramientas eléctricas",
+   "cons_codes": [
+    {
+     "code": "DWA271424",
+     "label": "DISCO CORTE SIERRA CIRCULA",
+     "cost": 8.04
+    }
+   ],
+   "cons": ""
+  },
+  {
+   "tool": "Sierra ingletadora eléctrica",
+   "spec": "Discos de 10\" o 12\" (254-305 mm), eje de 5/8\" o 1\"",
+   "ind": {
+    "code": "DWS713",
+    "desc": "SIERRA INGLETEADORA 10\" 1800W (254MM) 15A 110V DW",
+    "cost": 242.76,
+    "b87": 0,
+    "brand": "DeWalt",
+    "n": 1
+   },
+   "diy": {
+    "code": "STSM1525-B3",
+    "desc": "SIERRA INGLETEADORA 10\" 1500W (254MM) 12.5A 110V ST",
+    "cost": 198.46,
+    "b87": 2.0,
+    "brand": "Stanley",
+    "n": 2
+   },
+   "status": "ok",
+   "sub": null,
+   "grupo": "Herramientas eléctricas",
+   "cons_codes": [
+    {
+     "code": "DWA271424",
+     "label": "DISCO CORTE SIERRA CIRCULA",
+     "cost": 8.04
+    }
+   ],
+   "cons": ""
+  },
+  {
+   "tool": "Sierra caladora inalámbrica",
+   "spec": "Hojas tipo T-shank/U-shank de 75-100 mm; 6-10 TPI para madera, 18-24 TPI para metal",
+   "ind": {
+    "code": "DCS331M1",
+    "desc": "SIERRA CALADORA IN 20V XR MAX 3000 RPM 4 POSICIONES DEWALT",
+    "cost": 246.75,
+    "b87": 0,
+    "brand": "DeWalt",
+    "n": 1
+   },
+   "diy": {
+    "code": "CMCS600B",
+    "desc": "SIERRA CALADORA IN 20V CRF MAX 2500 RPM 3 POSICIONES SIN BAT",
+    "cost": 60.66,
+    "b87": 6.0,
+    "brand": "Craftsman",
+    "n": 2
+   },
+   "status": "ok",
+   "sub": null,
+   "grupo": "Herramientas eléctricas",
+   "cons_codes": [
+    {
+     "code": "CMAJ2SET12",
+     "label": "HOJAS SIERRA CALADORA JGO",
+     "cost": 9.31
+    }
+   ],
+   "cons": ""
+  },
+  {
+   "tool": "Sierra caladora eléctrica",
+   "spec": "Hojas tipo T-shank/U-shank de 75-100 mm; 6-10 TPI para madera, 18-24 TPI para metal",
+   "ind": {
+    "code": "DW317K",
+    "desc": "SIERRA CALADORA 600W 3100 CPM 5.5A TIPO T 120V DW",
+    "cost": 112.75,
+    "b87": 0,
+    "brand": "DeWalt",
+    "n": 3
+   },
+   "diy": {
+    "code": "CMES612",
+    "desc": "SIERRA CALADORA 720W 3200 CPM 6A TIPO T 120V CRF",
+    "cost": 61.22,
+    "b87": 0,
+    "brand": "Craftsman",
+    "n": 2
+   },
+   "status": "ok",
+   "sub": null,
+   "grupo": "Herramientas eléctricas",
+   "cons_codes": [
+    {
+     "code": "CMAJ2SET12",
+     "label": "HOJAS SIERRA CALADORA JGO",
+     "cost": 9.31
+    }
+   ],
+   "cons": ""
+  },
+  {
+   "tool": "Motosierra",
+   "spec": "Barras de 14\", 16\", 18\" o 20\"; paso de cadena 3/8\" o .325\"; mezcla gasolina/aceite 2T en p",
+   "ind": {
+    "code": "DCCS670X1",
+    "desc": "MOTOSIERRA INALAM 16\" 60V FLXV 3/8\" 1BAT 3AH DW",
+    "cost": 369.07,
+    "b87": 0,
+    "n": 1
+   },
+   "diy": {
+    "code": "CMCCS620M1",
+    "desc": "SIERRA CADENA IN 12\" 20V MAX 80WH 3/8\" 1BAT 4AH CRF",
+    "cost": 184.77,
+    "b87": 8.0,
+    "n": 1,
+    "brand": "Craftsman"
+   },
+   "status": "ok",
+   "grupo": "Herramientas eléctricas",
+   "cons": "Cadenas de repuesto, barra guía, mezcla de combustible 2T, aceite de cadena, lima de afilado",
+   "cons_codes": []
+  },
+  {
+   "tool": "Taladro / atornillador inalámbrica",
+   "spec": "Baterías de 12V, 18V o 20V; mandril de 3/8\" o 1/2\"; set de brocas de 3 a 13 mm (1/8\" a 1/2",
+   "ind": {
+    "code": "DCF620D2",
+    "desc": "DESTORNILLADOR IN 435W 1/4\" 30NM 20V XR LION GYPSUM KIT DW",
+    "cost": 236.78,
+    "b87": 1.0,
+    "brand": "DeWalt",
+    "n": 4
+   },
+   "diy": {
+    "code": "CMCD700C1",
+    "desc": "TALADRO ROTACION IN 1/2\" 280UW ??NM 20V CF MAX LION KIT CRF",
+    "cost": 80.78,
+    "b87": 1.0,
+    "brand": "Craftsman",
+    "n": 4
+   },
+   "status": "ok",
+   "sub": null,
+   "grupo": "Herramientas eléctricas",
+   "cons_codes": [
+    {
+     "code": "DW530400C",
+     "label": "BROCA CONCRETO CILI 5/32\"X",
+     "cost": 0.4
+    },
+    {
+     "code": "DW170018B",
+     "label": "BROCA METAL MADERA HSS ACE",
+     "cost": 0.2
+    },
+    {
+     "code": "DWA3PH1-1L",
+     "label": "PUNTA DESTORNILLADOR PH1X3",
+     "cost": 0.72
+    }
+   ],
+   "cons": ""
+  },
+  {
+   "tool": "Taladro / atornillador eléctrica",
+   "spec": "Baterías de 12V, 18V o 20V; mandril de 3/8\" o 1/2\"; set de brocas de 3 a 13 mm (1/8\" a 1/2",
+   "ind": {
+    "code": "DW235G",
+    "desc": "TALADRO ROTACION 1/2\" 600W ALTO TORQUE VVR DW",
+    "cost": 126.44,
+    "b87": 0,
+    "brand": "DeWalt",
+    "n": 7
+   },
+   "diy": {
+    "code": "CMED731",
+    "desc": "TALADRO ROTACION 3/8\" 840W 7A 120V CRF",
+    "cost": 37.88,
+    "b87": 11.0,
+    "brand": "Craftsman",
+    "n": 4
+   },
+   "status": "ok",
+   "sub": null,
+   "grupo": "Herramientas eléctricas",
+   "cons_codes": [
+    {
+     "code": "DW530400C",
+     "label": "BROCA CONCRETO CILI 5/32\"X",
+     "cost": 0.4
+    },
+    {
+     "code": "DW170018B",
+     "label": "BROCA METAL MADERA HSS ACE",
+     "cost": 0.2
+    },
+    {
+     "code": "DWA3PH1-1L",
+     "label": "PUNTA DESTORNILLADOR PH1X3",
+     "cost": 0.72
+    }
+   ],
+   "cons": ""
+  },
+  {
+   "tool": "Clavadora / grapadora neumática",
+   "spec": "Clavos de 1-1/4\" a 3-1/2\" según el tipo; manguera de 3/8\" de diámetro interno; trabajo a 7",
+   "ind": null,
+   "diy": {
+    "code": "CMCN618C1",
+    "desc": "CLAVADORA IN #18 5/8\"-2\" 20V CF MAX LION KIT CRF",
+    "cost": 182.08,
+    "b87": 0,
+    "n": 2,
+    "brand": "Craftsman"
+   },
+   "status": "ok",
+   "grupo": "Herramientas eléctricas",
+   "cons": "Clavos y grapas del calibre correspondiente, manguera de aire, aceite lubricante para herramienta neumática",
+   "cons_codes": []
+  },
+  {
+   "tool": "Compresor de aire portátil",
+   "spec": "Tanques de 6, 20 o 30 galones; manguera de 3/8\" o 1/2\"; presión de 90-150 PSI",
+   "ind": {
+    "code": "DWFP55130",
+    "desc": "COMPRESOR SILENCIOSO 1.1HP 120V 200PSI DW",
+    "cost": 316.48,
+    "b87": 0,
+    "n": 1
+   },
+   "diy": {
+    "code": "CMCE520B",
+    "desc": "COMPRESOR INFLADOR LLANTAS IN 160 PSI 20V/12V/110V SIN BAT",
+    "cost": 78.09,
+    "b87": 2.0,
+    "n": 3,
+    "brand": "Craftsman"
+   },
+   "status": "ok",
+   "grupo": "Compresores",
+   "cons": "Manguera de aire, filtro/regulador, aceite de compresor, acoples rápidos",
+   "cons_codes": []
+  },
+  {
+   "tool": "Cepilladora eléctrica",
+   "spec": "Ancho de cepillado de 82 mm (3-1/4\"); cuchillas del mismo ancho",
+   "ind": {
+    "code": "DW734",
+    "desc": "CEPILLO CANTEADOR BANCO 1800W 12 1/2\"X1/8\"X33 1/2\" 15A 120V",
+    "cost": 606.83,
+    "b87": 2.0,
+    "n": 1
+   },
+   "diy": {
+    "code": "CMEW320",
+    "desc": "CEPILLO CANTEADOR BANCO 1800W 15A 120V CRF",
+    "cost": 334.67,
+    "b87": 69.0,
+    "n": 1,
+    "brand": "Craftsman"
+   },
+   "status": "ok",
+   "grupo": "Herramientas eléctricas",
+   "cons": "Cuchillas de repuesto, bolsa colectora de viruta",
+   "cons_codes": []
+  },
+  {
+   "tool": "Router / fresadora eléctrica",
+   "spec": "Vástago (shank) de fresa de 1/4\" o 1/2\"; diámetros de corte de 6 a 32 mm",
+   "ind": {
+    "code": "DW621",
+    "desc": "REBAJADORA TUPI 1490W 2HP 1/2\"-1/4\" 24000RPM 12.4A 120V",
+    "cost": 325.77,
+    "b87": 5.0,
+    "brand": "DeWalt",
+    "n": 7
+   },
+   "diy": {
+    "code": "SRR1200-B3",
+    "desc": "REBAJADORA TUPI 1200W 1.6HP 6\" 15/64\"-1/4\"-5/16\" 11A 120V",
+    "cost": 81.8,
+    "b87": 4.0,
+    "brand": "Stanley",
+    "n": 1
+   },
+   "status": "ok",
+   "sub": null,
+   "grupo": "Herramientas eléctricas",
+   "cons_codes": [
+    {
+     "code": "6363",
+     "label": "PUNTAS O FRESAS MADERA 20",
+     "cost": 18.04
+    }
+   ],
+   "cons": ""
+  },
+  {
+   "tool": "Lijadora orbital inalámbrica",
+   "spec": "Grano 60 a 220; bandas de lijado de 76x457 mm (3\"x18\")",
+   "ind": {
+    "code": "DCW210D1",
+    "desc": "LIJADORA ROTO ORBITAL IN 5\" XR 12000 OPM 20V MAX LION DW",
+    "cost": 116.53,
+    "b87": 0,
+    "brand": "DeWalt",
+    "n": 1
+   },
+   "diy": {
+    "code": "CMCW220B",
+    "desc": "LIJADORA ROTO ORBITAL IN 5\" 20V MAX 12000 OPM  SIN BAT CRF",
+    "cost": 55.65,
+    "b87": 13.0,
+    "brand": "Craftsman",
+    "n": 1
+   },
+   "status": "ok",
+   "sub": null,
+   "grupo": "Herramientas eléctricas",
+   "cons_codes": [
+    {
+     "code": "7508",
+     "label": "LIJA AGUA #3-150 FANDELLI",
+     "cost": 0.22
+    }
+   ],
+   "cons": ""
+  },
+  {
+   "tool": "Lijadora orbital eléctrica",
+   "spec": "Grano 60 a 220; bandas de lijado de 76x457 mm (3\"x18\")",
+   "ind": {
+    "code": "D26441",
+    "desc": "LIJADORA ORBITAL 225W 1/4 HOJA 14000 OPM 1.9A 120V DW",
+    "cost": 57.69,
+    "b87": 0,
+    "brand": "DeWalt",
+    "n": 3
+   },
+   "diy": {
+    "code": "SS24-B3",
+    "desc": "LIJADORA ORBITAL 240W 1/4 HOJA 16000 OPM 2A 120V ST",
+    "cost": 27.87,
+    "b87": 3.0,
+    "brand": "Stanley",
+    "n": 7
+   },
+   "status": "ok",
+   "sub": null,
+   "grupo": "Herramientas eléctricas",
+   "cons_codes": [
+    {
+     "code": "7508",
+     "label": "LIJA AGUA #3-150 FANDELLI",
+     "cost": 0.22
+    }
+   ],
+   "cons": ""
+  },
+  {
+   "tool": "Compresor de aire industrial",
+   "spec": "Caudal de 100-375 CFM; presión de 100-150 PSI",
+   "ind": {
+    "code": "DWFP55130",
+    "desc": "COMPRESOR SILENCIOSO 1.1HP 120V 200PSI DW",
+    "cost": 316.48,
+    "b87": 0,
+    "n": 1
+   },
+   "diy": {
+    "code": "CMCE520B",
+    "desc": "COMPRESOR INFLADOR LLANTAS IN 160 PSI 20V/12V/110V SIN BAT",
+    "cost": 78.09,
+    "b87": 2.0,
+    "n": 3,
+    "brand": "Craftsman"
+   },
+   "status": "ok",
+   "grupo": "Compresores",
+   "cons": "Mangueras, filtros, aceite de compresor",
+   "cons_codes": []
+  },
+  {
+   "tool": "Nivel láser",
+   "spec": "Tripode de 1.2 a 1.6 m; alcance 30-50 m (hasta 150 m con receptor)",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Medición y diagnóstico",
+   "cons": "Tripode, receptor láser, baterías, lentes de mira, placa objetivo",
+   "cons_codes": []
+  },
+  {
+   "tool": "Nivel láser / estación total",
+   "spec": "Alcance de 50-150 m según receptor; precisión ±2-3 mm/10m",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Medición y diagnóstico",
+   "cons": "Tripode, jalones, prismas, baterías",
+   "cons_codes": []
+  },
+  {
+   "tool": "Prensas y mordazas",
+   "spec": "Aperturas comunes de 6\", 12\", 24\" y 36\" (150-900 mm)",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Especializada / pesada",
+   "cons": "Mordazas/mandíbulas de repuesto, protectores de superficie",
+   "cons_codes": []
+  }
+ ],
+ "ALBAÑILERIA": [
+  {
+   "tool": "Concretera / trompo (eléctrico o a gasolina)",
+   "spec": "Mezcla de concreto en obra — categoría creada, sin producto en maestro",
+   "ind": null,
+   "diy": null,
+   "status": "pordef",
+   "grupo": "Compactación y concreto",
+   "cons": "Tambor de repuesto, correa de transmisión, aceite de motor, bujía (si es a gasolina)",
+   "cons_codes": []
+  },
+  {
+   "tool": "Mezcladora de mortero",
+   "spec": "Capacidad de 60-120 litros",
+   "ind": null,
+   "diy": {
+    "code": "SDR1400-B3",
+    "desc": "MEZCLADORA CEMENTO 1400W 2HP 5.5\" 140MM 11.6A 120V ST",
+    "cost": 106.45,
+    "b87": 0,
+    "n": 1,
+    "brand": "Stanley"
+   },
+   "status": "ok",
+   "grupo": "Otros",
+   "cons": "Paletas mezcladoras de repuesto, correa de transmisión",
+   "cons_codes": []
+  },
+  {
+   "tool": "Vibrador de concreto (de inmersión)",
+   "spec": "Agujas de 25, 38, 45 y 58 mm; manguera de 3-6 m; 12,000-18,000 vpm",
+   "ind": {
+    "code": "DCE531B",
+    "desc": "VIBRADOR DE CONCRETO IN 1 1/8\" 15000VPM SIN BAT DW",
+    "cost": 242.42,
+    "b87": 0,
+    "n": 1
+   },
+   "diy": null,
+   "status": "ok",
+   "grupo": "Compactación y concreto",
+   "cons": "Agujas vibradoras de distintos diámetros, manguera flexible, motor de repuesto",
+   "cons_codes": []
+  },
+  {
+   "tool": "Regla vibratoria para losas",
+   "spec": "Perfiles de 2 a 6 m de longitud; motor de 1.5-3.5 HP",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Compactación y concreto",
+   "cons": "Motor, correas de transmisión, perfil/hoja de aluminio de distintas longitudes",
+   "cons_codes": []
+  },
+  {
+   "tool": "Allanadora mecánica",
+   "spec": "Rotor de 24\", 36\" o 46\" (600-1170 mm); motor de 5-9 HP",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Compactación y concreto",
+   "cons": "Palas flotadoras, paletas de acabado (finishing blades), disco flotador, extensión de mango/timón, combustible",
+   "cons_codes": []
+  },
+  {
+   "tool": "Plancha compactadora (placa vibratoria)",
+   "spec": "Placa vibratoria / vibroapisonador para compactación de suelos",
+   "ind": {
+    "code": "MR-68H",
+    "desc": "VIBROAPISONADOR 68KG 13KN 3HP SALTO 85mm 34X29cm GX100 MASAL",
+    "cost": 0,
+    "b87": 0,
+    "n": 1,
+    "brand": "MAS"
+   },
+   "diy": null,
+   "status": "ok",
+   "cons": "Combustible, aceite motor",
+   "grupo": "Compactación y concreto",
+   "cons_codes": []
+  },
+  {
+   "tool": "Rodillo compactador",
+   "spec": "Peso operativo 500-1500 kg; ancho de rodillo 60-90 cm",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Compactación y concreto",
+   "cons": "Correas de transmisión, sistema de riego de agua",
+   "cons_codes": []
+  },
+  {
+   "tool": "Cortadora de concreto",
+   "spec": "Discos de 14\" a 20\" (350-500 mm); profundidad de corte 10-18 cm",
+   "ind": {
+    "code": "DCS690X2",
+    "desc": "SIERRA CORTADORA CONCRETO IN 9\"X7/8\" 60V MAX LION KIT DW",
+    "cost": 653.13,
+    "b87": 1.0,
+    "n": 3
+   },
+   "diy": {
+    "code": "CMEM2500",
+    "desc": "TRONZADORA 14\" 355mm 1800W 3800RPM 15A 120V CRF",
+    "cost": 118.08,
+    "b87": 43.0,
+    "n": 1,
+    "brand": "Craftsman"
+   },
+   "status": "ok",
+   "grupo": "Corte de piso y concreto",
+   "cons": "Discos diamantados de distintos diámetros, sistema de agua para enfriamiento",
+   "cons_codes": [
+    {
+     "code": "66252843694",
+     "label": "DISCO CORTE METAL BNA32 14",
+     "cost": 3.9
+    },
+    {
+     "code": "N70184607720",
+     "label": "DISCO DIAMANTE FLEXIBLE 4\"",
+     "cost": 2.75
+    }
+   ]
+  },
+  {
+   "tool": "Pulidora de piso de hormigón",
+   "spec": "Discos de 400-500 mm; grano progresivo de 30 a 3000",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Limpieza",
+   "cons": "Discos/almohadillas de pulido de grano progresivo, aspiradora industrial para polvo",
+   "cons_codes": [
+    {
+     "code": "261240004",
+     "label": "SOLDADURA AGA 6011 1/8",
+     "cost": 4.75
+    }
+   ]
+  },
+  {
+   "tool": "Amoladora corte rápido inalámbrica",
+   "spec": "Disco corte 4-1/2\" metal/piedra; discos diamantados p/ concreto",
+   "ind": {
+    "code": "DCG418X2",
+    "desc": "ESMERILADORA IN 4 1/2\" 2300W 60V LION XR FLEXVOLT KIT DW",
+    "cost": 435.45,
+    "b87": 0,
+    "brand": "DeWalt",
+    "n": 2
+   },
+   "diy": {
+    "code": "CMCG400M1",
+    "desc": "ESMERILADORA IN 4 1/2\" 450UW 20V LION CF MAX KIT CRF",
+    "cost": 122.11,
+    "b87": 6.0,
+    "brand": "Craftsman",
+    "n": 2
+   },
+   "status": "ok",
+   "sub": "Corte y desbaste general",
+   "grupo": "Herramientas eléctricas",
+   "cons_codes": [
+    {
+     "code": "66252843680",
+     "label": "DISCO CORTE ACERO INOX BNA",
+     "cost": 0.94
+    },
+    {
+     "code": "N66252842857",
+     "label": "DISCO DESBASTE METAL BDA64",
+     "cost": 1.08
+    },
+    {
+     "code": "N70184607720",
+     "label": "DISCO DIAMANTE FLEXIBLE 4\"",
+     "cost": 2.75
+    }
+   ],
+   "cons": ""
+  },
+  {
+   "tool": "Amoladora corte rápido eléctrica",
+   "spec": "Disco corte 4-1/2\" metal/piedra; discos diamantados p/ concreto",
+   "ind": {
+    "code": "DWE4315-B3",
+    "desc": "ESMERILADORA 4 1/2\" 1500W 2HP 12.5A 120V DW",
+    "cost": 82.32,
+    "b87": 0,
+    "brand": "DeWalt",
+    "n": 17
+   },
+   "diy": {
+    "code": "CRF-CMEG100-5D",
+    "desc": "ESMERILADORA 4 1/2\" 720W CRF + 5 DISCOS DW84402 DW",
+    "cost": 27.97,
+    "b87": 78.0,
+    "brand": "Craftsman",
+    "n": 9
+   },
+   "status": "ok",
+   "sub": "Corte y desbaste general",
+   "grupo": "Herramientas eléctricas",
+   "cons_codes": [
+    {
+     "code": "66252843680",
+     "label": "DISCO CORTE ACERO INOX BNA",
+     "cost": 0.94
+    },
+    {
+     "code": "N66252842857",
+     "label": "DISCO DESBASTE METAL BDA64",
+     "cost": 1.08
+    },
+    {
+     "code": "N70184607720",
+     "label": "DISCO DIAMANTE FLEXIBLE 4\"",
+     "cost": 2.75
+    }
+   ],
+   "cons": ""
+  },
+  {
+   "tool": "Amoladora con extracción de polvo",
+   "spec": "4-1/2\" con guarda expulsora de polvo; corte de concreto/mampostería en seco",
+   "ind": {
+    "code": "D28114",
+    "desc": "ESMERILADORA 4 1/2\" 1400W 1.9HP 11.6A C/EXP. POLVO DW",
+    "cost": 106.03,
+    "b87": 0,
+    "n": 2,
+    "brand": "DeWalt"
+   },
+   "diy": null,
+   "status": "ok",
+   "sub": "Corte y desbaste general",
+   "grupo": "Herramientas eléctricas",
+   "cons": "",
+   "cons_codes": [
+    {
+     "code": "66252843680",
+     "label": "DISCO CORTE ACERO INOX BNA",
+     "cost": 0.94
+    },
+    {
+     "code": "N66252842857",
+     "label": "DISCO DESBASTE METAL BDA64",
+     "cost": 1.08
+    },
+    {
+     "code": "N70184607720",
+     "label": "DISCO DIAMANTE FLEXIBLE 4\"",
+     "cost": 2.75
+    }
+   ]
+  },
+  {
+   "tool": "Sierra circular (encofrado) inalámbrica",
+   "spec": "7-1/4\" para corte de tabla/tablero de encofrado",
+   "ind": {
+    "code": "DCS575T2",
+    "desc": "SIERRA CIRCULAR IN 7 1/4\" 60V 1600W 5800RPM MAX LION KIT DW",
+    "cost": 415.23,
+    "b87": 0,
+    "brand": "DeWalt",
+    "n": 1
+   },
+   "diy": {
+    "code": "CMCS500B",
+    "desc": "SIERRA CIRCULAR IN 6 1/2\" 20V MAX 4000RPM SIN BAT",
+    "cost": 64.68,
+    "b87": 10.0,
+    "brand": "Craftsman",
+    "n": 2
+   },
+   "status": "ok",
+   "sub": "Corte y desbaste general",
+   "grupo": "Herramientas eléctricas",
+   "cons_codes": [
+    {
+     "code": "DWA271424",
+     "label": "DISCO CORTE SIERRA CIRCULA",
+     "cost": 8.04
+    }
+   ],
+   "cons": ""
+  },
+  {
+   "tool": "Sierra circular (encofrado) eléctrica",
+   "spec": "7-1/4\" para corte de tabla/tablero de encofrado",
+   "ind": {
+    "code": "DWE575K",
+    "desc": "SIERRA CIRCULAR 7 1/4\" 1800W 5800RPM 15A DEWALT",
+    "cost": 124.92,
+    "b87": 0,
+    "brand": "DeWalt",
+    "n": 2
+   },
+   "diy": {
+    "code": "CMES500",
+    "desc": "SIERRA CIRCULAR 7 1/4\" 1560W 13A 120V CRF",
+    "cost": 68.19,
+    "b87": 0,
+    "brand": "Craftsman",
+    "n": 3
+   },
+   "status": "ok",
+   "sub": "Corte y desbaste general",
+   "grupo": "Herramientas eléctricas",
+   "cons_codes": [
+    {
+     "code": "DWA271424",
+     "label": "DISCO CORTE SIERRA CIRCULA",
+     "cost": 8.04
+    }
+   ],
+   "cons": ""
+  },
+  {
+   "tool": "Compactadora de placa",
+   "spec": "Vibroapisonador 68kg 13kN 3HP salto 85mm — compactación de suelos",
+   "ind": {
+    "code": "MR-68H",
+    "desc": "VIBROAPISONADOR 68KG 13KN 3HP SALTO 85mm 34X29cm GX100 MASAL",
+    "cost": 0,
+    "b87": 0,
+    "n": 1,
+    "brand": "MAS"
+   },
+   "diy": null,
+   "status": "ok",
+   "sub": null,
+   "grupo": "Compactación y concreto",
+   "cons": "Placa base, correa de transmisión, filtro de aire",
+   "cons_codes": []
+  }
+ ],
+ "PLOMERIA": [
+  {
+   "tool": "Máquina roscadora de tubo",
+   "spec": "Tarraja roscadora de tubos 1400W 1/2\" a 2\"",
+   "ind": {
+    "code": "DCE700X2K",
+    "desc": "TARRAJA ROSCADORA TUBOS IN 1400W 1/2\" A 2\" 60V FLEXVOLT",
+    "cost": 0,
+    "b87": 0,
+    "n": 1,
+    "brand": "DeWalt"
+   },
+   "diy": null,
+   "status": "ok",
+   "sub": "Destape de cañerías",
+   "grupo": "Especializada / pesada",
+   "cons": "Terrajas/cabezales de roscar de distintos diámetros, aceite de corte, mordazas de sujeción de repuesto",
+   "cons_codes": []
+  },
+  {
+   "tool": "Dobladora de tubo",
+   "spec": "Diámetros de 1/2\" a 2\" para tubo de cobre o EMT",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Especializada / pesada",
+   "cons": "Zapatas/matrices según diámetro de tubo",
+   "cons_codes": []
+  },
+  {
+   "tool": "Sopletes / equipo de soldadura autógena (PVC y cobre)",
+   "spec": "Tanques de oxígeno/acetileno tamaño B o R según proveedor local; varillas de aporte de 1.6",
+   "ind": {
+    "code": "D26411-B3",
+    "desc": "PISTOLA CALOR 1550W 50-400°C 650L/MIN 12A 120V DW",
+    "cost": 60.39,
+    "b87": 0,
+    "n": 1
+   },
+   "diy": {
+    "code": "CMEE531",
+    "desc": "PISTOLA CALOR 1500W 50-650°C ??L/MIN 12.5A 120V CRF",
+    "cost": 38.56,
+    "b87": 0,
+    "n": 2,
+    "brand": "Craftsman"
+   },
+   "status": "ok",
+   "grupo": "Calor y sellado",
+   "cons": "Boquillas, varillas de aporte, pasta/flux para soldar, tanques de gas de repuesto, regulador",
+   "cons_codes": []
+  },
+  {
+   "tool": "Máquina desatascadora de cañerías (\"snake\")",
+   "spec": "Cinta serpiente destapa tubos 3/8\" 11m inalámbrica",
+   "ind": {
+    "code": "DCD200D1",
+    "desc": "CINTA SERPIENTE DESTAPA TUBOS 3/8\" 11M CON TALADRO 20V MAX",
+    "cost": 256.21,
+    "b87": 5.0,
+    "n": 1,
+    "brand": "DeWalt"
+   },
+   "diy": null,
+   "status": "ok",
+   "sub": "Destape de cañerías",
+   "grupo": "Especializada / pesada",
+   "cons": "Cables/espirales de repuesto de distintos diámetros, boquillas de corte, guantes de protección",
+   "cons_codes": []
+  },
+  {
+   "tool": "Cámara de inspección de tuberías",
+   "spec": "Cable estándar de 30 m (hasta 60 m); cámara de 23-40 mm para tuberías desde 2\"",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Medición y diagnóstico",
+   "cons": "Monitor, cable de extensión, punta de cámara de repuesto",
+   "cons_codes": []
+  },
+  {
+   "tool": "Detector de fugas",
+   "spec": "Alcance de sensor según modelo; baterías AA o 9V",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Medición y diagnóstico",
+   "cons": "Baterías, sondas de detección",
+   "cons_codes": []
+  },
+  {
+   "tool": "Bomba sumergible / de achique",
+   "spec": "Descarga de 1\" a 2\"; caudal 100-300 L/min (motor de 0.5-1 HP)",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Bombas",
+   "cons": "Mangueras de descarga, filtro/colador de succión, cable eléctrico sumergible, flotador de nivel",
+   "cons_codes": []
+  },
+  {
+   "tool": "Motobomba (bomba de agua a motor, gasolina/diésel)",
+   "spec": "Succión/descarga de 2\", 3\" o 4\"; caudal 30,000-60,000 L/h; motor de 5.5-7 HP",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Bombas",
+   "cons": "Mangueras de succión y descarga, filtro/colador de pie, abrazaderas, combustible, filtro de aire y de aceite",
+   "cons_codes": []
+  },
+  {
+   "tool": "Ranuradora",
+   "spec": "Ranurado de tubería/pared — categoría creada, aún no la tienen",
+   "ind": null,
+   "diy": null,
+   "status": "pordef",
+   "sub": null,
+   "grupo": "Especializada / pesada",
+   "cons": "",
+   "cons_codes": []
+  },
+  {
+   "tool": "Bomba para aguas negras",
+   "spec": "Sólidos/aguas servidas — sumergible trituradora",
+   "ind": null,
+   "diy": null,
+   "status": "pordef",
+   "sub": "Bombas de agua",
+   "grupo": "Bombas",
+   "cons": "",
+   "cons_codes": []
+  },
+  {
+   "tool": "Bomba de desagüe / achique",
+   "spec": "Achique de agua limpia/turbia — sumergible",
+   "ind": null,
+   "diy": null,
+   "status": "pordef",
+   "sub": "Bombas de agua",
+   "grupo": "Bombas",
+   "cons": "",
+   "cons_codes": []
+  },
+  {
+   "tool": "Bomba de riego con motor",
+   "spec": "Motobomba a gasolina para riego",
+   "ind": null,
+   "diy": null,
+   "status": "pordef",
+   "sub": "Bombas de agua",
+   "grupo": "Bombas",
+   "cons": "",
+   "cons_codes": []
+  },
+  {
+   "tool": "Bomba centrífuga",
+   "spec": "Trasiego/presión — eléctrica centrífuga",
+   "ind": null,
+   "diy": null,
+   "status": "pordef",
+   "sub": "Bombas de agua",
+   "grupo": "Bombas",
+   "cons": "",
+   "cons_codes": []
+  },
+  {
+   "tool": "Bomba jet (sustituta)",
+   "spec": "Presurización doméstica — jet/periférica",
+   "ind": null,
+   "diy": null,
+   "status": "pordef",
+   "sub": "Bombas de agua",
+   "grupo": "Bombas",
+   "cons": "",
+   "cons_codes": []
+  },
+  {
+   "tool": "Pistola de calor",
+   "spec": "Pistola de calor para termofusión/PVC 50-650°C",
+   "ind": {
+    "code": "D26411-B3",
+    "desc": "PISTOLA CALOR 1550W 50-400°C 650L/MIN 12A 120V DW",
+    "cost": 60.39,
+    "b87": 0,
+    "n": 2,
+    "brand": "DeWalt"
+   },
+   "diy": {
+    "code": "CMEE531",
+    "desc": "PISTOLA CALOR 1500W 50-650°C ??L/MIN 12.5A 120V CRF",
+    "cost": 38.56,
+    "b87": 0,
+    "n": 2,
+    "brand": "Craftsman"
+   },
+   "status": "ok",
+   "sub": null,
+   "grupo": "Calor y sellado",
+   "cons": "",
+   "cons_codes": []
+  }
+ ],
+ "Electricidad": [
+  {
+   "tool": "Generador eléctrico",
+   "spec": "Potencias de 2, 5, 8 y 15 kVA para obra; tanque de 15-25 litros",
+   "ind": {
+    "code": "SK9000EB",
+    "desc": "GENERADOR GASOLINA 7/7.5KW 16HP 25L 78DB BIVOLT C/BOTON",
+    "cost": 0,
+    "b87": 0,
+    "n": 2,
+    "brand": "SK Power"
+   },
+   "diy": {
+    "code": "SK3900EB",
+    "desc": "GENERADOR GASOLINA 2.8/3KW 7HP 15L 69DB BIVOLT C/BOTON",
+    "cost": 0,
+    "b87": 0,
+    "n": 1,
+    "brand": "SK Power"
+   },
+   "status": "ok",
+   "grupo": "Generadores",
+   "cons": "Combustible, aceite de motor, filtro de aire, extensiones/cables eléctricos, batería de arranque",
+   "cons_codes": []
+  },
+  {
+   "tool": "Multímetro / pinza amperimétrica",
+   "spec": "Multímetro digital / pinza amperimétrica AC 600A",
+   "ind": {
+    "code": "171722",
+    "desc": "MULTIMETRO DIGITAL 10A MY60 10ADC 1000V TIPO AC 750V CHINT",
+    "cost": 31.5,
+    "b87": 0,
+    "n": 4,
+    "brand": "Truper/Gen"
+   },
+   "diy": null,
+   "status": "ok",
+   "sub": "Inspección de fugas",
+   "grupo": "Medición y diagnóstico",
+   "cons": "Baterías, puntas de prueba de repuesto",
+   "cons_codes": []
+  },
+  {
+   "tool": "Detector de cables / tensión",
+   "spec": "Baterías AAA; detección típica hasta 50-60 mm en pared",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Medición y diagnóstico",
+   "cons": "Baterías",
+   "cons_codes": []
+  },
+  {
+   "tool": "Dobladora de tubo conduit (EMT bender)",
+   "spec": "Diámetros de 1/2\", 3/4\" y 1\" (EMT)",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Especializada / pesada",
+   "cons": "Zapatas según diámetro de tubo",
+   "cons_codes": []
+  },
+  {
+   "tool": "Peladora y crimpadora de cable",
+   "spec": "Calibres de cable de 10 a 22 AWG (2.5-0.3 mm²)",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Medición y diagnóstico",
+   "cons": "Cuchillas de repuesto, terminales y conectores",
+   "cons_codes": []
+  },
+  {
+   "tool": "Torre de iluminación",
+   "spec": "Torres de 4-9 m de altura; reflectores LED de 1000-1500 W",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Especializada / pesada",
+   "cons": "Reflectores/bombillas de repuesto, combustible",
+   "cons_codes": []
+  },
+  {
+   "tool": "Escalera / plataforma con aislamiento eléctrico",
+   "spec": "Alturas de 1.8, 2.4 y 3.6 m; clasificación dieléctrica hasta 30 kV (tipo IA)",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Acceso y altura",
+   "cons": "Zapatas antideslizantes de repuesto",
+   "cons_codes": []
+  },
+  {
+   "tool": "Pelacables industrial",
+   "spec": "Pelacables inalámbrico 750MCM Cu/900MCM Al",
+   "ind": {
+    "code": "DCE151TD1",
+    "desc": "PELACABLES INALAMBRICO 750MCM CU/900MCM AL 20V MAX LION KIT",
+    "cost": 283.33,
+    "b87": 1.0,
+    "n": 1,
+    "brand": "DeWalt"
+   },
+   "diy": null,
+   "status": "ok",
+   "sub": "Inspección de fugas",
+   "grupo": "Medición y diagnóstico",
+   "cons": "",
+   "cons_codes": []
+  },
+  {
+   "tool": "Cortacables",
+   "spec": "Cortacable inalámbrico 750MCM 20V MAX",
+   "ind": {
+    "code": "DCE155D1",
+    "desc": "CORTACABLE INALAMBRICO 750MCM 20V MAX LION KIT DW",
+    "cost": 1039.25,
+    "b87": 2.0,
+    "n": 1,
+    "brand": "DeWalt"
+   },
+   "diy": null,
+   "status": "ok",
+   "sub": "Inspección de fugas",
+   "grupo": "Medición y diagnóstico",
+   "cons": "",
+   "cons_codes": []
+  },
+  {
+   "tool": "Cámara infrarroja / termográfica",
+   "spec": "Detección de puntos calientes/fugas térmicas — por definir",
+   "ind": null,
+   "diy": null,
+   "status": "pordef",
+   "sub": "Inspección de fugas",
+   "grupo": "Medición y diagnóstico",
+   "cons": "",
+   "cons_codes": []
+  },
+  {
+   "tool": "Transformador de obra",
+   "spec": "Transformador reductor 110/220 de obra — por definir",
+   "ind": null,
+   "diy": null,
+   "status": "pordef",
+   "sub": "Inspección de fugas",
+   "cons": "",
+   "grupo": "Generadores",
+   "cons_codes": []
+  }
+ ],
+ "PINTURA Y ACABADOS": [
+  {
+   "tool": "Compresor y pistola de pintura (equipo airless)",
+   "spec": "Boquillas de 0.011\" a 0.021\"; manguera de 3/8\"; presión de trabajo 3000-3300 PSI",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Compresores",
+   "cons": "Boquillas de distintos diámetros, filtros de repuesto, mangueras de alta presión, kit de empaques",
+   "cons_codes": []
+  },
+  {
+   "tool": "Máquina de texturizado",
+   "spec": "Boquilla de salida de 6-10 mm; presión de 4-6 bar",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Especializada / pesada",
+   "cons": "Boquillas, manguera, compresor de aire",
+   "cons_codes": []
+  },
+  {
+   "tool": "Lijadora para drywall / paredes",
+   "spec": "Discos de 225 mm (9\"); grano 80-220",
+   "ind": {
+    "code": "DCF620D2",
+    "desc": "DESTORNILLADOR IN 435W 1/4\" 30NM 20V XR LION GYPSUM KIT DW",
+    "cost": 236.78,
+    "b87": 1.0,
+    "n": 5
+   },
+   "diy": {
+    "code": "SW75-B3",
+    "desc": "LIJADORA EXTENSIBLE GYPSUM 750W 9\" 1700 OPM 180CM 6A ST",
+    "cost": 126.98,
+    "b87": 0,
+    "n": 1,
+    "brand": "Stanley"
+   },
+   "status": "ok",
+   "grupo": "Herramientas eléctricas",
+   "cons": "Discos/lijas de distintos granos, bolsa colectora de polvo",
+   "cons_codes": [
+    {
+     "code": "7508",
+     "label": "LIJA AGUA #3-150 FANDELLI",
+     "cost": 0.22
+    }
+   ]
+  },
+  {
+   "tool": "Mezcladora de pintura / masilla",
+   "spec": "Hélice para taladro de 1/2\"; diámetro de mezcla 100-120 mm",
+   "ind": null,
+   "diy": {
+    "code": "SDR1400-B3",
+    "desc": "MEZCLADORA CEMENTO 1400W 2HP 5.5\" 140MM 11.6A 120V ST",
+    "cost": 106.45,
+    "b87": 0,
+    "n": 1,
+    "brand": "Stanley"
+   },
+   "status": "ok",
+   "grupo": "Otros",
+   "cons": "Paleta o hélice de mezcla de repuesto",
+   "cons_codes": []
+  },
+  {
+   "tool": "Andamios y plataformas de trabajo",
+   "spec": "Módulos de 1.0x1.5 m o 1.2x2.0 m; cuerpos de 2 m de altura",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Acceso y altura",
+   "cons": "Ruedas/estabilizadores, tablones, barandas de seguridad",
+   "cons_codes": []
+  },
+  {
+   "tool": "Pulidora y abrillantadora de piso",
+   "spec": "Discos de 400-505 mm de diámetro",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Limpieza",
+   "cons": "Almohadillas de pulido, discos de diamante, productos abrillantadores",
+   "cons_codes": []
+  },
+  {
+   "tool": "Rociadora de pintura (airless)",
+   "spec": "Equipo airless para pintura — por definir, sin producto en maestro",
+   "ind": null,
+   "diy": null,
+   "status": "pordef",
+   "sub": null,
+   "grupo": "Especializada / pesada",
+   "cons": "",
+   "cons_codes": []
+  },
+  {
+   "tool": "Pulidora eléctrica",
+   "spec": "Pulidora 7\" para acabado de superficies",
+   "ind": {
+    "code": "DWP849X-B3",
+    "desc": "PULIDORA 7\" Y 9\" 1250W 3500RPM 10.4A 120V DW",
+    "cost": 170.58,
+    "b87": 1.0,
+    "brand": "DeWalt",
+    "n": 2
+   },
+   "diy": {
+    "code": "CMEE100",
+    "desc": "PULIDORA 10\" 120W 2800RPM 1A 120V CRF",
+    "cost": 48.29,
+    "b87": 12.0,
+    "brand": "Craftsman",
+    "n": 4
+   },
+   "status": "ok",
+   "sub": null,
+   "grupo": "Herramientas eléctricas",
+   "cons_codes": [],
+   "cons": ""
+  },
+  {
+   "tool": "Ventilador / soplador para secado",
+   "spec": "Soplador para secado de pintura/superficies",
+   "ind": null,
+   "diy": {
+    "code": "CMCBL720M1",
+    "desc": "SOPLADOR IN 375CFM 168KM/H 20V MAX LION 80WH 1BAT 4AH BRU",
+    "cost": 163.53,
+    "b87": 2.0,
+    "n": 2,
+    "brand": "Craftsman"
+   },
+   "status": "ok",
+   "sub": null,
+   "grupo": "Jardinería",
+   "cons": "",
+   "cons_codes": []
+  }
+ ],
+ "MOVIMIENTO DE TIERRA , DEMOLICION": [
+  {
+   "tool": "Miniexcavadora",
+   "spec": "Cucharones de 30, 45 y 60 cm; peso de máquina 1.5-3.5 ton",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Especializada / pesada",
+   "cons": "Cucharones de distintos anchos, martillo hidráulico acoplable, filtros de aire, aceite y combustible",
+   "cons_codes": []
+  },
+  {
+   "tool": "Minicargadora (skid steer)",
+   "spec": "Cucharón de 1.2-1.8 m de ancho; carga de 700-900 kg",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Especializada / pesada",
+   "cons": "Cucharón, horquillas para pallets, barredora acoplable",
+   "cons_codes": []
+  },
+  {
+   "tool": "Retroexcavadora",
+   "spec": "Cucharones de 30-90 cm de ancho",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Especializada / pesada",
+   "cons": "Cucharones de distintos anchos, dientes de cucharón de repuesto",
+   "cons_codes": []
+  },
+  {
+   "tool": "Martillo demoledor (eléctrico, neumático o hidráulico)",
+   "spec": "Puntas hexagonales de 1-1/8\" (28 mm), largo 400-600 mm; peso de martillo 10-30 kg",
+   "ind": {
+    "code": "D25881K",
+    "desc": "MARTILLO DEMOLEDOR 1600W 10KG SDS MAX 2160IPM 17J 12A 120V D",
+    "cost": 589.48,
+    "b87": 15.0,
+    "n": 4
+   },
+   "diy": null,
+   "status": "ok",
+   "grupo": "Demolición y rompedores",
+   "cons": "Puntas y cinceles de repuesto (punta, pala, cincel plano), aceite, filtro de aire",
+   "cons_codes": [
+    {
+     "code": "DW5809",
+     "label": "BROCA SDS MAX CONCRETO CAR",
+     "cost": 28.99
+    }
+   ]
+  },
+  {
+   "tool": "Rompedor hidráulico montado en excavadora",
+   "spec": "Puntas de 42-53 mm de diámetro, para excavadoras de 1.5-5 ton",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Demolición y rompedores",
+   "cons": "Puntas de repuesto, mangueras hidráulicas, aceite hidráulico",
+   "cons_codes": []
+  },
+  {
+   "tool": "Compactadora de placa",
+   "spec": "Placa de 40-55 cm de ancho; fuerza centrífuga 10-20 kN",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Compactación y concreto",
+   "cons": "Placa base, correa de transmisión, filtro de aire",
+   "cons_codes": []
+  },
+  {
+   "tool": "Rodillo compactador",
+   "spec": "Peso operativo 500-1500 kg",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Compactación y concreto",
+   "cons": "Correas de transmisión, sistema de riego de agua",
+   "cons_codes": []
+  },
+  {
+   "tool": "Cortadora de pavimento / concreto",
+   "spec": "Discos de 14\"-20\"; profundidad de corte hasta 18 cm",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Corte de piso y concreto",
+   "cons": "Discos diamantados, sistema de refrigeración por agua",
+   "cons_codes": []
+  },
+  {
+   "tool": "Perforadora de suelo / barrenadora",
+   "spec": "Barrenas de 4\" a 12\" de diámetro; extensiones de 0.5-1 m",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Especializada / pesada",
+   "cons": "Barrenas de distintos diámetros, extensiones",
+   "cons_codes": []
+  },
+  {
+   "tool": "Motobomba para achique de agua",
+   "spec": "Succión/descarga de 2\", 3\" o 4\"; caudal 30,000-60,000 L/h",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Bombas",
+   "cons": "Mangueras de succión y descarga, filtro/colador de pie, abrazaderas, combustible",
+   "cons_codes": []
+  },
+  {
+   "tool": "Carretilla motorizada (dumper)",
+   "spec": "Transporte de material en obra — por definir, sin producto en maestro",
+   "ind": null,
+   "diy": null,
+   "status": "pordef",
+   "sub": null,
+   "grupo": "Especializada / pesada",
+   "cons": "",
+   "cons_codes": []
+  },
+  {
+   "tool": "Elevador / tecle / polipasto",
+   "spec": "Izaje de cargas — por definir, sin producto en maestro",
+   "ind": null,
+   "diy": null,
+   "status": "pordef",
+   "sub": null,
+   "grupo": "Especializada / pesada",
+   "cons": "",
+   "cons_codes": []
+  }
+ ],
+ "SOLDADURA METALMECANICA": [
+  {
+   "tool": "Máquina de soldar MIG",
+   "spec": "Soldadora MIG 30-300A con antorcha",
+   "ind": {
+    "code": "SI8300MG+M1-111",
+    "desc": "SOLDADORA MIG 30-300A SI8300MG + ANTORCHA SWIFKEN",
+    "cost": 791.58,
+    "b87": 0,
+    "n": 1,
+    "brand": "Elite"
+   },
+   "diy": null,
+   "status": "ok",
+   "grupo": "Soldadura",
+   "cons": "Rollo de alambre/hilo de aporte, boquillas de contacto, gas de protección (CO2/argón), regulador de gas, tobera",
+   "cons_codes": [
+    {
+     "code": "261240004",
+     "label": "SOLDADURA AGA 6011 1/8",
+     "cost": 4.75
+    }
+   ]
+  },
+  {
+   "tool": "Máquina de soldar TIG",
+   "spec": "Soldadora MMA/TIG/MIG 10-220A",
+   "ind": {
+    "code": "SI9220MP",
+    "desc": "SOLDADORA MMA/TIG/MIG 10-220A 80V 60% 95V/260V SI9220MP ELIT",
+    "cost": 480.34,
+    "b87": 0,
+    "n": 1,
+    "brand": "Elite"
+   },
+   "diy": null,
+   "status": "ok",
+   "grupo": "Soldadura",
+   "cons": "Electrodos de tungsteno, varillas de aporte, gas argón, regulador de gas",
+   "cons_codes": [
+    {
+     "code": "261240004",
+     "label": "SOLDADURA AGA 6011 1/8",
+     "cost": 4.75
+    }
+   ]
+  },
+  {
+   "tool": "Máquina de soldar por electrodo revestido (SMAW)",
+   "spec": "Inversor MMA/TIG/MIG 20-260A multiproceso",
+   "ind": {
+    "code": "FLEX265",
+    "desc": "SOLDADORA MMA/TIG/MIG 20-260A 65V 60% 110V/220V FLEX265 FURI",
+    "cost": 468.12,
+    "b87": 0,
+    "n": 1,
+    "brand": "Furia"
+   },
+   "diy": null,
+   "status": "ok",
+   "grupo": "Soldadura",
+   "cons": "Electrodos según aplicación, porta-electrodo, pinza de tierra",
+   "cons_codes": [
+    {
+     "code": "261240004",
+     "label": "SOLDADURA AGA 6011 1/8",
+     "cost": 4.75
+    }
+   ]
+  },
+  {
+   "tool": "Cortadora de plasma",
+   "spec": "Corte limpio hasta 12-16 mm de espesor; aire de 4-5 CFM a 90 PSI",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Soldadura",
+   "cons": "Boquillas y electrodos de repuesto, compresor de aire",
+   "cons_codes": []
+  },
+  {
+   "tool": "Equipo de oxicorte",
+   "spec": "Corte de 3 a 150 mm de espesor según boquilla; oxígeno 3-4 bar, acetileno 0.5-1 bar",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Soldadura",
+   "cons": "Boquillas de corte, regulador de presión, mangueras, tanques de oxígeno y acetileno",
+   "cons_codes": []
+  },
+  {
+   "tool": "Amoladora angular inalámbrica",
+   "spec": "Discos de 4-1/2\" (115 mm), 7\" (180 mm) y 9\" (230 mm)",
+   "ind": {
+    "code": "DCG418X2",
+    "desc": "ESMERILADORA IN 4 1/2\" 2300W 60V LION XR FLEXVOLT KIT DW",
+    "cost": 435.45,
+    "b87": 0,
+    "brand": "DeWalt",
+    "n": 2
+   },
+   "diy": {
+    "code": "CMCG400M1",
+    "desc": "ESMERILADORA IN 4 1/2\" 450UW 20V LION CF MAX KIT CRF",
+    "cost": 122.11,
+    "b87": 6.0,
+    "brand": "Craftsman",
+    "n": 2
+   },
+   "status": "ok",
+   "sub": null,
+   "grupo": "Herramientas eléctricas",
+   "cons_codes": [
+    {
+     "code": "66252843680",
+     "label": "DISCO CORTE ACERO INOX BNA",
+     "cost": 0.94
+    },
+    {
+     "code": "N66252842857",
+     "label": "DISCO DESBASTE METAL BDA64",
+     "cost": 1.08
+    },
+    {
+     "code": "N70184607720",
+     "label": "DISCO DIAMANTE FLEXIBLE 4\"",
+     "cost": 2.75
+    }
+   ],
+   "cons": ""
+  },
+  {
+   "tool": "Amoladora angular eléctrica",
+   "spec": "Discos de 4-1/2\" (115 mm), 7\" (180 mm) y 9\" (230 mm)",
+   "ind": {
+    "code": "DWE4315-B3",
+    "desc": "ESMERILADORA 4 1/2\" 1500W 2HP 12.5A 120V DW",
+    "cost": 82.32,
+    "b87": 0,
+    "brand": "DeWalt",
+    "n": 17
+   },
+   "diy": {
+    "code": "CRF-CMEG100-5D",
+    "desc": "ESMERILADORA 4 1/2\" 720W CRF + 5 DISCOS DW84402 DW",
+    "cost": 27.97,
+    "b87": 78.0,
+    "brand": "Craftsman",
+    "n": 9
+   },
+   "status": "ok",
+   "sub": null,
+   "grupo": "Herramientas eléctricas",
+   "cons_codes": [
+    {
+     "code": "66252843680",
+     "label": "DISCO CORTE ACERO INOX BNA",
+     "cost": 0.94
+    },
+    {
+     "code": "N66252842857",
+     "label": "DISCO DESBASTE METAL BDA64",
+     "cost": 1.08
+    },
+    {
+     "code": "N70184607720",
+     "label": "DISCO DIAMANTE FLEXIBLE 4\"",
+     "cost": 2.75
+    }
+   ],
+   "cons": ""
+  },
+  {
+   "tool": "Dobladora y cizalla de metal",
+   "spec": "Capacidad hasta 3-6 mm de espesor en lámina; hasta 2 m de largo",
+   "ind": null,
+   "diy": null,
+   "status": "especializada",
+   "grupo": "Especializada / pesada",
+   "cons": "Matrices de doblado, cuchillas de corte de repuesto",
+   "cons_codes": []
+  },
+  {
+   "tool": "Taladro magnético",
+   "spec": "Brocas de corona de 12-100 mm de diámetro; base con sujeción de 1000-1500 kgf",
+   "ind": {
+    "code": "DWE1622K-B3",
+    "desc": "TALADRO MAGNETICO 1200W 450IPM 1200W KIT DW",
+    "cost": 1082.76,
+    "b87": 0,
+    "n": 1
+   },
+   "diy": null,
+   "status": "ok",
+   "grupo": "Herramientas eléctricas",
+   "cons": "Brocas de corona (hole saws), base magnética, refrigerante de corte",
+   "cons_codes": [
+    {
+     "code": "DW530400C",
+     "label": "BROCA CONCRETO CILI 5/32\"X",
+     "cost": 0.4
+    },
+    {
+     "code": "DW170018B",
+     "label": "BROCA METAL MADERA HSS ACE",
+     "cost": 0.2
+    },
+    {
+     "code": "DWA3PH1-1L",
+     "label": "PUNTA DESTORNILLADOR PH1X3",
+     "cost": 0.72
+    }
+   ]
+  },
+  {
+   "tool": "Tronzadora / cortadora sensitiva",
+   "spec": "Tronzadora 14\" 355mm para corte de metal",
+   "ind": {
+    "code": "D28730-B3",
+    "desc": "TRONZADORA 14\" 355mm 2300W 3800RPM 19A 120V DW",
+    "cost": 141.47,
+    "b87": 0,
+    "n": 6,
+    "brand": "DeWalt"
+   },
+   "diy": {
+    "code": "CMEM2500",
+    "desc": "TRONZADORA 14\" 355mm 1800W 3800RPM 15A 120V CRF",
+    "cost": 118.08,
+    "b87": 43.0,
+    "n": 1,
+    "brand": "Craftsman"
+   },
+   "status": "ok",
+   "sub": null,
+   "grupo": "Corte de piso y concreto",
+   "cons": "",
+   "cons_codes": [
+    {
+     "code": "66252843694",
+     "label": "DISCO CORTE METAL BNA32 14",
+     "cost": 3.9
+    },
+    {
+     "code": "N70184607720",
+     "label": "DISCO DIAMANTE FLEXIBLE 4\"",
+     "cost": 2.75
+    }
+   ]
+  }
+ ],
+ "IMPERMEABILIZACION DE CUBIERTAS": [
+  {
+   "tool": "Soplete de gas para impermeabilización",
+   "spec": "Soplete antorcha a gas propano para membrana asfáltica",
+   "ind": {
+    "code": "18257",
+    "desc": "SOPLETE ANTORCHA CILINDRO GAS PROPANO BR 16CM",
+    "cost": 22.95,
+    "b87": 1.0,
+    "n": 3,
+    "brand": "Variados"
+   },
+   "diy": null,
+   "status": "ok",
+   "sub": null,
+   "grupo": "Calor y sellado",
+   "cons": "",
+   "cons_codes": []
+  },
+  {
+   "tool": "Pistola de calor (sellado)",
+   "spec": "Sellado térmico de membranas/juntas",
+   "ind": {
+    "code": "D26411-B3",
+    "desc": "PISTOLA CALOR 1550W 50-400°C 650L/MIN 12A 120V DW",
+    "cost": 60.39,
+    "b87": 0,
+    "n": 2,
+    "brand": "DeWalt"
+   },
+   "diy": {
+    "code": "CMEE531",
+    "desc": "PISTOLA CALOR 1500W 50-650°C ??L/MIN 12.5A 120V CRF",
+    "cost": 38.56,
+    "b87": 0,
+    "n": 2,
+    "brand": "Craftsman"
+   },
+   "status": "ok",
+   "sub": null,
+   "grupo": "Calor y sellado",
+   "cons": "",
+   "cons_codes": []
+  }
+ ],
+ "SEGURIDAD INDUSTRIAL": [
+  {
+   "tool": "Andamio modular / plataforma",
+   "spec": "Andamio de obra — por definir (solo caballetes/ruedas en maestro)",
+   "ind": null,
+   "diy": null,
+   "status": "pordef",
+   "sub": "Acceso y trabajo en altura",
+   "grupo": "Acceso y altura",
+   "cons": "",
+   "cons_codes": []
+  },
+  {
+   "tool": "Escalera (telescópica / multiposición)",
+   "spec": "Escalera telescópica aluminio 8m",
+   "ind": {
+    "code": "BP03436",
+    "desc": "ESCALERA TELESCOPICA EXTENSIBL ALUMINIO 8.60m ALTURA MAXIMA",
+    "cost": 170.73,
+    "b87": 2.0,
+    "n": 4,
+    "brand": "Variados"
+   },
+   "diy": null,
+   "status": "ok",
+   "sub": "Acceso y trabajo en altura",
+   "grupo": "Acceso y altura",
+   "cons": "",
+   "cons_codes": []
+  },
+  {
+   "tool": "Arnés / línea de vida",
+   "spec": "Cinturón de seguridad con línea de vida",
+   "ind": {
+    "code": "6167",
+    "desc": "CINTURON SEGURIDAD CON LINEA DE VIDA",
+    "cost": 23.73,
+    "b87": 0,
+    "n": 1,
+    "brand": "Fidelpersa"
+   },
+   "diy": null,
+   "status": "venta",
+   "sub": "Acceso y trabajo en altura",
+   "grupo": "Seguridad / EPP",
+   "cons": "",
+   "cons_codes": []
+  },
+  {
+   "tool": "Casco de seguridad",
+   "spec": "Casco clase E dieléctrico",
+   "ind": {
+    "code": "HC414517/AM",
+    "desc": "CASCO CLASE E AMARILLO DIELECTRICO",
+    "cost": 7.57,
+    "b87": 0,
+    "n": 1,
+    "brand": "Halley"
+   },
+   "diy": null,
+   "status": "venta",
+   "sub": "EPP",
+   "grupo": "Seguridad / EPP",
+   "cons": "",
+   "cons_codes": []
+  },
+  {
+   "tool": "Gafas de protección",
+   "spec": "Gafas de protección transparentes",
+   "ind": {
+    "code": "22523",
+    "desc": "GAFAS DE PROTECCION TRANSPAREN HALLEY",
+    "cost": 2.04,
+    "b87": 0,
+    "n": 1,
+    "brand": "Halley"
+   },
+   "diy": null,
+   "status": "venta",
+   "sub": "EPP",
+   "grupo": "Seguridad / EPP",
+   "cons": "",
+   "cons_codes": []
+  },
+  {
+   "tool": "Orejeras / protección auditiva",
+   "spec": "Orejeras antirruido",
+   "ind": {
+    "code": "BP00805",
+    "desc": "OREJERAS ANTIRUIDO ",
+    "cost": 1.38,
+    "b87": 9.0,
+    "n": 1,
+    "brand": "Fidelpersa"
+   },
+   "diy": null,
+   "status": "venta",
+   "sub": "EPP",
+   "grupo": "Seguridad / EPP",
+   "cons": "",
+   "cons_codes": []
+  }
+ ],
+ "LIMPIEZA": [
+  {
+   "tool": "Hidrolavadora",
+   "spec": "Lavadora a presión 2400PSI",
+   "ind": null,
+   "diy": {
+    "code": "CMEPW2400",
+    "desc": "HIDROLAVADORA 2400PSI 1350W 4.2L/MIN 13A 120V CRF",
+    "cost": 276.75,
+    "b87": 2.0,
+    "n": 5,
+    "brand": "Craftsman"
+   },
+   "status": "ok",
+   "sub": null,
+   "cons": "Manguera alta presión, boquillas, jabón espuma",
+   "grupo": "Limpieza",
+   "cons_codes": []
+  },
+  {
+   "tool": "Aspiradora industrial inalámbrica",
+   "spec": "Aspirado en seco/húmedo — por definir",
+   "ind": {
+    "code": "DCV585T2",
+    "desc": "ASPIRADORA INALAMBRICA 125CFM 7.5L DRY 60V LION FLEXVOLT DW",
+    "cost": 0,
+    "b87": 0,
+    "brand": "DeWalt",
+    "n": 1
+   },
+   "diy": null,
+   "status": "ok",
+   "sub": null,
+   "cons": "Bolsas, filtros, mangueras",
+   "grupo": "Limpieza",
+   "cons_codes": []
+  },
+  {
+   "tool": "Pulidora / abrillantadora de piso",
+   "spec": "Enceradora/pulidora de piso — por definir",
+   "ind": null,
+   "diy": null,
+   "status": "pordef",
+   "sub": null,
+   "cons": "Discos/paños de pulido, pad-holder",
+   "grupo": "Limpieza",
+   "cons_codes": []
+  },
+  {
+   "tool": "Aspiradora industrial eléctrica",
+   "spec": "Aspirado seco/húmedo con cable",
+   "ind": {
+    "code": "DWV109-B3",
+    "desc": "ASPIRADORA 1.6HP 1200W 34L W/D 90CFM 120V DW",
+    "cost": 0,
+    "b87": 0,
+    "brand": "DeWalt",
+    "n": 1
+   },
+   "diy": null,
+   "status": "ok",
+   "sub": null,
+   "grupo": "Limpieza",
+   "cons_codes": [],
+   "cons": "Bolsas, filtros, mangueras"
+  }
+ ],
+ "JARDINERIA": [
+  {
+   "tool": "Desbrozadora / guadaña",
+   "spec": "Desbrozadora de césped a combustión / inalámbrica",
+   "ind": {
+    "code": "GST33-B3",
+    "desc": "DESBROZADORA CESPED COMBUSTION 900W 1.2HP 2TIEMPOS BD",
+    "cost": 178.13,
+    "b87": 0,
+    "n": 5,
+    "brand": "Black&Decker"
+   },
+   "diy": {
+    "code": "CMCST900D1",
+    "desc": "DESBROZADORA CESPED IN 13\" 20V 40WH 1.65MM 1BAT MAX 2.5AH",
+    "cost": 122.97,
+    "b87": 6.0,
+    "n": 2,
+    "brand": "Craftsman"
+   },
+   "status": "ok",
+   "sub": null,
+   "cons": "Hilo de corte, cuchilla 3 puntas, arnés",
+   "grupo": "Jardinería",
+   "cons_codes": [
+    {
+     "code": "DF080BKP1",
+     "label": "CARRETE NYLON DESBROZADORA",
+     "cost": 3.9
+    }
+   ]
+  },
+  {
+   "tool": "Motosierra",
+   "spec": "Motosierra inalámbrica 16\" 60V",
+   "ind": {
+    "code": "DCCS670X1",
+    "desc": "MOTOSIERRA INALAM 16\" 60V FLXV 3/8\" 1BAT 3AH DW",
+    "cost": 369.07,
+    "b87": 0,
+    "n": 2,
+    "brand": "DeWalt"
+   },
+   "diy": {
+    "code": "CMCCS620M1",
+    "desc": "SIERRA CADENA IN 12\" 20V MAX 80WH 3/8\" 1BAT 4AH CRF",
+    "cost": 184.77,
+    "b87": 8.0,
+    "n": 3,
+    "brand": "Craftsman"
+   },
+   "status": "ok",
+   "sub": null,
+   "cons": "Cadena, barra, aceite lubricante, lima",
+   "grupo": "Herramientas eléctricas",
+   "cons_codes": []
+  },
+  {
+   "tool": "Soplador / aspirador de hojas",
+   "spec": "Soplador 375CFM 20V",
+   "ind": null,
+   "diy": {
+    "code": "CMCBL720M1",
+    "desc": "SOPLADOR IN 375CFM 168KM/H 20V MAX LION 80WH 1BAT 4AH BRU",
+    "cost": 163.53,
+    "b87": 2.0,
+    "n": 2,
+    "brand": "Craftsman"
+   },
+   "status": "ok",
+   "sub": null,
+   "cons": "Tubo soplador, bolsa recolectora",
+   "grupo": "Jardinería",
+   "cons_codes": []
+  }
+ ]
+}
