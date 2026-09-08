@@ -126,6 +126,11 @@ class Consumables extends Table with SyncColumns {
 class Canonicals extends Table with SyncColumns {
   TextColumn get code => text()();
   TextColumn get name => text()();
+
+  /// Ícono: ruta remota (la pone el sync al subir) y locales.
+  TextColumn get iconPath => text().nullable()();
+  TextColumn get iconLocalPath => text().nullable()();
+  DateTimeColumn get iconUploadedAt => dateTime().nullable()();
 }
 
 /// Plantilla de atributos de una familia (canónico): QUÉ importa.
@@ -206,7 +211,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -228,7 +233,12 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(assets, assets.brand);
             await m.addColumn(assets, assets.mfrModel);
           }
-          // v4: createAll de arriba ya crea las tablas de atributos.
+          // v4/v5: createAll de arriba crea las tablas nuevas.
+          if (from == 5) {
+            await m.addColumn(canonicals, canonicals.iconPath);
+            await m.addColumn(canonicals, canonicals.iconLocalPath);
+            await m.addColumn(canonicals, canonicals.iconUploadedAt);
+          }
         },
       );
 

@@ -87,6 +87,7 @@ List<TableSyncAdapter> buildSyncAdapters() => [
                   id: Value(r['id'] as String),
                   code: Value(r['code'] as String),
                   name: Value(r['name'] as String),
+                  iconPath: Value(r['icon_path'] as String?),
                   updatedAt: Value(remoteUpdated),
                   deletedAt: Value(tsN(r['deleted_at'])),
                 ),

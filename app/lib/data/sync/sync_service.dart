@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -131,6 +132,7 @@ class SyncService {
   // ---------- Push ----------
 
   Future<(int, String?)> _push(String org) async {
+    await _uploadPendingCanonicalIcons(org);
     final entries = await (_db.select(_db.syncQueue)
           ..orderBy([(q) => OrderingTerm.asc(q.seq)]))
         .get();
@@ -164,6 +166,32 @@ class SyncService {
         : '$failed fila(s) no subieron (se reintentarán). '
             'Primer error → $firstError';
     return (pushed, error);
+  }
+
+  /// Sube íconos de canónicos al bucket photos y registra icon_path.
+  Future<void> _uploadPendingCanonicalIcons(String org) async {
+    final pending = await (_db.select(_db.canonicals)
+          ..where((c) =>
+              c.iconUploadedAt.isNull() & c.iconLocalPath.isNotNull()))
+        .get();
+    for (final c in pending) {
+      final file = File(c.iconLocalPath!);
+      if (!file.existsSync()) continue;
+      final remotePath = '$org/canonicos/${c.id}.jpg';
+      await _remote.storage.from('photos').upload(
+            remotePath,
+            file,
+            fileOptions: const FileOptions(upsert: true),
+          );
+      await _remote
+          .from('canonicals')
+          .update({'icon_path': remotePath}).eq('id', c.id);
+      await (_db.update(_db.canonicals)..where((x) => x.id.equals(c.id)))
+          .write(CanonicalsCompanion(
+        iconPath: Value(remotePath),
+        iconUploadedAt: Value(DateTime.now()),
+      ));
+    }
   }
 
   // ---------- Pull ----------

@@ -1362,8 +1362,51 @@ class $CanonicalsTable extends Canonicals
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _iconPathMeta = const VerificationMeta(
+    'iconPath',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, updatedAt, deletedAt, code, name];
+  late final GeneratedColumn<String> iconPath = GeneratedColumn<String>(
+    'icon_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _iconLocalPathMeta = const VerificationMeta(
+    'iconLocalPath',
+  );
+  @override
+  late final GeneratedColumn<String> iconLocalPath = GeneratedColumn<String>(
+    'icon_local_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _iconUploadedAtMeta = const VerificationMeta(
+    'iconUploadedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> iconUploadedAt =
+      GeneratedColumn<DateTime>(
+        'icon_uploaded_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    updatedAt,
+    deletedAt,
+    code,
+    name,
+    iconPath,
+    iconLocalPath,
+    iconUploadedAt,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1409,6 +1452,30 @@ class $CanonicalsTable extends Canonicals
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
+    if (data.containsKey('icon_path')) {
+      context.handle(
+        _iconPathMeta,
+        iconPath.isAcceptableOrUnknown(data['icon_path']!, _iconPathMeta),
+      );
+    }
+    if (data.containsKey('icon_local_path')) {
+      context.handle(
+        _iconLocalPathMeta,
+        iconLocalPath.isAcceptableOrUnknown(
+          data['icon_local_path']!,
+          _iconLocalPathMeta,
+        ),
+      );
+    }
+    if (data.containsKey('icon_uploaded_at')) {
+      context.handle(
+        _iconUploadedAtMeta,
+        iconUploadedAt.isAcceptableOrUnknown(
+          data['icon_uploaded_at']!,
+          _iconUploadedAtMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1438,6 +1505,18 @@ class $CanonicalsTable extends Canonicals
         DriftSqlType.string,
         data['${effectivePrefix}name'],
       )!,
+      iconPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}icon_path'],
+      ),
+      iconLocalPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}icon_local_path'],
+      ),
+      iconUploadedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}icon_uploaded_at'],
+      ),
     );
   }
 
@@ -1453,12 +1532,20 @@ class Canonical extends DataClass implements Insertable<Canonical> {
   final DateTime? deletedAt;
   final String code;
   final String name;
+
+  /// Ícono: ruta remota (la pone el sync al subir) y locales.
+  final String? iconPath;
+  final String? iconLocalPath;
+  final DateTime? iconUploadedAt;
   const Canonical({
     required this.id,
     required this.updatedAt,
     this.deletedAt,
     required this.code,
     required this.name,
+    this.iconPath,
+    this.iconLocalPath,
+    this.iconUploadedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1470,6 +1557,15 @@ class Canonical extends DataClass implements Insertable<Canonical> {
     }
     map['code'] = Variable<String>(code);
     map['name'] = Variable<String>(name);
+    if (!nullToAbsent || iconPath != null) {
+      map['icon_path'] = Variable<String>(iconPath);
+    }
+    if (!nullToAbsent || iconLocalPath != null) {
+      map['icon_local_path'] = Variable<String>(iconLocalPath);
+    }
+    if (!nullToAbsent || iconUploadedAt != null) {
+      map['icon_uploaded_at'] = Variable<DateTime>(iconUploadedAt);
+    }
     return map;
   }
 
@@ -1482,6 +1578,15 @@ class Canonical extends DataClass implements Insertable<Canonical> {
           : Value(deletedAt),
       code: Value(code),
       name: Value(name),
+      iconPath: iconPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(iconPath),
+      iconLocalPath: iconLocalPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(iconLocalPath),
+      iconUploadedAt: iconUploadedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(iconUploadedAt),
     );
   }
 
@@ -1496,6 +1601,9 @@ class Canonical extends DataClass implements Insertable<Canonical> {
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       code: serializer.fromJson<String>(json['code']),
       name: serializer.fromJson<String>(json['name']),
+      iconPath: serializer.fromJson<String?>(json['iconPath']),
+      iconLocalPath: serializer.fromJson<String?>(json['iconLocalPath']),
+      iconUploadedAt: serializer.fromJson<DateTime?>(json['iconUploadedAt']),
     );
   }
   @override
@@ -1507,6 +1615,9 @@ class Canonical extends DataClass implements Insertable<Canonical> {
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'code': serializer.toJson<String>(code),
       'name': serializer.toJson<String>(name),
+      'iconPath': serializer.toJson<String?>(iconPath),
+      'iconLocalPath': serializer.toJson<String?>(iconLocalPath),
+      'iconUploadedAt': serializer.toJson<DateTime?>(iconUploadedAt),
     };
   }
 
@@ -1516,12 +1627,22 @@ class Canonical extends DataClass implements Insertable<Canonical> {
     Value<DateTime?> deletedAt = const Value.absent(),
     String? code,
     String? name,
+    Value<String?> iconPath = const Value.absent(),
+    Value<String?> iconLocalPath = const Value.absent(),
+    Value<DateTime?> iconUploadedAt = const Value.absent(),
   }) => Canonical(
     id: id ?? this.id,
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
     code: code ?? this.code,
     name: name ?? this.name,
+    iconPath: iconPath.present ? iconPath.value : this.iconPath,
+    iconLocalPath: iconLocalPath.present
+        ? iconLocalPath.value
+        : this.iconLocalPath,
+    iconUploadedAt: iconUploadedAt.present
+        ? iconUploadedAt.value
+        : this.iconUploadedAt,
   );
   Canonical copyWithCompanion(CanonicalsCompanion data) {
     return Canonical(
@@ -1530,6 +1651,13 @@ class Canonical extends DataClass implements Insertable<Canonical> {
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       code: data.code.present ? data.code.value : this.code,
       name: data.name.present ? data.name.value : this.name,
+      iconPath: data.iconPath.present ? data.iconPath.value : this.iconPath,
+      iconLocalPath: data.iconLocalPath.present
+          ? data.iconLocalPath.value
+          : this.iconLocalPath,
+      iconUploadedAt: data.iconUploadedAt.present
+          ? data.iconUploadedAt.value
+          : this.iconUploadedAt,
     );
   }
 
@@ -1540,13 +1668,25 @@ class Canonical extends DataClass implements Insertable<Canonical> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('code: $code, ')
-          ..write('name: $name')
+          ..write('name: $name, ')
+          ..write('iconPath: $iconPath, ')
+          ..write('iconLocalPath: $iconLocalPath, ')
+          ..write('iconUploadedAt: $iconUploadedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, updatedAt, deletedAt, code, name);
+  int get hashCode => Object.hash(
+    id,
+    updatedAt,
+    deletedAt,
+    code,
+    name,
+    iconPath,
+    iconLocalPath,
+    iconUploadedAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1555,7 +1695,10 @@ class Canonical extends DataClass implements Insertable<Canonical> {
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
           other.code == this.code &&
-          other.name == this.name);
+          other.name == this.name &&
+          other.iconPath == this.iconPath &&
+          other.iconLocalPath == this.iconLocalPath &&
+          other.iconUploadedAt == this.iconUploadedAt);
 }
 
 class CanonicalsCompanion extends UpdateCompanion<Canonical> {
@@ -1564,6 +1707,9 @@ class CanonicalsCompanion extends UpdateCompanion<Canonical> {
   final Value<DateTime?> deletedAt;
   final Value<String> code;
   final Value<String> name;
+  final Value<String?> iconPath;
+  final Value<String?> iconLocalPath;
+  final Value<DateTime?> iconUploadedAt;
   final Value<int> rowid;
   const CanonicalsCompanion({
     this.id = const Value.absent(),
@@ -1571,6 +1717,9 @@ class CanonicalsCompanion extends UpdateCompanion<Canonical> {
     this.deletedAt = const Value.absent(),
     this.code = const Value.absent(),
     this.name = const Value.absent(),
+    this.iconPath = const Value.absent(),
+    this.iconLocalPath = const Value.absent(),
+    this.iconUploadedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CanonicalsCompanion.insert({
@@ -1579,6 +1728,9 @@ class CanonicalsCompanion extends UpdateCompanion<Canonical> {
     this.deletedAt = const Value.absent(),
     required String code,
     required String name,
+    this.iconPath = const Value.absent(),
+    this.iconLocalPath = const Value.absent(),
+    this.iconUploadedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        code = Value(code),
@@ -1589,6 +1741,9 @@ class CanonicalsCompanion extends UpdateCompanion<Canonical> {
     Expression<DateTime>? deletedAt,
     Expression<String>? code,
     Expression<String>? name,
+    Expression<String>? iconPath,
+    Expression<String>? iconLocalPath,
+    Expression<DateTime>? iconUploadedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1597,6 +1752,9 @@ class CanonicalsCompanion extends UpdateCompanion<Canonical> {
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (code != null) 'code': code,
       if (name != null) 'name': name,
+      if (iconPath != null) 'icon_path': iconPath,
+      if (iconLocalPath != null) 'icon_local_path': iconLocalPath,
+      if (iconUploadedAt != null) 'icon_uploaded_at': iconUploadedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1607,6 +1765,9 @@ class CanonicalsCompanion extends UpdateCompanion<Canonical> {
     Value<DateTime?>? deletedAt,
     Value<String>? code,
     Value<String>? name,
+    Value<String?>? iconPath,
+    Value<String?>? iconLocalPath,
+    Value<DateTime?>? iconUploadedAt,
     Value<int>? rowid,
   }) {
     return CanonicalsCompanion(
@@ -1615,6 +1776,9 @@ class CanonicalsCompanion extends UpdateCompanion<Canonical> {
       deletedAt: deletedAt ?? this.deletedAt,
       code: code ?? this.code,
       name: name ?? this.name,
+      iconPath: iconPath ?? this.iconPath,
+      iconLocalPath: iconLocalPath ?? this.iconLocalPath,
+      iconUploadedAt: iconUploadedAt ?? this.iconUploadedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1637,6 +1801,15 @@ class CanonicalsCompanion extends UpdateCompanion<Canonical> {
     if (name.present) {
       map['name'] = Variable<String>(name.value);
     }
+    if (iconPath.present) {
+      map['icon_path'] = Variable<String>(iconPath.value);
+    }
+    if (iconLocalPath.present) {
+      map['icon_local_path'] = Variable<String>(iconLocalPath.value);
+    }
+    if (iconUploadedAt.present) {
+      map['icon_uploaded_at'] = Variable<DateTime>(iconUploadedAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1651,6 +1824,9 @@ class CanonicalsCompanion extends UpdateCompanion<Canonical> {
           ..write('deletedAt: $deletedAt, ')
           ..write('code: $code, ')
           ..write('name: $name, ')
+          ..write('iconPath: $iconPath, ')
+          ..write('iconLocalPath: $iconLocalPath, ')
+          ..write('iconUploadedAt: $iconUploadedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -8017,6 +8193,9 @@ typedef $$CanonicalsTableCreateCompanionBuilder =
       Value<DateTime?> deletedAt,
       required String code,
       required String name,
+      Value<String?> iconPath,
+      Value<String?> iconLocalPath,
+      Value<DateTime?> iconUploadedAt,
       Value<int> rowid,
     });
 typedef $$CanonicalsTableUpdateCompanionBuilder =
@@ -8026,6 +8205,9 @@ typedef $$CanonicalsTableUpdateCompanionBuilder =
       Value<DateTime?> deletedAt,
       Value<String> code,
       Value<String> name,
+      Value<String?> iconPath,
+      Value<String?> iconLocalPath,
+      Value<DateTime?> iconUploadedAt,
       Value<int> rowid,
     });
 
@@ -8060,6 +8242,21 @@ class $$CanonicalsTableFilterComposer
 
   ColumnFilters<String> get name => $composableBuilder(
     column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get iconPath => $composableBuilder(
+    column: $table.iconPath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get iconLocalPath => $composableBuilder(
+    column: $table.iconLocalPath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get iconUploadedAt => $composableBuilder(
+    column: $table.iconUploadedAt,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -8097,6 +8294,21 @@ class $$CanonicalsTableOrderingComposer
     column: $table.name,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get iconPath => $composableBuilder(
+    column: $table.iconPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get iconLocalPath => $composableBuilder(
+    column: $table.iconLocalPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get iconUploadedAt => $composableBuilder(
+    column: $table.iconUploadedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CanonicalsTableAnnotationComposer
@@ -8122,6 +8334,19 @@ class $$CanonicalsTableAnnotationComposer
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get iconPath =>
+      $composableBuilder(column: $table.iconPath, builder: (column) => column);
+
+  GeneratedColumn<String> get iconLocalPath => $composableBuilder(
+    column: $table.iconLocalPath,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get iconUploadedAt => $composableBuilder(
+    column: $table.iconUploadedAt,
+    builder: (column) => column,
+  );
 }
 
 class $$CanonicalsTableTableManager
@@ -8160,6 +8385,9 @@ class $$CanonicalsTableTableManager
                 Value<DateTime?> deletedAt = const Value.absent(),
                 Value<String> code = const Value.absent(),
                 Value<String> name = const Value.absent(),
+                Value<String?> iconPath = const Value.absent(),
+                Value<String?> iconLocalPath = const Value.absent(),
+                Value<DateTime?> iconUploadedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CanonicalsCompanion(
                 id: id,
@@ -8167,6 +8395,9 @@ class $$CanonicalsTableTableManager
                 deletedAt: deletedAt,
                 code: code,
                 name: name,
+                iconPath: iconPath,
+                iconLocalPath: iconLocalPath,
+                iconUploadedAt: iconUploadedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -8176,6 +8407,9 @@ class $$CanonicalsTableTableManager
                 Value<DateTime?> deletedAt = const Value.absent(),
                 required String code,
                 required String name,
+                Value<String?> iconPath = const Value.absent(),
+                Value<String?> iconLocalPath = const Value.absent(),
+                Value<DateTime?> iconUploadedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CanonicalsCompanion.insert(
                 id: id,
@@ -8183,6 +8417,9 @@ class $$CanonicalsTableTableManager
                 deletedAt: deletedAt,
                 code: code,
                 name: name,
+                iconPath: iconPath,
+                iconLocalPath: iconLocalPath,
+                iconUploadedAt: iconUploadedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

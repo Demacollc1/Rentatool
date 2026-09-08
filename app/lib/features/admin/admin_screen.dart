@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../data/local/database.dart';
 import '../../data/repositories/canonical_repository.dart';
@@ -50,19 +53,40 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
                 final c = list[i];
                 return ListTile(
                   dense: true,
-                  leading: CircleAvatar(
-                    radius: 20,
-                    child: Text(c.code,
-                        style: const TextStyle(fontSize: 9)),
-                  ),
+                  leading: canonicalAvatar(c),
                   title: Text(c.name,
                       style: const TextStyle(fontSize: 13)),
                   subtitle: const Text(
                       'Toca para administrar sus atributos',
                       style: TextStyle(fontSize: 10)),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.edit, size: 18),
-                    onPressed: () => _editCanonical(context, c),
+                  trailing: PopupMenuButton<String>(
+                    onSelected: (v) async {
+                      if (v == 'edit') {
+                        await _editCanonical(context, c);
+                      } else if (v == 'icon') {
+                        await _pickIcon(c);
+                      } else if (v == 'delete') {
+                        final err = await ref
+                            .read(canonicalRepositoryProvider)
+                            .delete(c.id);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Text(err ??
+                                      '${c.code} eliminado ✔')));
+                        }
+                      }
+                    },
+                    itemBuilder: (_) => const [
+                      PopupMenuItem(
+                          value: 'edit', child: Text('Editar nombre')),
+                      PopupMenuItem(
+                          value: 'icon',
+                          child: Text('Subir / cambiar ícono')),
+                      PopupMenuItem(
+                          value: 'delete',
+                          child: Text('Eliminar (si no está en uso)')),
+                    ],
                   ),
                   onTap: () => Navigator.of(context).push(
                       MaterialPageRoute(
@@ -75,6 +99,20 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
         ),
       ]),
     );
+  }
+
+  Future<void> _pickIcon(Canonical c) async {
+    final picked = await ImagePicker().pickImage(
+        source: ImageSource.gallery, maxWidth: 512, imageQuality: 85);
+    if (picked == null) return;
+    await ref
+        .read(canonicalRepositoryProvider)
+        .setIcon(c.id, picked.path);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Ícono de ${c.code} guardado ✔ '
+              '(se sube al servidor en el próximo sync)')));
+    }
   }
 
   Future<void> _editCanonical(
@@ -120,6 +158,21 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
           name: name.text,
         );
   }
+}
+
+/// Avatar del canónico: su ícono si existe, o el código como texto.
+Widget canonicalAvatar(Canonical c, {double radius = 20}) {
+  final path = c.iconLocalPath;
+  if (path != null && File(path).existsSync()) {
+    return CircleAvatar(
+      radius: radius,
+      backgroundImage: FileImage(File(path)),
+    );
+  }
+  return CircleAvatar(
+    radius: radius,
+    child: Text(c.code, style: const TextStyle(fontSize: 9)),
+  );
 }
 
 /// Plantilla de atributos de una familia: qué se exige definir en

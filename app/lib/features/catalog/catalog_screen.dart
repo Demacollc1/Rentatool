@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../data/local/database.dart';
 import '../../data/repositories/catalog_repository.dart';
+import '../../data/repositories/canonical_repository.dart';
 import '../../data/repositories/category_repository.dart';
+import '../admin/admin_screen.dart' show canonicalAvatar;
 import 'product_sheet.dart';
 
 /// Catálogo agrupado oficio → grupo, con búsqueda.
@@ -23,6 +25,10 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
     final models = ref.watch(toolModelsProvider(_query));
     final cats = ref.watch(categoriesProvider);
     final assets = ref.watch(allAssetsProvider);
+    final canonicals = ref.watch(canonicalsDbProvider(''));
+    final canonicalByCode = {
+      for (final c in canonicals.value ?? <Canonical>[]) c.code: c
+    };
 
     return Scaffold(
       appBar: AppBar(title: const Text('Catálogo de renta')),
@@ -93,6 +99,9 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                           _ModelTile(
                             model: m,
                             units: unitsByModel[m.id] ?? const [],
+                            canonical: m.canonicalCode == null
+                                ? null
+                                : canonicalByCode[m.canonicalCode],
                           ),
                       ],
                     ),
@@ -107,10 +116,12 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
 }
 
 class _ModelTile extends StatelessWidget {
-  const _ModelTile({required this.model, required this.units});
+  const _ModelTile(
+      {required this.model, required this.units, this.canonical});
 
   final ToolModel model;
   final List<Asset> units;
+  final Canonical? canonical;
 
   @override
   Widget build(BuildContext context) {
@@ -118,16 +129,19 @@ class _ModelTile extends StatelessWidget {
         units.where((a) => a.status == 'available').length;
     return ListTile(
       dense: true,
-      leading: CircleAvatar(
-        radius: 16,
-        backgroundColor:
-            model.line == 'ind' ? Colors.amber.shade700 : Colors.blueGrey,
-        child: Text(model.line == 'ind' ? 'IND' : 'DIY',
-            style: const TextStyle(
-                fontSize: 8,
-                color: Colors.white,
-                fontWeight: FontWeight.bold)),
-      ),
+      leading: canonical != null && canonical!.iconLocalPath != null
+          ? canonicalAvatar(canonical!, radius: 16)
+          : CircleAvatar(
+              radius: 16,
+              backgroundColor: model.line == 'ind'
+                  ? Colors.amber.shade700
+                  : Colors.blueGrey,
+              child: Text(model.line == 'ind' ? 'IND' : 'DIY',
+                  style: const TextStyle(
+                      fontSize: 8,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold)),
+            ),
       title: Text('${model.name} — ${model.brand ?? ''}'),
       subtitle: Text(
         [

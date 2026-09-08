@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:drift/drift.dart';
+import 'package:path/path.dart' as pth;
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
@@ -85,6 +88,58 @@ class CanonicalRepository {
       'deleted_at': null,
     });
     return rowId;
+  }
+
+  /// Guarda el ícono del canónico: copia el archivo elegido a los
+  /// documentos del app y lo deja pendiente de subir al Storage.
+  Future<void> setIcon(String id, String pickedPath) async {
+    final dir = await getApplicationDocumentsDirectory();
+    final outDir = Directory(pth.join(dir.path, 'icons'));
+    await outDir.create(recursive: true);
+    final dest = pth.join(outDir.path, '$id.jpg');
+    await File(pickedPath).copy(dest);
+    await (_db.update(_db.canonicals)..where((c) => c.id.equals(id)))
+        .write(CanonicalsCompanion(
+      iconLocalPath: Value(dest),
+      iconUploadedAt: const Value(null),
+      updatedAt: Value(DateTime.now()),
+    ));
+  }
+
+  /// Cuántos productos vivos usan este canónico.
+  Future<int> productsUsing(String code) async {
+    final countExp = _db.toolModels.id.count();
+    final q = _db.selectOnly(_db.toolModels)
+      ..addColumns([countExp])
+      ..where(_db.toolModels.canonicalCode.equals(code) &
+          _db.toolModels.deletedAt.isNull());
+    return (await q.getSingle()).read(countExp) ?? 0;
+  }
+
+  /// Elimina (soft) un canónico SOLO si ningún producto lo usa.
+  /// Devuelve null si se eliminó, o el motivo si no se pudo.
+  Future<String?> delete(String id) async {
+    final c = await (_db.select(_db.canonicals)
+          ..where((x) => x.id.equals(id)))
+        .getSingleOrNull();
+    if (c == null) return 'Canónico no encontrado';
+    final inUse = await productsUsing(c.code);
+    if (inUse > 0) {
+      return 'No se puede eliminar: ${c.code} está en uso por '
+          '$inUse producto${inUse == 1 ? '' : 's'}';
+    }
+    final now = DateTime.now();
+    await (_db.update(_db.canonicals)..where((x) => x.id.equals(id)))
+        .write(CanonicalsCompanion(
+            deletedAt: Value(now), updatedAt: Value(now)));
+    await _sync.enqueue(table: 'canonicals', rowId: id, op: 'upsert', row: {
+      'id': c.id,
+      'code': c.code,
+      'name': c.name,
+      'updated_at': isoTs(now),
+      'deleted_at': isoTs(now),
+    });
+    return null;
   }
 }
 
