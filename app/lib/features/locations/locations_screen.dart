@@ -5,6 +5,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../data/local/database.dart';
 import '../../data/repositories/location_repository.dart';
+import '../../data/sync/sync_service.dart';
 import '../labels/qr_labels_pdf.dart';
 
 /// Árbol de ubicaciones con navegación por niveles y etiquetas QR.
@@ -142,10 +143,14 @@ class _LocationsScreenState extends ConsumerState<LocationsScreen> {
         data: qrForLocation(l.id),
       ));
     }
+    final (wMm, hMm) =
+        await loadLabelSize(ref.read(syncServiceProvider));
     final pdf = await buildQrLabelsPdf(
-      title: 'Ubicaciones',
+      title: 'Ubicación',
       labels: labels,
       fileName: 'etiquetas_ubicaciones',
+      widthMm: wMm,
+      heightMm: hMm,
     );
     await SharePlus.instance.share(ShareParams(files: [XFile(pdf)]));
   }

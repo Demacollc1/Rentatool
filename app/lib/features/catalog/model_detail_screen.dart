@@ -12,6 +12,7 @@ import '../../data/repositories/catalog_repository.dart';
 import '../../data/repositories/category_repository.dart';
 import '../../data/repositories/location_repository.dart';
 import '../../data/repositories/supplier_repository.dart';
+import '../../data/sync/sync_service.dart';
 import '../dashboard/dashboard_screen.dart' show statusLabels;
 import '../labels/qr_labels_pdf.dart';
 import '../locations/location_picker.dart';
@@ -225,10 +226,14 @@ class ModelDetailScreen extends ConsumerWidget {
         ),
       ));
     }
+    final (wMm, hMm) =
+        await loadLabelSize(ref.read(syncServiceProvider));
     final pdf = await buildQrLabelsPdf(
-      title: m.name,
+      title: 'Unidad',
       labels: labels,
-      fileName: 'etiquetas_${m.supplierCode ?? m.id}',
+      fileName: 'etiquetas_${m.ratCode ?? m.id}',
+      widthMm: wMm,
+      heightMm: hMm,
     );
     await SharePlus.instance.share(ShareParams(files: [XFile(pdf)]));
   }
@@ -918,8 +923,12 @@ class _AssetSheetState extends ConsumerState<AssetSheet> {
       );
       final brandModel =
           '${_brand.text.trim()} ${_mfrModel.text.trim()}'.trim();
+      final (wMm, hMm) =
+          await loadLabelSize(ref.read(syncServiceProvider));
       final pdf = await buildQrLabelsPdf(
-        title: widget.model.name,
+        title: 'Unidad',
+        widthMm: wMm,
+        heightMm: hMm,
         labels: [
           QrLabel(
             title: '$tag${brandModel.isEmpty ? '' : ' · $brandModel'}',
