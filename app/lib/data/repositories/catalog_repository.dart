@@ -385,6 +385,7 @@ class CatalogRepository {
     String? invoiceNumber,
     String? brand,
     String? mfrModel,
+    String? datasheetUrl,
   }) async {
     final rowId = const Uuid().v4();
     await _db.into(_db.assets).insert(AssetsCompanion.insert(
@@ -401,6 +402,7 @@ class CatalogRepository {
           invoiceNumber: Value(invoiceNumber),
           brand: Value(brand),
           mfrModel: Value(mfrModel),
+          datasheetUrl: Value(datasheetUrl),
           updatedAt: Value(DateTime.now()),
         ));
     await _enqueueAsset(rowId);
@@ -425,6 +427,7 @@ class CatalogRepository {
     String? supplierId,
     String? condition,
     String? notes,
+    String? datasheetUrl,
   }) async {
     await (_db.update(_db.assets)..where((a) => a.id.equals(id))).write(
       AssetsCompanion(
@@ -438,6 +441,7 @@ class CatalogRepository {
         condition:
             condition == null ? const Value.absent() : Value(condition),
         notes: Value(notes),
+        datasheetUrl: Value(datasheetUrl),
         updatedAt: Value(DateTime.now()),
       ),
     );
@@ -505,6 +509,7 @@ class CatalogRepository {
       'invoice_number': a.invoiceNumber,
       'brand': a.brand,
       'mfr_model': a.mfrModel,
+      'datasheet_url': a.datasheetUrl,
       'updated_at': isoTs(a.updatedAt),
       'deleted_at': isoTsN(a.deletedAt),
     });

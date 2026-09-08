@@ -4568,6 +4568,17 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _datasheetUrlMeta = const VerificationMeta(
+    'datasheetUrl',
+  );
+  @override
+  late final GeneratedColumn<String> datasheetUrl = GeneratedColumn<String>(
+    'datasheet_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -4586,6 +4597,7 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
     invoiceNumber,
     brand,
     mfrModel,
+    datasheetUrl,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -4710,6 +4722,15 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
         mfrModel.isAcceptableOrUnknown(data['mfr_model']!, _mfrModelMeta),
       );
     }
+    if (data.containsKey('datasheet_url')) {
+      context.handle(
+        _datasheetUrlMeta,
+        datasheetUrl.isAcceptableOrUnknown(
+          data['datasheet_url']!,
+          _datasheetUrlMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -4783,6 +4804,10 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
         DriftSqlType.string,
         data['${effectivePrefix}mfr_model'],
       ),
+      datasheetUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}datasheet_url'],
+      ),
     );
   }
 
@@ -4816,6 +4841,9 @@ class Asset extends DataClass implements Insertable<Asset> {
   /// dos unidades del mismo producto pueden ser de marcas distintas).
   final String? brand;
   final String? mfrModel;
+
+  /// Link a la ficha técnica del modelo de esta unidad.
+  final String? datasheetUrl;
   const Asset({
     required this.id,
     required this.updatedAt,
@@ -4833,6 +4861,7 @@ class Asset extends DataClass implements Insertable<Asset> {
     this.invoiceNumber,
     this.brand,
     this.mfrModel,
+    this.datasheetUrl,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -4870,6 +4899,9 @@ class Asset extends DataClass implements Insertable<Asset> {
     }
     if (!nullToAbsent || mfrModel != null) {
       map['mfr_model'] = Variable<String>(mfrModel);
+    }
+    if (!nullToAbsent || datasheetUrl != null) {
+      map['datasheet_url'] = Variable<String>(datasheetUrl);
     }
     return map;
   }
@@ -4910,6 +4942,9 @@ class Asset extends DataClass implements Insertable<Asset> {
       mfrModel: mfrModel == null && nullToAbsent
           ? const Value.absent()
           : Value(mfrModel),
+      datasheetUrl: datasheetUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(datasheetUrl),
     );
   }
 
@@ -4935,6 +4970,7 @@ class Asset extends DataClass implements Insertable<Asset> {
       invoiceNumber: serializer.fromJson<String?>(json['invoiceNumber']),
       brand: serializer.fromJson<String?>(json['brand']),
       mfrModel: serializer.fromJson<String?>(json['mfrModel']),
+      datasheetUrl: serializer.fromJson<String?>(json['datasheetUrl']),
     );
   }
   @override
@@ -4957,6 +4993,7 @@ class Asset extends DataClass implements Insertable<Asset> {
       'invoiceNumber': serializer.toJson<String?>(invoiceNumber),
       'brand': serializer.toJson<String?>(brand),
       'mfrModel': serializer.toJson<String?>(mfrModel),
+      'datasheetUrl': serializer.toJson<String?>(datasheetUrl),
     };
   }
 
@@ -4977,6 +5014,7 @@ class Asset extends DataClass implements Insertable<Asset> {
     Value<String?> invoiceNumber = const Value.absent(),
     Value<String?> brand = const Value.absent(),
     Value<String?> mfrModel = const Value.absent(),
+    Value<String?> datasheetUrl = const Value.absent(),
   }) => Asset(
     id: id ?? this.id,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -4996,6 +5034,7 @@ class Asset extends DataClass implements Insertable<Asset> {
         : this.invoiceNumber,
     brand: brand.present ? brand.value : this.brand,
     mfrModel: mfrModel.present ? mfrModel.value : this.mfrModel,
+    datasheetUrl: datasheetUrl.present ? datasheetUrl.value : this.datasheetUrl,
   );
   Asset copyWithCompanion(AssetsCompanion data) {
     return Asset(
@@ -5027,6 +5066,9 @@ class Asset extends DataClass implements Insertable<Asset> {
           : this.invoiceNumber,
       brand: data.brand.present ? data.brand.value : this.brand,
       mfrModel: data.mfrModel.present ? data.mfrModel.value : this.mfrModel,
+      datasheetUrl: data.datasheetUrl.present
+          ? data.datasheetUrl.value
+          : this.datasheetUrl,
     );
   }
 
@@ -5048,7 +5090,8 @@ class Asset extends DataClass implements Insertable<Asset> {
           ..write('supplierId: $supplierId, ')
           ..write('invoiceNumber: $invoiceNumber, ')
           ..write('brand: $brand, ')
-          ..write('mfrModel: $mfrModel')
+          ..write('mfrModel: $mfrModel, ')
+          ..write('datasheetUrl: $datasheetUrl')
           ..write(')'))
         .toString();
   }
@@ -5071,6 +5114,7 @@ class Asset extends DataClass implements Insertable<Asset> {
     invoiceNumber,
     brand,
     mfrModel,
+    datasheetUrl,
   );
   @override
   bool operator ==(Object other) =>
@@ -5091,7 +5135,8 @@ class Asset extends DataClass implements Insertable<Asset> {
           other.supplierId == this.supplierId &&
           other.invoiceNumber == this.invoiceNumber &&
           other.brand == this.brand &&
-          other.mfrModel == this.mfrModel);
+          other.mfrModel == this.mfrModel &&
+          other.datasheetUrl == this.datasheetUrl);
 }
 
 class AssetsCompanion extends UpdateCompanion<Asset> {
@@ -5111,6 +5156,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
   final Value<String?> invoiceNumber;
   final Value<String?> brand;
   final Value<String?> mfrModel;
+  final Value<String?> datasheetUrl;
   final Value<int> rowid;
   const AssetsCompanion({
     this.id = const Value.absent(),
@@ -5129,6 +5175,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     this.invoiceNumber = const Value.absent(),
     this.brand = const Value.absent(),
     this.mfrModel = const Value.absent(),
+    this.datasheetUrl = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   AssetsCompanion.insert({
@@ -5148,6 +5195,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     this.invoiceNumber = const Value.absent(),
     this.brand = const Value.absent(),
     this.mfrModel = const Value.absent(),
+    this.datasheetUrl = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        toolModelId = Value(toolModelId),
@@ -5169,6 +5217,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     Expression<String>? invoiceNumber,
     Expression<String>? brand,
     Expression<String>? mfrModel,
+    Expression<String>? datasheetUrl,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -5188,6 +5237,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
       if (invoiceNumber != null) 'invoice_number': invoiceNumber,
       if (brand != null) 'brand': brand,
       if (mfrModel != null) 'mfr_model': mfrModel,
+      if (datasheetUrl != null) 'datasheet_url': datasheetUrl,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -5209,6 +5259,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     Value<String?>? invoiceNumber,
     Value<String?>? brand,
     Value<String?>? mfrModel,
+    Value<String?>? datasheetUrl,
     Value<int>? rowid,
   }) {
     return AssetsCompanion(
@@ -5228,6 +5279,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
       invoiceNumber: invoiceNumber ?? this.invoiceNumber,
       brand: brand ?? this.brand,
       mfrModel: mfrModel ?? this.mfrModel,
+      datasheetUrl: datasheetUrl ?? this.datasheetUrl,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -5283,6 +5335,9 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     if (mfrModel.present) {
       map['mfr_model'] = Variable<String>(mfrModel.value);
     }
+    if (datasheetUrl.present) {
+      map['datasheet_url'] = Variable<String>(datasheetUrl.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -5308,6 +5363,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
           ..write('invoiceNumber: $invoiceNumber, ')
           ..write('brand: $brand, ')
           ..write('mfrModel: $mfrModel, ')
+          ..write('datasheetUrl: $datasheetUrl, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -10171,6 +10227,7 @@ typedef $$AssetsTableCreateCompanionBuilder =
       Value<String?> invoiceNumber,
       Value<String?> brand,
       Value<String?> mfrModel,
+      Value<String?> datasheetUrl,
       Value<int> rowid,
     });
 typedef $$AssetsTableUpdateCompanionBuilder =
@@ -10191,6 +10248,7 @@ typedef $$AssetsTableUpdateCompanionBuilder =
       Value<String?> invoiceNumber,
       Value<String?> brand,
       Value<String?> mfrModel,
+      Value<String?> datasheetUrl,
       Value<int> rowid,
     });
 
@@ -10280,6 +10338,11 @@ class $$AssetsTableFilterComposer
 
   ColumnFilters<String> get mfrModel => $composableBuilder(
     column: $table.mfrModel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get datasheetUrl => $composableBuilder(
+    column: $table.datasheetUrl,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -10372,6 +10435,11 @@ class $$AssetsTableOrderingComposer
     column: $table.mfrModel,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get datasheetUrl => $composableBuilder(
+    column: $table.datasheetUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$AssetsTableAnnotationComposer
@@ -10442,6 +10510,11 @@ class $$AssetsTableAnnotationComposer
 
   GeneratedColumn<String> get mfrModel =>
       $composableBuilder(column: $table.mfrModel, builder: (column) => column);
+
+  GeneratedColumn<String> get datasheetUrl => $composableBuilder(
+    column: $table.datasheetUrl,
+    builder: (column) => column,
+  );
 }
 
 class $$AssetsTableTableManager
@@ -10488,6 +10561,7 @@ class $$AssetsTableTableManager
                 Value<String?> invoiceNumber = const Value.absent(),
                 Value<String?> brand = const Value.absent(),
                 Value<String?> mfrModel = const Value.absent(),
+                Value<String?> datasheetUrl = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => AssetsCompanion(
                 id: id,
@@ -10506,6 +10580,7 @@ class $$AssetsTableTableManager
                 invoiceNumber: invoiceNumber,
                 brand: brand,
                 mfrModel: mfrModel,
+                datasheetUrl: datasheetUrl,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -10526,6 +10601,7 @@ class $$AssetsTableTableManager
                 Value<String?> invoiceNumber = const Value.absent(),
                 Value<String?> brand = const Value.absent(),
                 Value<String?> mfrModel = const Value.absent(),
+                Value<String?> datasheetUrl = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => AssetsCompanion.insert(
                 id: id,
@@ -10544,6 +10620,7 @@ class $$AssetsTableTableManager
                 invoiceNumber: invoiceNumber,
                 brand: brand,
                 mfrModel: mfrModel,
+                datasheetUrl: datasheetUrl,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

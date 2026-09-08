@@ -105,6 +105,9 @@ class Assets extends Table with SyncColumns {
   /// dos unidades del mismo producto pueden ser de marcas distintas).
   TextColumn get brand => text().nullable()();
   TextColumn get mfrModel => text().nullable()();
+
+  /// Link a la ficha técnica del modelo de esta unidad.
+  TextColumn get datasheetUrl => text().nullable()();
 }
 
 /// Consumibles y accesorios (stock por cantidad).
@@ -219,7 +222,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -241,7 +244,10 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(assets, assets.brand);
             await m.addColumn(assets, assets.mfrModel);
           }
-          // v4/v5: createAll de arriba crea las tablas nuevas.
+          // v4/v5/v7: createAll de arriba crea las tablas nuevas.
+          if (from < 8 && from >= 3) {
+            await m.addColumn(assets, assets.datasheetUrl);
+          }
           if (from == 5) {
             await m.addColumn(canonicals, canonicals.iconPath);
             await m.addColumn(canonicals, canonicals.iconLocalPath);

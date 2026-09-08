@@ -271,6 +271,7 @@ List<TableSyncAdapter> buildSyncAdapters() => [
                   invoiceNumber: Value(r['invoice_number'] as String?),
                   brand: Value(r['brand'] as String?),
                   mfrModel: Value(r['mfr_model'] as String?),
+                  datasheetUrl: Value(r['datasheet_url'] as String?),
                   updatedAt: Value(remoteUpdated),
                   deletedAt: Value(tsN(r['deleted_at'])),
                 ),

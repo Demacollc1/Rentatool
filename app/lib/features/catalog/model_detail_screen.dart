@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../../data/ocr/label_parser.dart';
 
 import '../../data/local/database.dart';
 import '../../data/repositories/catalog_repository.dart';
@@ -614,7 +619,13 @@ class _AssetTile extends ConsumerWidget {
       trailing: PopupMenuButton<String>(
         onSelected: (v) async {
           final repo = ref.read(catalogRepositoryProvider);
-          if (v == 'edit') {
+          if (v == 'datasheet') {
+            final url = asset.datasheetUrl;
+            if (url != null && url.isNotEmpty) {
+              await launchUrl(Uri.parse(url),
+                  mode: LaunchMode.externalApplication);
+            }
+          } else if (v == 'edit') {
             final model =
                 await repo.getModel(asset.toolModelId);
             if (model != null && context.mounted) {
@@ -633,6 +644,10 @@ class _AssetTile extends ConsumerWidget {
           }
         },
         itemBuilder: (_) => [
+          if (asset.datasheetUrl?.isNotEmpty ?? false)
+            const PopupMenuItem(
+                value: 'datasheet',
+                child: Text('📄 Abrir ficha técnica')),
           const PopupMenuItem(
               value: 'edit',
               child: Text('Editar (serie, marca, factura…)')),
@@ -664,6 +679,8 @@ class _AssetSheetState extends ConsumerState<AssetSheet> {
       TextEditingController(text: widget.existing?.serial);
   late final _invoice =
       TextEditingController(text: widget.existing?.invoiceNumber);
+  late final _datasheet =
+      TextEditingController(text: widget.existing?.datasheetUrl);
   late final _brand =
       TextEditingController(text: widget.existing?.brand);
   late final _mfrModel =
@@ -693,7 +710,14 @@ class _AssetSheetState extends ConsumerState<AssetSheet> {
                     ? 'Nueva unidad — ${widget.model.name}'
                     : 'Editar ${widget.existing!.assetTag}',
                 style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: _busy ? null : _scanLabel,
+              icon: const Icon(Icons.document_scanner_outlined),
+              label: const Text(
+                  'Fotografiar etiqueta (reconoce serie y modelo)'),
+            ),
+            const SizedBox(height: 8),
             Row(children: [
               Expanded(
                 child: TextField(
@@ -731,6 +755,14 @@ class _AssetSheetState extends ConsumerState<AssetSheet> {
               controller: _invoice,
               decoration: const InputDecoration(
                   labelText: 'N° de factura de compra (opcional)'),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _datasheet,
+              keyboardType: TextInputType.url,
+              decoration: const InputDecoration(
+                  labelText: 'Link a la ficha técnica (opcional)',
+                  hintText: 'https://…'),
             ),
             const SizedBox(height: 8),
             ListTile(
@@ -791,6 +823,50 @@ class _AssetSheetState extends ConsumerState<AssetSheet> {
     );
   }
 
+  /// Foto a la etiqueta/caja → OCR en el dispositivo → prellena
+  /// marca, modelo y serie (solo los campos que estén vacíos).
+  Future<void> _scanLabel() async {
+    final picked = await ImagePicker().pickImage(
+        source: ImageSource.camera, maxWidth: 1920, imageQuality: 90);
+    if (picked == null || !mounted) return;
+    setState(() => _busy = true);
+    try {
+      final recognizer =
+          TextRecognizer(script: TextRecognitionScript.latin);
+      final result = await recognizer
+          .processImage(InputImage.fromFilePath(picked.path));
+      await recognizer.close();
+      final guess = parseLabelText(result.text);
+      if (!mounted) return;
+      if (guess.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('No se reconoció serie ni modelo en la '
+                'foto. Intenta con más luz y la etiqueta plana.')));
+        return;
+      }
+      setState(() {
+        if (guess.brand != null && _brand.text.trim().isEmpty) {
+          _brand.text = guess.brand!;
+        }
+        if (guess.model != null && _mfrModel.text.trim().isEmpty) {
+          _mfrModel.text = guess.model!;
+        }
+        if (guess.serial != null && _serial.text.trim().isEmpty) {
+          _serial.text = guess.serial!;
+        }
+      });
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Reconocido: '
+              '${[
+            if (guess.brand != null) 'marca ${guess.brand}',
+            if (guess.model != null) 'modelo ${guess.model}',
+            if (guess.serial != null) 'serie ${guess.serial}',
+          ].join(' · ')} — revisa y corrige si hace falta')));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   Future<void> _save() async {
     setState(() => _busy = true);
     try {
@@ -811,6 +887,9 @@ class _AssetSheetState extends ConsumerState<AssetSheet> {
           supplierId: _supplierId ?? widget.existing!.supplierId,
           condition: widget.existing!.condition,
           notes: widget.existing!.notes,
+          datasheetUrl: _datasheet.text.trim().isEmpty
+              ? null
+              : _datasheet.text.trim(),
         );
         if (mounted) Navigator.pop(context);
         return;
@@ -831,6 +910,9 @@ class _AssetSheetState extends ConsumerState<AssetSheet> {
         mfrModel: _mfrModel.text.trim().isEmpty
             ? null
             : _mfrModel.text.trim(),
+        datasheetUrl: _datasheet.text.trim().isEmpty
+            ? null
+            : _datasheet.text.trim(),
       );
       final brandModel =
           '${_brand.text.trim()} ${_mfrModel.text.trim()}'.trim();

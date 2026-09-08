@@ -6,6 +6,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:demaco/data/local/database.dart';
+import 'package:demaco/data/ocr/label_parser.dart';
 import 'package:demaco/data/repositories/catalog_repository.dart';
 import 'package:demaco/data/repositories/category_repository.dart';
 import 'package:demaco/data/repositories/location_repository.dart';
@@ -189,6 +190,37 @@ void main() {
       expect(await catalog.nextRatCode('AAQ'), 'AAQ-002');
       expect(await catalog.nextRatCode('SIE'), 'SIE-001');
       await db.close();
+    });
+  });
+
+  group('OCR label parser', () {
+    test('reconoce marca, modelo y serie etiquetados', () {
+      final g = parseLabelText("""
+DEWALT
+Angle Grinder
+MODEL: D28114
+S/N: 23245662345
+120V~ 60Hz 11.6A
+""");
+      expect(g.brand, 'Dewalt');
+      expect(g.model, 'D28114');
+      expect(g.serial, '23245662345');
+    });
+
+    test('serie sin etiqueta: dígitos largos; modelo por patrón', () {
+      final g = parseLabelText("""
+BOSCH GWS14-125
+987654321012
+1400W 11000RPM
+""");
+      expect(g.brand, 'Bosch');
+      expect(g.model, 'GWS14-125');
+      expect(g.serial, '987654321012');
+    });
+
+    test('specs eléctricas no se confunden con modelo', () {
+      final g = parseLabelText('CRAFTSMAN\n120V 60HZ 1500W\nCMES500');
+      expect(g.model, 'CMES500');
     });
   });
 }
