@@ -2629,6 +2629,873 @@ class ToolModelsCompanion extends UpdateCompanion<ToolModel> {
   }
 }
 
+class $CanonicalAttributesTable extends CanonicalAttributes
+    with TableInfo<$CanonicalAttributesTable, CanonicalAttribute> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CanonicalAttributesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _canonicalCodeMeta = const VerificationMeta(
+    'canonicalCode',
+  );
+  @override
+  late final GeneratedColumn<String> canonicalCode = GeneratedColumn<String>(
+    'canonical_code',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _positionMeta = const VerificationMeta(
+    'position',
+  );
+  @override
+  late final GeneratedColumn<int> position = GeneratedColumn<int>(
+    'position',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    updatedAt,
+    deletedAt,
+    canonicalCode,
+    name,
+    position,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'canonical_attributes';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CanonicalAttribute> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('canonical_code')) {
+      context.handle(
+        _canonicalCodeMeta,
+        canonicalCode.isAcceptableOrUnknown(
+          data['canonical_code']!,
+          _canonicalCodeMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_canonicalCodeMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('position')) {
+      context.handle(
+        _positionMeta,
+        position.isAcceptableOrUnknown(data['position']!, _positionMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CanonicalAttribute map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CanonicalAttribute(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      canonicalCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}canonical_code'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      position: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}position'],
+      )!,
+    );
+  }
+
+  @override
+  $CanonicalAttributesTable createAlias(String alias) {
+    return $CanonicalAttributesTable(attachedDatabase, alias);
+  }
+}
+
+class CanonicalAttribute extends DataClass
+    implements Insertable<CanonicalAttribute> {
+  final String id;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final String canonicalCode;
+  final String name;
+  final int position;
+  const CanonicalAttribute({
+    required this.id,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.canonicalCode,
+    required this.name,
+    required this.position,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['canonical_code'] = Variable<String>(canonicalCode);
+    map['name'] = Variable<String>(name);
+    map['position'] = Variable<int>(position);
+    return map;
+  }
+
+  CanonicalAttributesCompanion toCompanion(bool nullToAbsent) {
+    return CanonicalAttributesCompanion(
+      id: Value(id),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      canonicalCode: Value(canonicalCode),
+      name: Value(name),
+      position: Value(position),
+    );
+  }
+
+  factory CanonicalAttribute.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CanonicalAttribute(
+      id: serializer.fromJson<String>(json['id']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      canonicalCode: serializer.fromJson<String>(json['canonicalCode']),
+      name: serializer.fromJson<String>(json['name']),
+      position: serializer.fromJson<int>(json['position']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'canonicalCode': serializer.toJson<String>(canonicalCode),
+      'name': serializer.toJson<String>(name),
+      'position': serializer.toJson<int>(position),
+    };
+  }
+
+  CanonicalAttribute copyWith({
+    String? id,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    String? canonicalCode,
+    String? name,
+    int? position,
+  }) => CanonicalAttribute(
+    id: id ?? this.id,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    canonicalCode: canonicalCode ?? this.canonicalCode,
+    name: name ?? this.name,
+    position: position ?? this.position,
+  );
+  CanonicalAttribute copyWithCompanion(CanonicalAttributesCompanion data) {
+    return CanonicalAttribute(
+      id: data.id.present ? data.id.value : this.id,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      canonicalCode: data.canonicalCode.present
+          ? data.canonicalCode.value
+          : this.canonicalCode,
+      name: data.name.present ? data.name.value : this.name,
+      position: data.position.present ? data.position.value : this.position,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CanonicalAttribute(')
+          ..write('id: $id, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('canonicalCode: $canonicalCode, ')
+          ..write('name: $name, ')
+          ..write('position: $position')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, updatedAt, deletedAt, canonicalCode, name, position);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CanonicalAttribute &&
+          other.id == this.id &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.canonicalCode == this.canonicalCode &&
+          other.name == this.name &&
+          other.position == this.position);
+}
+
+class CanonicalAttributesCompanion extends UpdateCompanion<CanonicalAttribute> {
+  final Value<String> id;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String> canonicalCode;
+  final Value<String> name;
+  final Value<int> position;
+  final Value<int> rowid;
+  const CanonicalAttributesCompanion({
+    this.id = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.canonicalCode = const Value.absent(),
+    this.name = const Value.absent(),
+    this.position = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CanonicalAttributesCompanion.insert({
+    required String id,
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    required String canonicalCode,
+    required String name,
+    this.position = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       canonicalCode = Value(canonicalCode),
+       name = Value(name);
+  static Insertable<CanonicalAttribute> custom({
+    Expression<String>? id,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? canonicalCode,
+    Expression<String>? name,
+    Expression<int>? position,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (canonicalCode != null) 'canonical_code': canonicalCode,
+      if (name != null) 'name': name,
+      if (position != null) 'position': position,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CanonicalAttributesCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<String>? canonicalCode,
+    Value<String>? name,
+    Value<int>? position,
+    Value<int>? rowid,
+  }) {
+    return CanonicalAttributesCompanion(
+      id: id ?? this.id,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      canonicalCode: canonicalCode ?? this.canonicalCode,
+      name: name ?? this.name,
+      position: position ?? this.position,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (canonicalCode.present) {
+      map['canonical_code'] = Variable<String>(canonicalCode.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (position.present) {
+      map['position'] = Variable<int>(position.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CanonicalAttributesCompanion(')
+          ..write('id: $id, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('canonicalCode: $canonicalCode, ')
+          ..write('name: $name, ')
+          ..write('position: $position, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ToolModelAttributesTable extends ToolModelAttributes
+    with TableInfo<$ToolModelAttributesTable, ToolModelAttribute> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ToolModelAttributesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _toolModelIdMeta = const VerificationMeta(
+    'toolModelId',
+  );
+  @override
+  late final GeneratedColumn<String> toolModelId = GeneratedColumn<String>(
+    'tool_model_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _valueMeta = const VerificationMeta('value');
+  @override
+  late final GeneratedColumn<String> value = GeneratedColumn<String>(
+    'value',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _positionMeta = const VerificationMeta(
+    'position',
+  );
+  @override
+  late final GeneratedColumn<int> position = GeneratedColumn<int>(
+    'position',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    updatedAt,
+    deletedAt,
+    toolModelId,
+    name,
+    value,
+    position,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'tool_model_attributes';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ToolModelAttribute> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('tool_model_id')) {
+      context.handle(
+        _toolModelIdMeta,
+        toolModelId.isAcceptableOrUnknown(
+          data['tool_model_id']!,
+          _toolModelIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_toolModelIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('value')) {
+      context.handle(
+        _valueMeta,
+        value.isAcceptableOrUnknown(data['value']!, _valueMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_valueMeta);
+    }
+    if (data.containsKey('position')) {
+      context.handle(
+        _positionMeta,
+        position.isAcceptableOrUnknown(data['position']!, _positionMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ToolModelAttribute map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ToolModelAttribute(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      toolModelId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tool_model_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      value: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}value'],
+      )!,
+      position: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}position'],
+      )!,
+    );
+  }
+
+  @override
+  $ToolModelAttributesTable createAlias(String alias) {
+    return $ToolModelAttributesTable(attachedDatabase, alias);
+  }
+}
+
+class ToolModelAttribute extends DataClass
+    implements Insertable<ToolModelAttribute> {
+  final String id;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final String toolModelId;
+  final String name;
+  final String value;
+  final int position;
+  const ToolModelAttribute({
+    required this.id,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.toolModelId,
+    required this.name,
+    required this.value,
+    required this.position,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['tool_model_id'] = Variable<String>(toolModelId);
+    map['name'] = Variable<String>(name);
+    map['value'] = Variable<String>(value);
+    map['position'] = Variable<int>(position);
+    return map;
+  }
+
+  ToolModelAttributesCompanion toCompanion(bool nullToAbsent) {
+    return ToolModelAttributesCompanion(
+      id: Value(id),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      toolModelId: Value(toolModelId),
+      name: Value(name),
+      value: Value(value),
+      position: Value(position),
+    );
+  }
+
+  factory ToolModelAttribute.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ToolModelAttribute(
+      id: serializer.fromJson<String>(json['id']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      toolModelId: serializer.fromJson<String>(json['toolModelId']),
+      name: serializer.fromJson<String>(json['name']),
+      value: serializer.fromJson<String>(json['value']),
+      position: serializer.fromJson<int>(json['position']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'toolModelId': serializer.toJson<String>(toolModelId),
+      'name': serializer.toJson<String>(name),
+      'value': serializer.toJson<String>(value),
+      'position': serializer.toJson<int>(position),
+    };
+  }
+
+  ToolModelAttribute copyWith({
+    String? id,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    String? toolModelId,
+    String? name,
+    String? value,
+    int? position,
+  }) => ToolModelAttribute(
+    id: id ?? this.id,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    toolModelId: toolModelId ?? this.toolModelId,
+    name: name ?? this.name,
+    value: value ?? this.value,
+    position: position ?? this.position,
+  );
+  ToolModelAttribute copyWithCompanion(ToolModelAttributesCompanion data) {
+    return ToolModelAttribute(
+      id: data.id.present ? data.id.value : this.id,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      toolModelId: data.toolModelId.present
+          ? data.toolModelId.value
+          : this.toolModelId,
+      name: data.name.present ? data.name.value : this.name,
+      value: data.value.present ? data.value.value : this.value,
+      position: data.position.present ? data.position.value : this.position,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ToolModelAttribute(')
+          ..write('id: $id, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('toolModelId: $toolModelId, ')
+          ..write('name: $name, ')
+          ..write('value: $value, ')
+          ..write('position: $position')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, updatedAt, deletedAt, toolModelId, name, value, position);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ToolModelAttribute &&
+          other.id == this.id &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.toolModelId == this.toolModelId &&
+          other.name == this.name &&
+          other.value == this.value &&
+          other.position == this.position);
+}
+
+class ToolModelAttributesCompanion extends UpdateCompanion<ToolModelAttribute> {
+  final Value<String> id;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String> toolModelId;
+  final Value<String> name;
+  final Value<String> value;
+  final Value<int> position;
+  final Value<int> rowid;
+  const ToolModelAttributesCompanion({
+    this.id = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.toolModelId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.value = const Value.absent(),
+    this.position = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ToolModelAttributesCompanion.insert({
+    required String id,
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    required String toolModelId,
+    required String name,
+    required String value,
+    this.position = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       toolModelId = Value(toolModelId),
+       name = Value(name),
+       value = Value(value);
+  static Insertable<ToolModelAttribute> custom({
+    Expression<String>? id,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? toolModelId,
+    Expression<String>? name,
+    Expression<String>? value,
+    Expression<int>? position,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (toolModelId != null) 'tool_model_id': toolModelId,
+      if (name != null) 'name': name,
+      if (value != null) 'value': value,
+      if (position != null) 'position': position,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ToolModelAttributesCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<String>? toolModelId,
+    Value<String>? name,
+    Value<String>? value,
+    Value<int>? position,
+    Value<int>? rowid,
+  }) {
+    return ToolModelAttributesCompanion(
+      id: id ?? this.id,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      toolModelId: toolModelId ?? this.toolModelId,
+      name: name ?? this.name,
+      value: value ?? this.value,
+      position: position ?? this.position,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (toolModelId.present) {
+      map['tool_model_id'] = Variable<String>(toolModelId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (value.present) {
+      map['value'] = Variable<String>(value.value);
+    }
+    if (position.present) {
+      map['position'] = Variable<int>(position.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ToolModelAttributesCompanion(')
+          ..write('id: $id, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('toolModelId: $toolModelId, ')
+          ..write('name: $name, ')
+          ..write('value: $value, ')
+          ..write('position: $position, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -6054,6 +6921,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $LocationsTable locations = $LocationsTable(this);
   late final $SuppliersTable suppliers = $SuppliersTable(this);
   late final $ToolModelsTable toolModels = $ToolModelsTable(this);
+  late final $CanonicalAttributesTable canonicalAttributes =
+      $CanonicalAttributesTable(this);
+  late final $ToolModelAttributesTable toolModelAttributes =
+      $ToolModelAttributesTable(this);
   late final $AssetsTable assets = $AssetsTable(this);
   late final $ConsumablesTable consumables = $ConsumablesTable(this);
   late final $ToolModelConsumablesTable toolModelConsumables =
@@ -6071,6 +6942,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     locations,
     suppliers,
     toolModels,
+    canonicalAttributes,
+    toolModelAttributes,
     assets,
     consumables,
     toolModelConsumables,
@@ -7363,6 +8236,521 @@ typedef $$ToolModelsTableProcessedTableManager =
       $$ToolModelsTableUpdateCompanionBuilder,
       (ToolModel, BaseReferences<_$AppDatabase, $ToolModelsTable, ToolModel>),
       ToolModel,
+      PrefetchHooks Function()
+    >;
+typedef $$CanonicalAttributesTableCreateCompanionBuilder =
+    CanonicalAttributesCompanion Function({
+      required String id,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      required String canonicalCode,
+      required String name,
+      Value<int> position,
+      Value<int> rowid,
+    });
+typedef $$CanonicalAttributesTableUpdateCompanionBuilder =
+    CanonicalAttributesCompanion Function({
+      Value<String> id,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<String> canonicalCode,
+      Value<String> name,
+      Value<int> position,
+      Value<int> rowid,
+    });
+
+class $$CanonicalAttributesTableFilterComposer
+    extends Composer<_$AppDatabase, $CanonicalAttributesTable> {
+  $$CanonicalAttributesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get canonicalCode => $composableBuilder(
+    column: $table.canonicalCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$CanonicalAttributesTableOrderingComposer
+    extends Composer<_$AppDatabase, $CanonicalAttributesTable> {
+  $$CanonicalAttributesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get canonicalCode => $composableBuilder(
+    column: $table.canonicalCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$CanonicalAttributesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CanonicalAttributesTable> {
+  $$CanonicalAttributesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get canonicalCode => $composableBuilder(
+    column: $table.canonicalCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => column);
+}
+
+class $$CanonicalAttributesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CanonicalAttributesTable,
+          CanonicalAttribute,
+          $$CanonicalAttributesTableFilterComposer,
+          $$CanonicalAttributesTableOrderingComposer,
+          $$CanonicalAttributesTableAnnotationComposer,
+          $$CanonicalAttributesTableCreateCompanionBuilder,
+          $$CanonicalAttributesTableUpdateCompanionBuilder,
+          (
+            CanonicalAttribute,
+            BaseReferences<
+              _$AppDatabase,
+              $CanonicalAttributesTable,
+              CanonicalAttribute
+            >,
+          ),
+          CanonicalAttribute,
+          PrefetchHooks Function()
+        > {
+  $$CanonicalAttributesTableTableManager(
+    _$AppDatabase db,
+    $CanonicalAttributesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CanonicalAttributesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CanonicalAttributesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$CanonicalAttributesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> canonicalCode = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<int> position = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CanonicalAttributesCompanion(
+                id: id,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                canonicalCode: canonicalCode,
+                name: name,
+                position: position,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required String canonicalCode,
+                required String name,
+                Value<int> position = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CanonicalAttributesCompanion.insert(
+                id: id,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                canonicalCode: canonicalCode,
+                name: name,
+                position: position,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$CanonicalAttributesTable, CanonicalAttribute>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $CanonicalAttributesTable,
+                    CanonicalAttribute
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$CanonicalAttributesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CanonicalAttributesTable,
+      CanonicalAttribute,
+      $$CanonicalAttributesTableFilterComposer,
+      $$CanonicalAttributesTableOrderingComposer,
+      $$CanonicalAttributesTableAnnotationComposer,
+      $$CanonicalAttributesTableCreateCompanionBuilder,
+      $$CanonicalAttributesTableUpdateCompanionBuilder,
+      (
+        CanonicalAttribute,
+        BaseReferences<
+          _$AppDatabase,
+          $CanonicalAttributesTable,
+          CanonicalAttribute
+        >,
+      ),
+      CanonicalAttribute,
+      PrefetchHooks Function()
+    >;
+typedef $$ToolModelAttributesTableCreateCompanionBuilder =
+    ToolModelAttributesCompanion Function({
+      required String id,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      required String toolModelId,
+      required String name,
+      required String value,
+      Value<int> position,
+      Value<int> rowid,
+    });
+typedef $$ToolModelAttributesTableUpdateCompanionBuilder =
+    ToolModelAttributesCompanion Function({
+      Value<String> id,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<String> toolModelId,
+      Value<String> name,
+      Value<String> value,
+      Value<int> position,
+      Value<int> rowid,
+    });
+
+class $$ToolModelAttributesTableFilterComposer
+    extends Composer<_$AppDatabase, $ToolModelAttributesTable> {
+  $$ToolModelAttributesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get toolModelId => $composableBuilder(
+    column: $table.toolModelId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ToolModelAttributesTableOrderingComposer
+    extends Composer<_$AppDatabase, $ToolModelAttributesTable> {
+  $$ToolModelAttributesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get toolModelId => $composableBuilder(
+    column: $table.toolModelId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ToolModelAttributesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ToolModelAttributesTable> {
+  $$ToolModelAttributesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get toolModelId => $composableBuilder(
+    column: $table.toolModelId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get value =>
+      $composableBuilder(column: $table.value, builder: (column) => column);
+
+  GeneratedColumn<int> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => column);
+}
+
+class $$ToolModelAttributesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ToolModelAttributesTable,
+          ToolModelAttribute,
+          $$ToolModelAttributesTableFilterComposer,
+          $$ToolModelAttributesTableOrderingComposer,
+          $$ToolModelAttributesTableAnnotationComposer,
+          $$ToolModelAttributesTableCreateCompanionBuilder,
+          $$ToolModelAttributesTableUpdateCompanionBuilder,
+          (
+            ToolModelAttribute,
+            BaseReferences<
+              _$AppDatabase,
+              $ToolModelAttributesTable,
+              ToolModelAttribute
+            >,
+          ),
+          ToolModelAttribute,
+          PrefetchHooks Function()
+        > {
+  $$ToolModelAttributesTableTableManager(
+    _$AppDatabase db,
+    $ToolModelAttributesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ToolModelAttributesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ToolModelAttributesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ToolModelAttributesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> toolModelId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> value = const Value.absent(),
+                Value<int> position = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ToolModelAttributesCompanion(
+                id: id,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                toolModelId: toolModelId,
+                name: name,
+                value: value,
+                position: position,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required String toolModelId,
+                required String name,
+                required String value,
+                Value<int> position = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ToolModelAttributesCompanion.insert(
+                id: id,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                toolModelId: toolModelId,
+                name: name,
+                value: value,
+                position: position,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ToolModelAttributesTable, ToolModelAttribute>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $ToolModelAttributesTable,
+                    ToolModelAttribute
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ToolModelAttributesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ToolModelAttributesTable,
+      ToolModelAttribute,
+      $$ToolModelAttributesTableFilterComposer,
+      $$ToolModelAttributesTableOrderingComposer,
+      $$ToolModelAttributesTableAnnotationComposer,
+      $$ToolModelAttributesTableCreateCompanionBuilder,
+      $$ToolModelAttributesTableUpdateCompanionBuilder,
+      (
+        ToolModelAttribute,
+        BaseReferences<
+          _$AppDatabase,
+          $ToolModelAttributesTable,
+          ToolModelAttribute
+        >,
+      ),
+      ToolModelAttribute,
       PrefetchHooks Function()
     >;
 typedef $$AssetsTableCreateCompanionBuilder =
@@ -9153,6 +10541,10 @@ class $AppDatabaseManager {
       $$SuppliersTableTableManager(_db, _db.suppliers);
   $$ToolModelsTableTableManager get toolModels =>
       $$ToolModelsTableTableManager(_db, _db.toolModels);
+  $$CanonicalAttributesTableTableManager get canonicalAttributes =>
+      $$CanonicalAttributesTableTableManager(_db, _db.canonicalAttributes);
+  $$ToolModelAttributesTableTableManager get toolModelAttributes =>
+      $$ToolModelAttributesTableTableManager(_db, _db.toolModelAttributes);
   $$AssetsTableTableManager get assets =>
       $$AssetsTableTableManager(_db, _db.assets);
   $$ConsumablesTableTableManager get consumables =>

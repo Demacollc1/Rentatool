@@ -121,6 +121,22 @@ class Consumables extends Table with SyncColumns {
   TextColumn get supplierId => text().nullable()();
 }
 
+/// Plantilla de atributos de una familia (canónico): QUÉ importa.
+class CanonicalAttributes extends Table with SyncColumns {
+  TextColumn get canonicalCode => text()();
+  TextColumn get name => text()(); // "Potencia (W)", "Disco (mm)"
+  IntColumn get position => integer().withDefault(const Constant(0))();
+}
+
+/// Valores mínimos del producto: lo que un modelo alternativo debe
+/// cumplir para pertenecer a este código RAT.
+class ToolModelAttributes extends Table with SyncColumns {
+  TextColumn get toolModelId => text()();
+  TextColumn get name => text()();
+  TextColumn get value => text()(); // "1400-1500 W", ">=115 mm"
+  IntColumn get position => integer().withDefault(const Constant(0))();
+}
+
 /// n:m modelo ↔ consumible (el mismo disco sirve a varias sierras).
 class ToolModelConsumables extends Table with SyncColumns {
   TextColumn get toolModelId => text()();
@@ -168,6 +184,8 @@ class SyncState extends Table {
   Locations,
   Suppliers,
   ToolModels,
+  CanonicalAttributes,
+  ToolModelAttributes,
   Assets,
   Consumables,
   ToolModelConsumables,
@@ -180,7 +198,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -202,6 +220,7 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(assets, assets.brand);
             await m.addColumn(assets, assets.mfrModel);
           }
+          // v4: createAll de arriba ya crea las tablas de atributos.
         },
       );
 

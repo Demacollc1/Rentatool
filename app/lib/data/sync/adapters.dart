@@ -114,6 +114,51 @@ List<TableSyncAdapter> buildSyncAdapters() => [
         },
       ),
       TableSyncAdapter(
+        remoteTable: 'canonical_attributes',
+        mergeRemote: (db, r) async {
+          final local = await (db.select(db.canonicalAttributes)
+                ..where((x) => x.id.equals(r['id'] as String)))
+              .getSingleOrNull();
+          final remoteUpdated = ts(r['updated_at']);
+          if (!newer(local?.updatedAt, remoteUpdated)) return false;
+          await db.into(db.canonicalAttributes).insertOnConflictUpdate(
+                CanonicalAttributesCompanion(
+                  id: Value(r['id'] as String),
+                  canonicalCode: Value(r['canonical_code'] as String),
+                  name: Value(r['name'] as String),
+                  position:
+                      Value((r['position'] as num?)?.toInt() ?? 0),
+                  updatedAt: Value(remoteUpdated),
+                  deletedAt: Value(tsN(r['deleted_at'])),
+                ),
+              );
+          return true;
+        },
+      ),
+      TableSyncAdapter(
+        remoteTable: 'tool_model_attributes',
+        mergeRemote: (db, r) async {
+          final local = await (db.select(db.toolModelAttributes)
+                ..where((x) => x.id.equals(r['id'] as String)))
+              .getSingleOrNull();
+          final remoteUpdated = ts(r['updated_at']);
+          if (!newer(local?.updatedAt, remoteUpdated)) return false;
+          await db.into(db.toolModelAttributes).insertOnConflictUpdate(
+                ToolModelAttributesCompanion(
+                  id: Value(r['id'] as String),
+                  toolModelId: Value(r['tool_model_id'] as String),
+                  name: Value(r['name'] as String),
+                  value: Value(r['value'] as String),
+                  position:
+                      Value((r['position'] as num?)?.toInt() ?? 0),
+                  updatedAt: Value(remoteUpdated),
+                  deletedAt: Value(tsN(r['deleted_at'])),
+                ),
+              );
+          return true;
+        },
+      ),
+      TableSyncAdapter(
         remoteTable: 'consumables',
         mergeRemote: (db, r) async {
           final local = await (db.select(db.consumables)

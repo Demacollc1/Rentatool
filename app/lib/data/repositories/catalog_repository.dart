@@ -134,6 +134,123 @@ class CatalogRepository {
     });
   }
 
+  // ═══════════ Atributos ═══════════
+
+  /// Plantilla de la familia: qué atributos importan en este canónico.
+  Stream<List<CanonicalAttribute>> watchCanonicalAttrs(String code) =>
+      (_db.select(_db.canonicalAttributes)
+            ..where((a) =>
+                a.canonicalCode.equals(code) & a.deletedAt.isNull())
+            ..orderBy([
+              (a) => OrderingTerm.asc(a.position),
+              (a) => OrderingTerm.asc(a.name),
+            ]))
+          .watch();
+
+  Future<String> saveCanonicalAttr(String code, String name) async {
+    final existing = await (_db.select(_db.canonicalAttributes)
+          ..where((a) =>
+              a.canonicalCode.equals(code) &
+              a.name.equals(name) &
+              a.deletedAt.isNull()))
+        .getSingleOrNull();
+    if (existing != null) return existing.id;
+    final rowId = const Uuid().v4();
+    await _db.into(_db.canonicalAttributes).insert(
+        CanonicalAttributesCompanion.insert(
+            id: rowId,
+            canonicalCode: code,
+            name: name,
+            updatedAt: Value(DateTime.now())));
+    await _sync.enqueue(
+        table: 'canonical_attributes',
+        rowId: rowId,
+        op: 'upsert',
+        row: {
+          'id': rowId,
+          'canonical_code': code,
+          'name': name,
+          'position': 0,
+          'updated_at': isoTs(DateTime.now()),
+          'deleted_at': null,
+        });
+    return rowId;
+  }
+
+  /// Valores mínimos del producto (lo que debe cumplir una alternativa).
+  Stream<List<ToolModelAttribute>> watchModelAttrs(String modelId) =>
+      (_db.select(_db.toolModelAttributes)
+            ..where((a) =>
+                a.toolModelId.equals(modelId) & a.deletedAt.isNull())
+            ..orderBy([
+              (a) => OrderingTerm.asc(a.position),
+              (a) => OrderingTerm.asc(a.name),
+            ]))
+          .watch();
+
+  Future<void> saveModelAttr({
+    required String toolModelId,
+    required String name,
+    required String value,
+    String? canonicalCode,
+  }) async {
+    // Alta en la plantilla del canónico si es un atributo nuevo.
+    if (canonicalCode != null && canonicalCode.isNotEmpty) {
+      await saveCanonicalAttr(canonicalCode, name);
+    }
+    final existing = await (_db.select(_db.toolModelAttributes)
+          ..where((a) =>
+              a.toolModelId.equals(toolModelId) &
+              a.name.equals(name) &
+              a.deletedAt.isNull()))
+        .getSingleOrNull();
+    final rowId = existing?.id ?? const Uuid().v4();
+    await _db.into(_db.toolModelAttributes).insertOnConflictUpdate(
+        ToolModelAttributesCompanion.insert(
+            id: rowId,
+            toolModelId: toolModelId,
+            name: name,
+            value: value,
+            updatedAt: Value(DateTime.now())));
+    await _sync.enqueue(
+        table: 'tool_model_attributes',
+        rowId: rowId,
+        op: 'upsert',
+        row: {
+          'id': rowId,
+          'tool_model_id': toolModelId,
+          'name': name,
+          'value': value,
+          'position': 0,
+          'updated_at': isoTs(DateTime.now()),
+          'deleted_at': null,
+        });
+  }
+
+  Future<void> deleteModelAttr(String id) async {
+    final now = DateTime.now();
+    await (_db.update(_db.toolModelAttributes)
+          ..where((a) => a.id.equals(id)))
+        .write(ToolModelAttributesCompanion(
+            deletedAt: Value(now), updatedAt: Value(now)));
+    final a = await (_db.select(_db.toolModelAttributes)
+          ..where((x) => x.id.equals(id)))
+        .getSingle();
+    await _sync.enqueue(
+        table: 'tool_model_attributes',
+        rowId: id,
+        op: 'upsert',
+        row: {
+          'id': a.id,
+          'tool_model_id': a.toolModelId,
+          'name': a.name,
+          'value': a.value,
+          'position': a.position,
+          'updated_at': isoTs(a.updatedAt),
+          'deleted_at': isoTsN(a.deletedAt),
+        });
+  }
+
   // ═══════════ Unidades (assets) ═══════════
 
   Stream<List<Asset>> watchAssets({String? modelId}) {
@@ -454,6 +571,15 @@ final modelConsumablesProvider = StreamProvider.autoDispose
     .family<List<Consumable>, String>((ref, modelId) => ref
         .watch(catalogRepositoryProvider)
         .watchModelConsumables(modelId));
+
+final canonicalAttrsProvider = StreamProvider.autoDispose
+    .family<List<CanonicalAttribute>, String>((ref, code) => ref
+        .watch(catalogRepositoryProvider)
+        .watchCanonicalAttrs(code));
+
+final modelAttrsProvider = StreamProvider.autoDispose
+    .family<List<ToolModelAttribute>, String>((ref, modelId) =>
+        ref.watch(catalogRepositoryProvider).watchModelAttrs(modelId));
 
 final assetMovementsProvider = StreamProvider.autoDispose
     .family<List<InventoryMovement>, String?>((ref, assetId) => ref

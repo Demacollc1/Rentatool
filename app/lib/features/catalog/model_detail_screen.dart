@@ -116,6 +116,8 @@ class ModelDetailScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 8),
+              _AttributesCard(model: m),
+              const SizedBox(height: 8),
               _RatesCard(model: m),
               const SizedBox(height: 8),
               consumables.when(
@@ -220,6 +222,164 @@ class ModelDetailScreen extends ConsumerWidget {
       fileName: 'etiquetas_${m.supplierCode ?? m.id}',
     );
     await SharePlus.instance.share(ShareParams(files: [XFile(pdf)]));
+  }
+}
+
+/// Atributos del producto: los mínimos que debe cumplir cualquier
+/// modelo alternativo para pertenecer a este código. La plantilla de
+/// nombres se hereda del canónico y crece al agregar nuevos.
+class _AttributesCard extends ConsumerWidget {
+  const _AttributesCard({required this.model});
+
+  final ToolModel model;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final attrs = ref.watch(modelAttrsProvider(model.id));
+    final template = model.canonicalCode == null
+        ? const AsyncValue<List<CanonicalAttribute>>.data([])
+        : ref.watch(canonicalAttrsProvider(model.canonicalCode!));
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(children: [
+              const Expanded(
+                child: Text('Atributos del producto',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+              TextButton.icon(
+                onPressed: () => _editAttr(context, ref, null, null),
+                icon: const Icon(Icons.add, size: 16),
+                label: const Text('Atributo'),
+              ),
+            ]),
+            const Text(
+                'Mínimos que debe cumplir cualquier modelo alternativo '
+                'para entrar en este código.',
+                style: TextStyle(fontSize: 11)),
+            const SizedBox(height: 6),
+            attrs.when(
+              loading: () => const LinearProgressIndicator(),
+              error: (e, _) => Text('Error: $e'),
+              data: (list) {
+                // Atributos de la plantilla del canónico aún sin valor.
+                final pending = (template.value ?? [])
+                    .where((t) =>
+                        !list.any((a) => a.name == t.name))
+                    .toList();
+                if (list.isEmpty && pending.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    child: Text('Sin atributos definidos todavía. '
+                        'Agrégalos con "+ Atributo" (ej. Potencia (W): '
+                        '1400-1500).'),
+                  );
+                }
+                return Column(children: [
+                  for (final a in list)
+                    ListTile(
+                      dense: true,
+                      visualDensity: VisualDensity.compact,
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.rule, size: 18),
+                      title: Text(a.name,
+                          style: const TextStyle(fontSize: 13)),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(a.value,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w600)),
+                          IconButton(
+                            icon: const Icon(Icons.edit, size: 16),
+                            onPressed: () =>
+                                _editAttr(context, ref, a.name, a.value),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete_outline,
+                                size: 16),
+                            onPressed: () => ref
+                                .read(catalogRepositoryProvider)
+                                .deleteModelAttr(a.id),
+                          ),
+                        ],
+                      ),
+                    ),
+                  for (final t in pending)
+                    ListTile(
+                      dense: true,
+                      visualDensity: VisualDensity.compact,
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.help_outline,
+                          size: 18, color: Colors.orange),
+                      title: Text(t.name,
+                          style: const TextStyle(
+                              fontSize: 13, color: Colors.orange)),
+                      subtitle: const Text(
+                          'Definido en la familia — falta el valor',
+                          style: TextStyle(fontSize: 10)),
+                      trailing: TextButton(
+                        onPressed: () =>
+                            _editAttr(context, ref, t.name, null),
+                        child: const Text('Definir'),
+                      ),
+                    ),
+                ]);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _editAttr(BuildContext context, WidgetRef ref,
+      String? name, String? value) async {
+    final nameC = TextEditingController(text: name);
+    final valueC = TextEditingController(text: value);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(name ?? 'Nuevo atributo'),
+        content: Column(mainAxisSize: MainAxisSize.min, children: [
+          if (name == null)
+            TextField(
+                controller: nameC,
+                autofocus: true,
+                decoration: const InputDecoration(
+                    labelText: 'Atributo',
+                    hintText: 'Ej. Potencia (W), Disco (mm), Uso')),
+          TextField(
+              controller: valueC,
+              autofocus: name != null,
+              decoration: const InputDecoration(
+                  labelText: 'Valor mínimo / rango',
+                  hintText: 'Ej. 1400-1500, ≥115, Industrial')),
+        ]),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancelar')),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Guardar')),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    final attrName = (name ?? nameC.text).trim();
+    final attrValue = valueC.text.trim();
+    if (attrName.isEmpty || attrValue.isEmpty) return;
+    await ref.read(catalogRepositoryProvider).saveModelAttr(
+          toolModelId: model.id,
+          name: attrName,
+          value: attrValue,
+          canonicalCode: model.canonicalCode,
+        );
   }
 }
 
