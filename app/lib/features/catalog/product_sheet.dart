@@ -295,8 +295,10 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
             const SizedBox(height: 8),
             TextField(
                 controller: _name,
-                decoration:
-                    const InputDecoration(labelText: 'Nombre del producto *')),
+                decoration: const InputDecoration(
+                    labelText: 'Nombre del producto (por especificación) *',
+                    hintText:
+                        'Ej. Esmeriladora angular 4 1/2" Industrial 1400-1500W')),
             const SizedBox(height: 8),
             TextField(
                 controller: _variant,
@@ -308,8 +310,8 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
               Expanded(
                 child: TextField(
                     controller: _brand,
-                    decoration:
-                        const InputDecoration(labelText: 'Marca')),
+                    decoration: const InputDecoration(
+                        labelText: 'Marca de referencia (opcional)')),
               ),
               const SizedBox(width: 8),
               SegmentedButton<String>(
@@ -326,8 +328,8 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
             TextField(
                 controller: _supplierCode,
                 decoration: const InputDecoration(
-                    labelText: 'Código del proveedor',
-                    hintText: 'Ej. DWE575K')),
+                    labelText: 'Modelo de referencia para compra (opcional)',
+                    hintText: 'Ej. D28114 — la marca/modelo real va en cada unidad')),
             const SizedBox(height: 8),
             ListTile(
               contentPadding: EdgeInsets.zero,

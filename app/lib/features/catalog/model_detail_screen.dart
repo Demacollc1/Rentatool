@@ -179,11 +179,24 @@ class ModelDetailScreen extends ConsumerWidget {
       final path = a.locationId == null
           ? null
           : await locRepo.fullPath(a.locationId!);
+      final brandModel =
+          '${a.brand ?? ''} ${a.mfrModel ?? ''}'.trim();
       labels.add(QrLabel(
-        title: a.assetTag,
-        subtitle: [m.name, if (path != null && path.isNotEmpty) path]
-            .join(' · '),
-        data: qrForAsset(a.id),
+        title:
+            '${a.assetTag}${brandModel.isEmpty ? '' : ' · $brandModel'}',
+        subtitle: [
+          if (m.ratCode != null) m.ratCode!,
+          m.name,
+          if (a.serial?.isNotEmpty ?? false) 'SN ${a.serial}',
+          if (path != null && path.isNotEmpty) path,
+        ].join(' · '),
+        data: qrForAssetFull(
+          id: a.id,
+          ratCode: m.ratCode,
+          brandModel: brandModel,
+          lote: a.assetTag,
+          serial: a.serial,
+        ),
       ));
     }
     final pdf = await buildQrLabelsPdf(
@@ -331,7 +344,12 @@ class _AssetTile extends ConsumerWidget {
                 ? Colors.orange
                 : Colors.grey,
       ),
-      title: Text(asset.assetTag,
+      title: Text(
+          [
+            asset.assetTag,
+            if (asset.brand != null || asset.mfrModel != null)
+              '${asset.brand ?? ''} ${asset.mfrModel ?? ''}'.trim(),
+          ].join(' · '),
           style: const TextStyle(fontWeight: FontWeight.w600)),
       subtitle: Text(
         [
@@ -377,6 +395,8 @@ class AssetSheet extends ConsumerStatefulWidget {
 class _AssetSheetState extends ConsumerState<AssetSheet> {
   final _serial = TextEditingController();
   final _invoice = TextEditingController();
+  final _brand = TextEditingController();
+  final _mfrModel = TextEditingController();
   late final TextEditingController _cost = TextEditingController(
       text: widget.model.listCost.toStringAsFixed(2));
   String? _locationId;
@@ -399,6 +419,25 @@ class _AssetSheetState extends ConsumerState<AssetSheet> {
             Text('Nueva unidad — ${widget.model.name}',
                 style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 12),
+            Row(children: [
+              Expanded(
+                child: TextField(
+                  controller: _brand,
+                  decoration:
+                      const InputDecoration(labelText: 'Marca *',
+                          hintText: 'DeWalt, Bosch…'),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextField(
+                  controller: _mfrModel,
+                  decoration: const InputDecoration(
+                      labelText: 'Modelo *', hintText: 'D28114'),
+                ),
+              ),
+            ]),
+            const SizedBox(height: 8),
             TextField(
               controller: _serial,
               decoration: const InputDecoration(
@@ -488,17 +527,32 @@ class _AssetSheetState extends ConsumerState<AssetSheet> {
         supplierId: _supplierId,
         invoiceNumber:
             _invoice.text.trim().isEmpty ? null : _invoice.text.trim(),
+        brand: _brand.text.trim().isEmpty ? null : _brand.text.trim(),
+        mfrModel: _mfrModel.text.trim().isEmpty
+            ? null
+            : _mfrModel.text.trim(),
       );
+      final brandModel =
+          '${_brand.text.trim()} ${_mfrModel.text.trim()}'.trim();
       final pdf = await buildQrLabelsPdf(
         title: widget.model.name,
         labels: [
           QrLabel(
-            title: tag,
+            title: '$tag${brandModel.isEmpty ? '' : ' · $brandModel'}',
             subtitle: [
+              if (widget.model.ratCode != null) widget.model.ratCode!,
               widget.model.name,
+              if (_serial.text.trim().isNotEmpty)
+                'SN ${_serial.text.trim()}',
               if (_locationPath != null) _locationPath!,
             ].join(' · '),
-            data: qrForAsset(id),
+            data: qrForAssetFull(
+              id: id,
+              ratCode: widget.model.ratCode,
+              brandModel: brandModel,
+              lote: tag,
+              serial: _serial.text.trim(),
+            ),
           ),
         ],
         fileName: 'etiqueta_$tag',

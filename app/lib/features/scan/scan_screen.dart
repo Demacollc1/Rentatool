@@ -24,7 +24,8 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
     _handled = true;
 
     if (raw.startsWith('demaco:asset:')) {
-      final id = raw.substring('demaco:asset:'.length);
+      final id =
+          raw.substring('demaco:asset:'.length).split('|').first;
       final asset = await ref.read(catalogRepositoryProvider).getAsset(id);
       if (!mounted) return;
       if (asset == null) {

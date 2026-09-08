@@ -168,6 +168,8 @@ class CatalogRepository {
     String? notes,
     String? supplierId,
     String? invoiceNumber,
+    String? brand,
+    String? mfrModel,
   }) async {
     final rowId = const Uuid().v4();
     await _db.into(_db.assets).insert(AssetsCompanion.insert(
@@ -182,6 +184,8 @@ class CatalogRepository {
           notes: Value(notes),
           supplierId: Value(supplierId),
           invoiceNumber: Value(invoiceNumber),
+          brand: Value(brand),
+          mfrModel: Value(mfrModel),
           updatedAt: Value(DateTime.now()),
         ));
     await _enqueueAsset(rowId);
@@ -253,6 +257,8 @@ class CatalogRepository {
       'notes': a.notes,
       'supplier_id': a.supplierId,
       'invoice_number': a.invoiceNumber,
+      'brand': a.brand,
+      'mfr_model': a.mfrModel,
       'updated_at': isoTs(a.updatedAt),
       'deleted_at': isoTsN(a.deletedAt),
     });

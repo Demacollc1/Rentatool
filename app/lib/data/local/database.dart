@@ -100,6 +100,11 @@ class Assets extends Table with SyncColumns {
   /// Compra: proveedor y número de factura.
   TextColumn get supplierId => text().nullable()();
   TextColumn get invoiceNumber => text().nullable()();
+
+  /// Fabricante de ESTA unidad (el producto es genérico por specs;
+  /// dos unidades del mismo producto pueden ser de marcas distintas).
+  TextColumn get brand => text().nullable()();
+  TextColumn get mfrModel => text().nullable()();
 }
 
 /// Consumibles y accesorios (stock por cantidad).
@@ -175,7 +180,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -192,6 +197,10 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(assets, assets.invoiceNumber);
             await m.addColumn(consumables, consumables.canonicalCode);
             await m.addColumn(consumables, consumables.supplierId);
+          }
+          if (from < 3) {
+            await m.addColumn(assets, assets.brand);
+            await m.addColumn(assets, assets.mfrModel);
           }
         },
       );

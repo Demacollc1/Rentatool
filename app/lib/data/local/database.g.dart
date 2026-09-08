@@ -2784,6 +2784,26 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _brandMeta = const VerificationMeta('brand');
+  @override
+  late final GeneratedColumn<String> brand = GeneratedColumn<String>(
+    'brand',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _mfrModelMeta = const VerificationMeta(
+    'mfrModel',
+  );
+  @override
+  late final GeneratedColumn<String> mfrModel = GeneratedColumn<String>(
+    'mfr_model',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2800,6 +2820,8 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
     notes,
     supplierId,
     invoiceNumber,
+    brand,
+    mfrModel,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2912,6 +2934,18 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
         ),
       );
     }
+    if (data.containsKey('brand')) {
+      context.handle(
+        _brandMeta,
+        brand.isAcceptableOrUnknown(data['brand']!, _brandMeta),
+      );
+    }
+    if (data.containsKey('mfr_model')) {
+      context.handle(
+        _mfrModelMeta,
+        mfrModel.isAcceptableOrUnknown(data['mfr_model']!, _mfrModelMeta),
+      );
+    }
     return context;
   }
 
@@ -2977,6 +3011,14 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
         DriftSqlType.string,
         data['${effectivePrefix}invoice_number'],
       ),
+      brand: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}brand'],
+      ),
+      mfrModel: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}mfr_model'],
+      ),
     );
   }
 
@@ -3005,6 +3047,11 @@ class Asset extends DataClass implements Insertable<Asset> {
   /// Compra: proveedor y número de factura.
   final String? supplierId;
   final String? invoiceNumber;
+
+  /// Fabricante de ESTA unidad (el producto es genérico por specs;
+  /// dos unidades del mismo producto pueden ser de marcas distintas).
+  final String? brand;
+  final String? mfrModel;
   const Asset({
     required this.id,
     required this.updatedAt,
@@ -3020,6 +3067,8 @@ class Asset extends DataClass implements Insertable<Asset> {
     this.notes,
     this.supplierId,
     this.invoiceNumber,
+    this.brand,
+    this.mfrModel,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3051,6 +3100,12 @@ class Asset extends DataClass implements Insertable<Asset> {
     }
     if (!nullToAbsent || invoiceNumber != null) {
       map['invoice_number'] = Variable<String>(invoiceNumber);
+    }
+    if (!nullToAbsent || brand != null) {
+      map['brand'] = Variable<String>(brand);
+    }
+    if (!nullToAbsent || mfrModel != null) {
+      map['mfr_model'] = Variable<String>(mfrModel);
     }
     return map;
   }
@@ -3085,6 +3140,12 @@ class Asset extends DataClass implements Insertable<Asset> {
       invoiceNumber: invoiceNumber == null && nullToAbsent
           ? const Value.absent()
           : Value(invoiceNumber),
+      brand: brand == null && nullToAbsent
+          ? const Value.absent()
+          : Value(brand),
+      mfrModel: mfrModel == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mfrModel),
     );
   }
 
@@ -3108,6 +3169,8 @@ class Asset extends DataClass implements Insertable<Asset> {
       notes: serializer.fromJson<String?>(json['notes']),
       supplierId: serializer.fromJson<String?>(json['supplierId']),
       invoiceNumber: serializer.fromJson<String?>(json['invoiceNumber']),
+      brand: serializer.fromJson<String?>(json['brand']),
+      mfrModel: serializer.fromJson<String?>(json['mfrModel']),
     );
   }
   @override
@@ -3128,6 +3191,8 @@ class Asset extends DataClass implements Insertable<Asset> {
       'notes': serializer.toJson<String?>(notes),
       'supplierId': serializer.toJson<String?>(supplierId),
       'invoiceNumber': serializer.toJson<String?>(invoiceNumber),
+      'brand': serializer.toJson<String?>(brand),
+      'mfrModel': serializer.toJson<String?>(mfrModel),
     };
   }
 
@@ -3146,6 +3211,8 @@ class Asset extends DataClass implements Insertable<Asset> {
     Value<String?> notes = const Value.absent(),
     Value<String?> supplierId = const Value.absent(),
     Value<String?> invoiceNumber = const Value.absent(),
+    Value<String?> brand = const Value.absent(),
+    Value<String?> mfrModel = const Value.absent(),
   }) => Asset(
     id: id ?? this.id,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -3163,6 +3230,8 @@ class Asset extends DataClass implements Insertable<Asset> {
     invoiceNumber: invoiceNumber.present
         ? invoiceNumber.value
         : this.invoiceNumber,
+    brand: brand.present ? brand.value : this.brand,
+    mfrModel: mfrModel.present ? mfrModel.value : this.mfrModel,
   );
   Asset copyWithCompanion(AssetsCompanion data) {
     return Asset(
@@ -3192,6 +3261,8 @@ class Asset extends DataClass implements Insertable<Asset> {
       invoiceNumber: data.invoiceNumber.present
           ? data.invoiceNumber.value
           : this.invoiceNumber,
+      brand: data.brand.present ? data.brand.value : this.brand,
+      mfrModel: data.mfrModel.present ? data.mfrModel.value : this.mfrModel,
     );
   }
 
@@ -3211,7 +3282,9 @@ class Asset extends DataClass implements Insertable<Asset> {
           ..write('purchaseCost: $purchaseCost, ')
           ..write('notes: $notes, ')
           ..write('supplierId: $supplierId, ')
-          ..write('invoiceNumber: $invoiceNumber')
+          ..write('invoiceNumber: $invoiceNumber, ')
+          ..write('brand: $brand, ')
+          ..write('mfrModel: $mfrModel')
           ..write(')'))
         .toString();
   }
@@ -3232,6 +3305,8 @@ class Asset extends DataClass implements Insertable<Asset> {
     notes,
     supplierId,
     invoiceNumber,
+    brand,
+    mfrModel,
   );
   @override
   bool operator ==(Object other) =>
@@ -3250,7 +3325,9 @@ class Asset extends DataClass implements Insertable<Asset> {
           other.purchaseCost == this.purchaseCost &&
           other.notes == this.notes &&
           other.supplierId == this.supplierId &&
-          other.invoiceNumber == this.invoiceNumber);
+          other.invoiceNumber == this.invoiceNumber &&
+          other.brand == this.brand &&
+          other.mfrModel == this.mfrModel);
 }
 
 class AssetsCompanion extends UpdateCompanion<Asset> {
@@ -3268,6 +3345,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
   final Value<String?> notes;
   final Value<String?> supplierId;
   final Value<String?> invoiceNumber;
+  final Value<String?> brand;
+  final Value<String?> mfrModel;
   final Value<int> rowid;
   const AssetsCompanion({
     this.id = const Value.absent(),
@@ -3284,6 +3363,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     this.notes = const Value.absent(),
     this.supplierId = const Value.absent(),
     this.invoiceNumber = const Value.absent(),
+    this.brand = const Value.absent(),
+    this.mfrModel = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   AssetsCompanion.insert({
@@ -3301,6 +3382,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     this.notes = const Value.absent(),
     this.supplierId = const Value.absent(),
     this.invoiceNumber = const Value.absent(),
+    this.brand = const Value.absent(),
+    this.mfrModel = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        toolModelId = Value(toolModelId),
@@ -3320,6 +3403,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     Expression<String>? notes,
     Expression<String>? supplierId,
     Expression<String>? invoiceNumber,
+    Expression<String>? brand,
+    Expression<String>? mfrModel,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -3337,6 +3422,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
       if (notes != null) 'notes': notes,
       if (supplierId != null) 'supplier_id': supplierId,
       if (invoiceNumber != null) 'invoice_number': invoiceNumber,
+      if (brand != null) 'brand': brand,
+      if (mfrModel != null) 'mfr_model': mfrModel,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3356,6 +3443,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     Value<String?>? notes,
     Value<String?>? supplierId,
     Value<String?>? invoiceNumber,
+    Value<String?>? brand,
+    Value<String?>? mfrModel,
     Value<int>? rowid,
   }) {
     return AssetsCompanion(
@@ -3373,6 +3462,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
       notes: notes ?? this.notes,
       supplierId: supplierId ?? this.supplierId,
       invoiceNumber: invoiceNumber ?? this.invoiceNumber,
+      brand: brand ?? this.brand,
+      mfrModel: mfrModel ?? this.mfrModel,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3422,6 +3513,12 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     if (invoiceNumber.present) {
       map['invoice_number'] = Variable<String>(invoiceNumber.value);
     }
+    if (brand.present) {
+      map['brand'] = Variable<String>(brand.value);
+    }
+    if (mfrModel.present) {
+      map['mfr_model'] = Variable<String>(mfrModel.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -3445,6 +3542,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
           ..write('notes: $notes, ')
           ..write('supplierId: $supplierId, ')
           ..write('invoiceNumber: $invoiceNumber, ')
+          ..write('brand: $brand, ')
+          ..write('mfrModel: $mfrModel, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -7282,6 +7381,8 @@ typedef $$AssetsTableCreateCompanionBuilder =
       Value<String?> notes,
       Value<String?> supplierId,
       Value<String?> invoiceNumber,
+      Value<String?> brand,
+      Value<String?> mfrModel,
       Value<int> rowid,
     });
 typedef $$AssetsTableUpdateCompanionBuilder =
@@ -7300,6 +7401,8 @@ typedef $$AssetsTableUpdateCompanionBuilder =
       Value<String?> notes,
       Value<String?> supplierId,
       Value<String?> invoiceNumber,
+      Value<String?> brand,
+      Value<String?> mfrModel,
       Value<int> rowid,
     });
 
@@ -7379,6 +7482,16 @@ class $$AssetsTableFilterComposer
 
   ColumnFilters<String> get invoiceNumber => $composableBuilder(
     column: $table.invoiceNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get brand => $composableBuilder(
+    column: $table.brand,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get mfrModel => $composableBuilder(
+    column: $table.mfrModel,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -7461,6 +7574,16 @@ class $$AssetsTableOrderingComposer
     column: $table.invoiceNumber,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get brand => $composableBuilder(
+    column: $table.brand,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mfrModel => $composableBuilder(
+    column: $table.mfrModel,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$AssetsTableAnnotationComposer
@@ -7525,6 +7648,12 @@ class $$AssetsTableAnnotationComposer
     column: $table.invoiceNumber,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get brand =>
+      $composableBuilder(column: $table.brand, builder: (column) => column);
+
+  GeneratedColumn<String> get mfrModel =>
+      $composableBuilder(column: $table.mfrModel, builder: (column) => column);
 }
 
 class $$AssetsTableTableManager
@@ -7569,6 +7698,8 @@ class $$AssetsTableTableManager
                 Value<String?> notes = const Value.absent(),
                 Value<String?> supplierId = const Value.absent(),
                 Value<String?> invoiceNumber = const Value.absent(),
+                Value<String?> brand = const Value.absent(),
+                Value<String?> mfrModel = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => AssetsCompanion(
                 id: id,
@@ -7585,6 +7716,8 @@ class $$AssetsTableTableManager
                 notes: notes,
                 supplierId: supplierId,
                 invoiceNumber: invoiceNumber,
+                brand: brand,
+                mfrModel: mfrModel,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -7603,6 +7736,8 @@ class $$AssetsTableTableManager
                 Value<String?> notes = const Value.absent(),
                 Value<String?> supplierId = const Value.absent(),
                 Value<String?> invoiceNumber = const Value.absent(),
+                Value<String?> brand = const Value.absent(),
+                Value<String?> mfrModel = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => AssetsCompanion.insert(
                 id: id,
@@ -7619,6 +7754,8 @@ class $$AssetsTableTableManager
                 notes: notes,
                 supplierId: supplierId,
                 invoiceNumber: invoiceNumber,
+                brand: brand,
+                mfrModel: mfrModel,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

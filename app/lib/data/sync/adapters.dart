@@ -183,6 +183,8 @@ List<TableSyncAdapter> buildSyncAdapters() => [
                   notes: Value(r['notes'] as String?),
                   supplierId: Value(r['supplier_id'] as String?),
                   invoiceNumber: Value(r['invoice_number'] as String?),
+                  brand: Value(r['brand'] as String?),
+                  mfrModel: Value(r['mfr_model'] as String?),
                   updatedAt: Value(remoteUpdated),
                   deletedAt: Value(tsN(r['deleted_at'])),
                 ),

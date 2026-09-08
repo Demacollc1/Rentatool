@@ -17,6 +17,24 @@ class QrLabel {
 String qrForLocation(String id) => 'demaco:loc:$id';
 String qrForAsset(String id) => 'demaco:asset:$id';
 
+/// Payload completo de unidad: legible por el app (el id va primero)
+/// y por cualquier lector genérico (producto, marca/modelo, lote, serie).
+String qrForAssetFull({
+  required String id,
+  String? ratCode,
+  String? brandModel,
+  required String lote,
+  String? serial,
+}) =>
+    [
+      'demaco:asset:$id',
+      if (ratCode != null && ratCode.isNotEmpty) ratCode,
+      if (brandModel != null && brandModel.trim().isNotEmpty)
+        brandModel.trim(),
+      lote,
+      if (serial != null && serial.isNotEmpty) 'SN:$serial',
+    ].join('|');
+
 const _ink = PdfColor.fromInt(0xFF15130D);
 const _yellow = PdfColor.fromInt(0xFFFFC400);
 
