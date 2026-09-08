@@ -65,7 +65,7 @@ class ModelDetailScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(m.description ?? m.name,
+                      Text(m.name,
                           style: const TextStyle(
                               fontWeight: FontWeight.bold)),
                       Text(
@@ -73,9 +73,6 @@ class ModelDetailScreen extends ConsumerWidget {
                             m.line == 'ind'
                                 ? 'Línea industrial'
                                 : 'Línea DIY',
-                            if (m.brand != null) m.brand!,
-                            if (m.supplierCode != null)
-                              'Cód. proveedor: ${m.supplierCode}',
                             if (m.variant != null) m.variant!,
                           ].join(' · '),
                           style: const TextStyle(fontSize: 12)),
@@ -92,6 +89,24 @@ class ModelDetailScreen extends ConsumerWidget {
                                   fontSize: 12,
                                   color: Colors.grey.shade700)),
                         ),
+                      if ((m.description?.isNotEmpty ?? false) ||
+                          m.supplierCode != null) ...[
+                        const SizedBox(height: 8),
+                        const Text('Modelos de referencia',
+                            style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600)),
+                        for (final line in (m.description ?? '')
+                            .split('\n')
+                            .where((l) => l.trim().isNotEmpty))
+                          Text('• ${line.trim()}',
+                              style: const TextStyle(fontSize: 12)),
+                        if (m.supplierCode != null)
+                          Text(
+                              '• Compra preferida: '
+                              '${m.brand ?? ''} ${m.supplierCode}'.trim(),
+                              style: const TextStyle(fontSize: 12)),
+                      ],
                       const Divider(),
                       Text('Costo de referencia: '
                           '\$${m.listCost.toStringAsFixed(2)}'

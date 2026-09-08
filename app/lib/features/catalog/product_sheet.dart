@@ -212,6 +212,8 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
   late final _brand = TextEditingController(text: widget.existing?.brand);
   late final _supplierCode =
       TextEditingController(text: widget.existing?.supplierCode);
+  late final _references =
+      TextEditingController(text: widget.existing?.description);
   late final _cost = TextEditingController(
       text: widget.existing == null
           ? ''
@@ -326,10 +328,21 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
             ]),
             const SizedBox(height: 8),
             TextField(
+                controller: _references,
+                maxLines: 4,
+                minLines: 2,
+                decoration: const InputDecoration(
+                    labelText:
+                        'Modelos de referencia y atributos (uno por línea)',
+                    hintText: 'DeWalt D28114 — 1400W 1.9HP c/expulsor\n'
+                        'Bosch GWS 14-125 — 1400W embrague KickBack',
+                    alignLabelWithHint: true)),
+            const SizedBox(height: 8),
+            TextField(
                 controller: _supplierCode,
                 decoration: const InputDecoration(
-                    labelText: 'Modelo de referencia para compra (opcional)',
-                    hintText: 'Ej. D28114 — la marca/modelo real va en cada unidad')),
+                    labelText: 'Código de compra preferido (opcional)',
+                    hintText: 'Ej. D28114')),
             const SizedBox(height: 8),
             ListTile(
               contentPadding: EdgeInsets.zero,
@@ -393,7 +406,9 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
             supplierCode: _supplierCode.text.trim().isEmpty
                 ? null
                 : _supplierCode.text.trim(),
-            description: e?.description,
+            description: _references.text.trim().isEmpty
+                ? null
+                : _references.text.trim(),
             categoryId: e?.categoryId,
             listCost: cost,
             rateHalfDay: cost > 0
