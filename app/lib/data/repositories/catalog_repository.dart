@@ -388,11 +388,19 @@ class CatalogRepository {
     String? datasheetUrl,
   }) async {
     final rowId = const Uuid().v4();
+    // Si el producto no trae número de serie de fábrica, la serie es
+    // el código de la unidad + la fecha de ingreso (AAAA MM DD).
+    final now = DateTime.now();
+    final effectiveSerial = (serial == null || serial.trim().isEmpty)
+        ? '$assetTag-${now.year}'
+            '${now.month.toString().padLeft(2, '0')}'
+            '${now.day.toString().padLeft(2, '0')}'
+        : serial.trim();
     await _db.into(_db.assets).insert(AssetsCompanion.insert(
           id: rowId,
           toolModelId: toolModelId,
           assetTag: assetTag,
-          serial: Value(serial),
+          serial: Value(effectiveSerial),
           locationId: Value(locationId),
           purchaseCost: Value(purchaseCost),
           purchaseDate: Value(purchaseDate),

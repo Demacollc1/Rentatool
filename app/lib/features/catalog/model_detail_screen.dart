@@ -740,7 +740,9 @@ class _AssetSheetState extends ConsumerState<AssetSheet> {
             TextField(
               controller: _serial,
               decoration: const InputDecoration(
-                  labelText: 'Número de serie (opcional)'),
+                  labelText: 'Número de serie',
+                  helperText: 'Vacío = se genera solo: lote + fecha '
+                      'de ingreso (ej. DEM-0007-20260908)'),
             ),
             const SizedBox(height: 8),
             TextField(

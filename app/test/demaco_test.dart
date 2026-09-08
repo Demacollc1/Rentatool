@@ -148,6 +148,19 @@ void main() {
       expect(capital, 95);
     });
 
+    test('sin serie de fábrica → lote + fecha de ingreso', () async {
+      final modelId = await catalog.saveModel(name: 'Nivel láser');
+      final tag = await catalog.nextAssetTag();
+      final id = await catalog.createAsset(
+          toolModelId: modelId, assetTag: tag, serial: '  ');
+      final asset = await catalog.getAsset(id);
+      final now = DateTime.now();
+      final fecha = '${now.year}'
+          '${now.month.toString().padLeft(2, '0')}'
+          '${now.day.toString().padLeft(2, '0')}';
+      expect(asset!.serial, '$tag-$fecha');
+    });
+
     test('correlativo de asset_tag avanza', () async {
       final modelId = await catalog.saveModel(name: 'X');
       await catalog.createAsset(
