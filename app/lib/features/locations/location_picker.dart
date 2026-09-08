@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../data/local/database.dart';
 import '../../data/repositories/location_repository.dart';
@@ -45,6 +46,19 @@ class _LocationPickerSheetState
           title: Text(_stack.isEmpty
               ? 'Elige la ubicación'
               : _stack.map((l) => l.name).join(' > ')),
+          subtitle: TextButton.icon(
+            style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                alignment: Alignment.centerLeft),
+            onPressed: () async {
+              final id = await scanLocationQr(context);
+              if (id != null && context.mounted) {
+                Navigator.pop(context, id);
+              }
+            },
+            icon: const Icon(Icons.qr_code_scanner, size: 18),
+            label: const Text('Escanear QR de la ubicación'),
+          ),
           trailing: _stack.isEmpty
               ? null
               : FilledButton(
@@ -88,6 +102,45 @@ class _LocationPickerSheetState
           ),
         ),
       ]),
+    );
+  }
+}
+
+
+/// Escanea un QR de ubicación (demaco:loc:) y devuelve su id.
+Future<String?> scanLocationQr(BuildContext context) {
+  return Navigator.of(context).push<String>(MaterialPageRoute(
+    builder: (_) => const _LocationScanPage(),
+  ));
+}
+
+class _LocationScanPage extends StatefulWidget {
+  const _LocationScanPage();
+
+  @override
+  State<_LocationScanPage> createState() => _LocationScanPageState();
+}
+
+class _LocationScanPageState extends State<_LocationScanPage> {
+  bool _handled = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar:
+          AppBar(title: const Text('Escanea la etiqueta de la ubicación')),
+      body: MobileScanner(onDetect: (capture) {
+        if (_handled) return;
+        final raw = capture.barcodes.firstOrNull?.rawValue ?? '';
+        if (raw.startsWith('demaco:loc:')) {
+          _handled = true;
+          Navigator.pop(
+              context, raw.substring('demaco:loc:'.length).split('|').first);
+        } else if (raw.isNotEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('Ese QR no es de una ubicación')));
+        }
+      }),
     );
   }
 }

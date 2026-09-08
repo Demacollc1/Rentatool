@@ -20,9 +20,13 @@ import 'category_tree_picker.dart';
 import 'product_sheet.dart';
 
 class ModelDetailScreen extends ConsumerWidget {
-  const ModelDetailScreen({super.key, required this.modelId});
+  const ModelDetailScreen(
+      {super.key, required this.modelId, this.highlightAssetId});
 
   final String modelId;
+
+  /// Unidad a resaltar (llegó por escaneo de su QR).
+  final String? highlightAssetId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -187,7 +191,10 @@ class ModelDetailScreen extends ConsumerWidget {
                             'para registrar cada equipo físico y '
                             'generar su etiqueta QR.'),
                       ),
-                    for (final a in list) _AssetTile(asset: a),
+                    for (final a in list)
+                      _AssetTile(
+                          asset: a,
+                          highlight: a.id == highlightAssetId),
                   ]),
                 ),
               ),
@@ -587,9 +594,10 @@ class _RatesCard extends ConsumerWidget {
 }
 
 class _AssetTile extends ConsumerWidget {
-  const _AssetTile({required this.asset});
+  const _AssetTile({required this.asset, this.highlight = false});
 
   final Asset asset;
+  final bool highlight;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -598,8 +606,9 @@ class _AssetTile extends ConsumerWidget {
         : ref.watch(locationPathProvider(asset.locationId!)).value;
     return ListTile(
       dense: true,
+      tileColor: highlight ? Colors.amber.shade100 : null,
       leading: Icon(
-        Icons.qr_code_2,
+        highlight ? Icons.center_focus_strong : Icons.qr_code_2,
         color: asset.status == 'available'
             ? Colors.green
             : asset.status == 'rented'

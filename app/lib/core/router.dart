@@ -73,7 +73,9 @@ final routerProvider = Provider<GoRouter>((ref) {
                 GoRoute(
                   path: 'model/:id',
                   builder: (_, state) => ModelDetailScreen(
-                      modelId: state.pathParameters['id']!),
+                      modelId: state.pathParameters['id']!,
+                      highlightAssetId:
+                          state.uri.queryParameters['asset']),
                 ),
               ],
             ),

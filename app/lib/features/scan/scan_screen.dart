@@ -26,13 +26,21 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
     if (raw.startsWith('demaco:asset:')) {
       final id =
           raw.substring('demaco:asset:'.length).split('|').first;
-      final asset = await ref.read(catalogRepositoryProvider).getAsset(id);
+      final repo = ref.read(catalogRepositoryProvider);
+      final asset = await repo.getAsset(id);
       if (!mounted) return;
       if (asset == null) {
         _notFound('Unidad no encontrada');
         return;
       }
-      context.go('/catalog/model/${asset.toolModelId}');
+      final model = await repo.getModel(asset.toolModelId);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('${asset.assetTag} · '
+              '${[asset.brand, asset.mfrModel].whereType<String>().join(' ')}'
+              ' — ${model?.name ?? ''}')));
+      context.go(
+          '/catalog/model/${asset.toolModelId}?asset=${asset.id}');
       return;
     }
     if (raw.startsWith('demaco:loc:')) {
