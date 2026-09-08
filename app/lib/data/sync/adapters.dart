@@ -75,6 +75,26 @@ List<TableSyncAdapter> buildSyncAdapters() => [
         },
       ),
       TableSyncAdapter(
+        remoteTable: 'canonicals',
+        mergeRemote: (db, r) async {
+          final local = await (db.select(db.canonicals)
+                ..where((x) => x.id.equals(r['id'] as String)))
+              .getSingleOrNull();
+          final remoteUpdated = ts(r['updated_at']);
+          if (!newer(local?.updatedAt, remoteUpdated)) return false;
+          await db.into(db.canonicals).insertOnConflictUpdate(
+                CanonicalsCompanion(
+                  id: Value(r['id'] as String),
+                  code: Value(r['code'] as String),
+                  name: Value(r['name'] as String),
+                  updatedAt: Value(remoteUpdated),
+                  deletedAt: Value(tsN(r['deleted_at'])),
+                ),
+              );
+          return true;
+        },
+      ),
+      TableSyncAdapter(
         remoteTable: 'tool_models',
         mergeRemote: (db, r) async {
           final local = await (db.select(db.toolModels)

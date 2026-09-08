@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/config.dart';
 import '../../data/sync/sync_service.dart';
+import '../admin/admin_screen.dart';
 import '../auth/auth_providers.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -71,6 +72,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               : null,
           enabled: AppConfig.hasSupabase && !_busy,
           onTap: _publish,
+        ),
+        ListTile(
+          leading: const Icon(Icons.admin_panel_settings_outlined),
+          title: const Text('Administración'),
+          subtitle: const Text('Códigos canónicos y atributos por '
+              'familia'),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => const AdminScreen())),
         ),
         ListTile(
           leading: const Icon(Icons.upload_file),

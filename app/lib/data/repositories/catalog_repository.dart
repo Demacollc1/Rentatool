@@ -177,6 +177,29 @@ class CatalogRepository {
     return rowId;
   }
 
+  Future<void> deleteCanonicalAttr(String id) async {
+    final now = DateTime.now();
+    await (_db.update(_db.canonicalAttributes)
+          ..where((a) => a.id.equals(id)))
+        .write(CanonicalAttributesCompanion(
+            deletedAt: Value(now), updatedAt: Value(now)));
+    final a = await (_db.select(_db.canonicalAttributes)
+          ..where((x) => x.id.equals(id)))
+        .getSingle();
+    await _sync.enqueue(
+        table: 'canonical_attributes',
+        rowId: id,
+        op: 'upsert',
+        row: {
+          'id': a.id,
+          'canonical_code': a.canonicalCode,
+          'name': a.name,
+          'position': a.position,
+          'updated_at': isoTs(a.updatedAt),
+          'deleted_at': isoTsN(a.deletedAt),
+        });
+  }
+
   /// Valores mínimos del producto (lo que debe cumplir una alternativa).
   Stream<List<ToolModelAttribute>> watchModelAttrs(String modelId) =>
       (_db.select(_db.toolModelAttributes)

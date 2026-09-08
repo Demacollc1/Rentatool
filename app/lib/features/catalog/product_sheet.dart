@@ -4,44 +4,36 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/config.dart';
 import '../../data/local/database.dart';
 import '../../data/repositories/catalog_repository.dart';
+import '../../data/repositories/canonical_repository.dart';
 import '../../data/repositories/supplier_repository.dart';
-import '../../data/seed/canonicals.dart';
 
-/// Selector de canónico (busca entre ~1,700 subgrupos del ERP).
+/// Selector de canónico (subgrupos del ERP + los creados en
+/// Administración; la semilla se carga sola la primera vez).
 Future<Canonical?> pickCanonical(
     BuildContext context, WidgetRef ref) async {
-  final all = await ref.read(canonicalsProvider.future);
+  await ref.read(canonicalRepositoryProvider).ensureSeeded();
   if (!context.mounted) return null;
   return showModalBottomSheet<Canonical>(
     context: context,
     isScrollControlled: true,
-    builder: (_) => _CanonicalPicker(all: all),
+    builder: (_) => const _CanonicalPicker(),
   );
 }
 
-class _CanonicalPicker extends StatefulWidget {
-  const _CanonicalPicker({required this.all});
-
-  final List<Canonical> all;
+class _CanonicalPicker extends ConsumerStatefulWidget {
+  const _CanonicalPicker();
 
   @override
-  State<_CanonicalPicker> createState() => _CanonicalPickerState();
+  ConsumerState<_CanonicalPicker> createState() =>
+      _CanonicalPickerState();
 }
 
-class _CanonicalPickerState extends State<_CanonicalPicker> {
+class _CanonicalPickerState extends ConsumerState<_CanonicalPicker> {
   String _query = '';
 
   @override
   Widget build(BuildContext context) {
-    final q = _query.trim().toLowerCase();
-    final matches = q.isEmpty
-        ? widget.all.take(30).toList()
-        : widget.all
-            .where((c) =>
-                c.code.toLowerCase().contains(q) ||
-                c.name.toLowerCase().contains(q))
-            .take(50)
-            .toList();
+    final matches = ref.watch(canonicalsDbProvider(_query));
     return DraggableScrollableSheet(
       expand: false,
       initialChildSize: 0.85,
@@ -58,19 +50,24 @@ class _CanonicalPickerState extends State<_CanonicalPicker> {
           ),
         ),
         Expanded(
-          child: ListView.builder(
-            controller: scroll,
-            itemCount: matches.length,
-            itemBuilder: (_, i) => ListTile(
-              dense: true,
-              leading: CircleAvatar(
-                radius: 20,
-                child: Text(matches[i].code,
-                    style: const TextStyle(fontSize: 9)),
+          child: matches.when(
+            loading: () =>
+                const Center(child: CircularProgressIndicator()),
+            error: (e, _) => Center(child: Text('Error: $e')),
+            data: (list) => ListView.builder(
+              controller: scroll,
+              itemCount: list.length > 60 ? 60 : list.length,
+              itemBuilder: (_, i) => ListTile(
+                dense: true,
+                leading: CircleAvatar(
+                  radius: 20,
+                  child: Text(list[i].code,
+                      style: const TextStyle(fontSize: 9)),
+                ),
+                title: Text(list[i].name,
+                    style: const TextStyle(fontSize: 13)),
+                onTap: () => Navigator.pop(context, list[i]),
               ),
-              title: Text(matches[i].name,
-                  style: const TextStyle(fontSize: 13)),
-              onTap: () => Navigator.pop(context, matches[i]),
             ),
           ),
         ),
@@ -219,7 +216,8 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
           ? ''
           : widget.existing!.listCost.toStringAsFixed(2));
   late String _line = widget.existing?.line ?? 'ind';
-  Canonical? _canonical;
+  String? _canonicalCode;
+  String? _canonicalName;
   String? _ratCode;
   bool _busy = false;
 
@@ -228,8 +226,8 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
     super.initState();
     final e = widget.existing;
     if (e?.canonicalCode != null) {
-      _canonical =
-          Canonical(code: e!.canonicalCode!, name: e.canonicalName ?? '');
+      _canonicalCode = e!.canonicalCode;
+      _canonicalName = e.canonicalName ?? '';
       _ratCode = e.ratCode;
     }
   }
@@ -243,7 +241,8 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
         : await ref.read(catalogRepositoryProvider).nextRatCode(c.code);
     if (!mounted) return;
     setState(() {
-      _canonical = c;
+      _canonicalCode = c.code;
+      _canonicalName = c.name;
       _ratCode = code;
       if (_name.text.trim().isEmpty) _name.text = c.name;
     });
@@ -270,9 +269,9 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
             Card(
               child: ListTile(
                 leading: const Icon(Icons.category_outlined),
-                title: Text(_canonical == null
+                title: Text(_canonicalCode == null
                     ? 'Elegir canónico *'
-                    : '${_canonical!.code} — ${_canonical!.name}'),
+                    : '$_canonicalCode — ${_canonicalName ?? ''}'),
                 subtitle: Text(
                     _ratCode == null
                         ? 'El código Rent a Tool se genera solo '
@@ -355,7 +354,7 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
   }
 
   Future<void> _save() async {
-    if (_name.text.trim().isEmpty || _canonical == null) {
+    if (_name.text.trim().isEmpty || _canonicalCode == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Elige el canónico y escribe el nombre')));
       return;
@@ -394,8 +393,8 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
             published: e?.published ?? false,
             notes: e?.notes,
             ratCode: _ratCode,
-            canonicalCode: _canonical!.code,
-            canonicalName: _canonical!.name,
+            canonicalCode: _canonicalCode,
+            canonicalName: _canonicalName,
             variant: _variant.text.trim().isEmpty
                 ? null
                 : _variant.text.trim(),

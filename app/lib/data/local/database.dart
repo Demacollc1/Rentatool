@@ -121,6 +121,13 @@ class Consumables extends Table with SyncColumns {
   TextColumn get supplierId => text().nullable()();
 }
 
+/// Canónicos (subgrupos del ERP + los propios): familia y prefijo de
+/// código. La semilla del ERP se carga con ids determinísticos.
+class Canonicals extends Table with SyncColumns {
+  TextColumn get code => text()();
+  TextColumn get name => text()();
+}
+
 /// Plantilla de atributos de una familia (canónico): QUÉ importa.
 class CanonicalAttributes extends Table with SyncColumns {
   TextColumn get canonicalCode => text()();
@@ -183,6 +190,7 @@ class SyncState extends Table {
   Categories,
   Locations,
   Suppliers,
+  Canonicals,
   ToolModels,
   CanonicalAttributes,
   ToolModelAttributes,
@@ -198,7 +206,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
