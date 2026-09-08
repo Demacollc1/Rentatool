@@ -315,6 +315,37 @@ class CatalogRepository {
     return rowId;
   }
 
+  /// Edita los datos de una unidad (sin tocar ubicación ni estado —
+  /// para eso están mover y cambiar estado, que escriben kardex).
+  Future<void> updateAsset({
+    required String id,
+    String? serial,
+    String? brand,
+    String? mfrModel,
+    double? purchaseCost,
+    String? invoiceNumber,
+    String? supplierId,
+    String? condition,
+    String? notes,
+  }) async {
+    await (_db.update(_db.assets)..where((a) => a.id.equals(id))).write(
+      AssetsCompanion(
+        serial: Value(serial),
+        brand: Value(brand),
+        mfrModel: Value(mfrModel),
+        purchaseCost:
+            purchaseCost == null ? const Value.absent() : Value(purchaseCost),
+        invoiceNumber: Value(invoiceNumber),
+        supplierId: Value(supplierId),
+        condition:
+            condition == null ? const Value.absent() : Value(condition),
+        notes: Value(notes),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+    await _enqueueAsset(id);
+  }
+
   /// Mueve una unidad de ubicación (kardex `transfer`).
   Future<void> moveAsset(String id, String? toLocationId) async {
     final asset = await getAsset(id);

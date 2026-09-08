@@ -537,7 +537,18 @@ class _AssetTile extends ConsumerWidget {
       trailing: PopupMenuButton<String>(
         onSelected: (v) async {
           final repo = ref.read(catalogRepositoryProvider);
-          if (v == 'move') {
+          if (v == 'edit') {
+            final model =
+                await repo.getModel(asset.toolModelId);
+            if (model != null && context.mounted) {
+              await showModalBottomSheet<void>(
+                context: context,
+                isScrollControlled: true,
+                builder: (_) =>
+                    AssetSheet(model: model, existing: asset),
+              );
+            }
+          } else if (v == 'move') {
             final locId = await pickLocation(context, ref);
             if (locId != null) await repo.moveAsset(asset.id, locId);
           } else {
@@ -545,6 +556,9 @@ class _AssetTile extends ConsumerWidget {
           }
         },
         itemBuilder: (_) => [
+          const PopupMenuItem(
+              value: 'edit',
+              child: Text('Editar (serie, marca, factura…)')),
           const PopupMenuItem(
               value: 'move', child: Text('Mover de ubicación')),
           for (final s in statusLabels.entries)
@@ -559,21 +573,27 @@ class _AssetTile extends ConsumerWidget {
 
 /// Alta/edición de unidad física con etiqueta inmediata.
 class AssetSheet extends ConsumerStatefulWidget {
-  const AssetSheet({super.key, required this.model});
+  const AssetSheet({super.key, required this.model, this.existing});
 
   final ToolModel model;
+  final Asset? existing;
 
   @override
   ConsumerState<AssetSheet> createState() => _AssetSheetState();
 }
 
 class _AssetSheetState extends ConsumerState<AssetSheet> {
-  final _serial = TextEditingController();
-  final _invoice = TextEditingController();
-  final _brand = TextEditingController();
-  final _mfrModel = TextEditingController();
+  late final _serial =
+      TextEditingController(text: widget.existing?.serial);
+  late final _invoice =
+      TextEditingController(text: widget.existing?.invoiceNumber);
+  late final _brand =
+      TextEditingController(text: widget.existing?.brand);
+  late final _mfrModel =
+      TextEditingController(text: widget.existing?.mfrModel);
   late final TextEditingController _cost = TextEditingController(
-      text: widget.model.listCost.toStringAsFixed(2));
+      text: (widget.existing?.purchaseCost ?? widget.model.listCost)
+          .toStringAsFixed(2));
   String? _locationId;
   String? _locationPath;
   String? _supplierId;
@@ -591,7 +611,10 @@ class _AssetSheetState extends ConsumerState<AssetSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Nueva unidad — ${widget.model.name}',
+            Text(
+                widget.existing == null
+                    ? 'Nueva unidad — ${widget.model.name}'
+                    : 'Editar ${widget.existing!.assetTag}',
                 style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 12),
             Row(children: [
@@ -653,6 +676,7 @@ class _AssetSheetState extends ConsumerState<AssetSheet> {
                 child: const Text('Elegir'),
               ),
             ),
+            if (widget.existing == null)
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.place_outlined),
@@ -676,8 +700,12 @@ class _AssetSheetState extends ConsumerState<AssetSheet> {
             const SizedBox(height: 12),
             FilledButton.icon(
               onPressed: _busy ? null : _save,
-              icon: const Icon(Icons.qr_code),
-              label: const Text('Registrar y generar etiqueta'),
+              icon: Icon(widget.existing == null
+                  ? Icons.qr_code
+                  : Icons.save),
+              label: Text(widget.existing == null
+                  ? 'Registrar y generar etiqueta'
+                  : 'Guardar cambios'),
             ),
             const SizedBox(height: 12),
           ],
@@ -690,6 +718,26 @@ class _AssetSheetState extends ConsumerState<AssetSheet> {
     setState(() => _busy = true);
     try {
       final repo = ref.read(catalogRepositoryProvider);
+      if (widget.existing != null) {
+        await repo.updateAsset(
+          id: widget.existing!.id,
+          serial:
+              _serial.text.trim().isEmpty ? null : _serial.text.trim(),
+          brand: _brand.text.trim().isEmpty ? null : _brand.text.trim(),
+          mfrModel: _mfrModel.text.trim().isEmpty
+              ? null
+              : _mfrModel.text.trim(),
+          purchaseCost:
+              double.tryParse(_cost.text.replaceAll(',', '.')),
+          invoiceNumber:
+              _invoice.text.trim().isEmpty ? null : _invoice.text.trim(),
+          supplierId: _supplierId ?? widget.existing!.supplierId,
+          condition: widget.existing!.condition,
+          notes: widget.existing!.notes,
+        );
+        if (mounted) Navigator.pop(context);
+        return;
+      }
       final tag = await repo.nextAssetTag();
       final id = await repo.createAsset(
         toolModelId: widget.model.id,
