@@ -10,6 +10,7 @@ import '../../data/repositories/supplier_repository.dart';
 import '../dashboard/dashboard_screen.dart' show statusLabels;
 import '../labels/qr_labels_pdf.dart';
 import '../locations/location_picker.dart';
+import 'category_tree_picker.dart';
 import 'product_sheet.dart';
 
 class ModelDetailScreen extends ConsumerWidget {
@@ -228,7 +229,7 @@ class ModelDetailScreen extends ConsumerWidget {
   }
 }
 
-/// Categorías (oficios) del producto: selección múltiple.
+/// Categorías del producto (oficios y subgrupos), selección múltiple.
 class _CategoriesCard extends ConsumerWidget {
   const _CategoriesCard({required this.model});
 
@@ -239,17 +240,18 @@ class _CategoriesCard extends ConsumerWidget {
     final cats = ref.watch(categoriesProvider);
     final selected =
         ref.watch(modelCategoryIdsProvider(model.id)).value ?? {};
-    final oficios = (cats.value ?? [])
-        .where((c) => c.level == 0)
-        .toList()
-      ..sort((a, b) => a.name.compareTo(b.name));
-    if (oficios.isEmpty) return const SizedBox.shrink();
-
-    // Oficio "principal" heredado del import (vía category_id).
     final byId = {for (final c in cats.value ?? <Category>[]) c.id: c};
-    String? legacyRoot = model.categoryId;
-    while (legacyRoot != null && byId[legacyRoot]?.parentId != null) {
-      legacyRoot = byId[legacyRoot]!.parentId;
+
+    // Sin vínculos aún: hereda la categoría del import como efectiva.
+    final effective = selected.isNotEmpty
+        ? selected
+        : {if (model.categoryId != null) model.categoryId!};
+
+    String label(String id) {
+      final c = byId[id];
+      if (c == null) return '?';
+      final parent = c.parentId == null ? null : byId[c.parentId!];
+      return parent == null ? c.name : '${parent.name} › ${c.name}';
     }
 
     return Card(
@@ -258,37 +260,41 @@ class _CategoriesCard extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Categorías (oficios)',
-                style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 6),
-            Wrap(
-              spacing: 6,
-              runSpacing: 4,
-              children: [
-                for (final o in oficios)
-                  FilterChip(
-                    label: Text(o.name,
-                        style: const TextStyle(fontSize: 11)),
-                    selected: selected.contains(o.id) ||
-                        (selected.isEmpty && o.id == legacyRoot),
-                    onSelected: (_) async {
-                      final current = selected.isEmpty &&
-                              legacyRoot != null
-                          ? {legacyRoot}
-                          : {...selected};
-                      if (current.contains(o.id)) {
-                        current.remove(o.id);
-                      } else {
-                        current.add(o.id);
-                      }
-                      await ref
-                          .read(catalogRepositoryProvider)
-                          .setModelCategories(
-                              model.id, current.cast<String>());
-                    },
-                  ),
-              ],
-            ),
+            Row(children: [
+              const Expanded(
+                child: Text('Categorías',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+              TextButton.icon(
+                onPressed: () async {
+                  final picked = await pickCategorySet(context, ref,
+                      initial: effective.cast<String>());
+                  if (picked != null) {
+                    await ref
+                        .read(catalogRepositoryProvider)
+                        .setModelCategories(model.id, picked);
+                  }
+                },
+                icon: const Icon(Icons.edit, size: 16),
+                label: const Text('Editar'),
+              ),
+            ]),
+            if (effective.isEmpty)
+              const Text('Sin categorías asignadas.',
+                  style: TextStyle(fontSize: 12))
+            else
+              Wrap(
+                spacing: 6,
+                runSpacing: 4,
+                children: [
+                  for (final id in effective)
+                    Chip(
+                      label: Text(label(id),
+                          style: const TextStyle(fontSize: 11)),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                ],
+              ),
           ],
         ),
       ),

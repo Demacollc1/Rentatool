@@ -33,7 +33,15 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
     };
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Catálogo de renta')),
+      appBar: AppBar(
+        title: const Text('Catálogo de renta'),
+        actions: [
+          IconButton(
+              icon: const Icon(Icons.settings),
+              tooltip: 'Configuración',
+              onPressed: () => context.go('/settings')),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => showModalBottomSheet<void>(
           context: context,

@@ -8,6 +8,7 @@ import '../../data/local/database.dart';
 import '../../data/repositories/canonical_repository.dart';
 import '../../data/repositories/catalog_repository.dart';
 import 'categories_admin_screen.dart';
+import 'product_categorization_screen.dart';
 
 /// Hub de administración.
 class AdminScreen extends StatelessWidget {
@@ -35,6 +36,16 @@ class AdminScreen extends StatelessWidget {
           trailing: const Icon(Icons.chevron_right),
           onTap: () => Navigator.of(context).push(MaterialPageRoute(
               builder: (_) => const CategoriesAdminScreen())),
+        ),
+        ListTile(
+          leading: const Icon(Icons.rule_folder_outlined),
+          title: const Text('Categorización de productos'),
+          subtitle: const Text('Ver y asignar categorías a varios '
+              'productos a la vez'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) =>
+                  const ProductCategorizationScreen())),
         ),
       ]),
     );

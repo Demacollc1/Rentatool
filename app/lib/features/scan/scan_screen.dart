@@ -66,7 +66,15 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Escanear')),
+      appBar: AppBar(
+        title: const Text('Escanear'),
+        actions: [
+          IconButton(
+              icon: const Icon(Icons.settings),
+              tooltip: 'Configuración',
+              onPressed: () => context.go('/settings')),
+        ],
+      ),
       body: MobileScanner(onDetect: _onDetect),
     );
   }

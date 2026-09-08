@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../data/local/database.dart';
@@ -41,6 +42,10 @@ class _LocationsScreenState extends ConsumerState<LocationsScreen> {
             tooltip: 'Etiquetas QR de este nivel',
             onPressed: () => _printLabels(children.value ?? const []),
           ),
+          IconButton(
+              icon: const Icon(Icons.settings),
+              tooltip: 'Configuración',
+              onPressed: () => context.go('/settings')),
         ],
       ),
       floatingActionButton: depth >= locationLevels.length
