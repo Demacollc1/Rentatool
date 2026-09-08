@@ -221,8 +221,6 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
   late String _line = widget.existing?.line ?? 'ind';
   Canonical? _canonical;
   String? _ratCode;
-  String? _supplierId;
-  String? _supplierName;
   bool _busy = false;
 
   @override
@@ -233,15 +231,6 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
       _canonical =
           Canonical(code: e!.canonicalCode!, name: e.canonicalName ?? '');
       _ratCode = e.ratCode;
-    }
-    if (e?.supplierId != null) {
-      Future.microtask(() async {
-        final s = await ref
-            .read(supplierRepositoryProvider)
-            .getById(e!.supplierId!);
-        if (mounted) setState(() => _supplierName = s?.name);
-      });
-      _supplierId = e?.supplierId;
     }
   }
 
@@ -344,26 +333,6 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
                     labelText: 'Código de compra preferido (opcional)',
                     hintText: 'Ej. D28114')),
             const SizedBox(height: 8),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.business_outlined),
-              title: Text(_supplierName ?? 'Sin proveedor'),
-              trailing: TextButton(
-                onPressed: () async {
-                  final id = await pickSupplier(context, ref);
-                  if (id != null && mounted) {
-                    final s = await ref
-                        .read(supplierRepositoryProvider)
-                        .getById(id);
-                    setState(() {
-                      _supplierId = id;
-                      _supplierName = s?.name;
-                    });
-                  }
-                },
-                child: const Text('Elegir'),
-              ),
-            ),
             TextField(
                 controller: _cost,
                 keyboardType:
@@ -430,7 +399,7 @@ class _ProductSheetState extends ConsumerState<ProductSheet> {
             variant: _variant.text.trim().isEmpty
                 ? null
                 : _variant.text.trim(),
-            supplierId: _supplierId,
+            supplierId: null, // el proveedor pertenece a la unidad
           );
       if (mounted) Navigator.pop(context);
     } finally {
