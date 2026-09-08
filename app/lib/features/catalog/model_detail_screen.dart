@@ -4,6 +4,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../data/local/database.dart';
 import '../../data/repositories/catalog_repository.dart';
+import '../../data/repositories/category_repository.dart';
 import '../../data/repositories/location_repository.dart';
 import '../../data/repositories/supplier_repository.dart';
 import '../dashboard/dashboard_screen.dart' show statusLabels;
@@ -116,6 +117,8 @@ class ModelDetailScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 8),
+              _CategoriesCard(model: m),
+              const SizedBox(height: 8),
               _AttributesCard(model: m),
               const SizedBox(height: 8),
               _RatesCard(model: m),
@@ -222,6 +225,74 @@ class ModelDetailScreen extends ConsumerWidget {
       fileName: 'etiquetas_${m.supplierCode ?? m.id}',
     );
     await SharePlus.instance.share(ShareParams(files: [XFile(pdf)]));
+  }
+}
+
+/// Categorías (oficios) del producto: selección múltiple.
+class _CategoriesCard extends ConsumerWidget {
+  const _CategoriesCard({required this.model});
+
+  final ToolModel model;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cats = ref.watch(categoriesProvider);
+    final selected =
+        ref.watch(modelCategoryIdsProvider(model.id)).value ?? {};
+    final oficios = (cats.value ?? [])
+        .where((c) => c.level == 0)
+        .toList()
+      ..sort((a, b) => a.name.compareTo(b.name));
+    if (oficios.isEmpty) return const SizedBox.shrink();
+
+    // Oficio "principal" heredado del import (vía category_id).
+    final byId = {for (final c in cats.value ?? <Category>[]) c.id: c};
+    String? legacyRoot = model.categoryId;
+    while (legacyRoot != null && byId[legacyRoot]?.parentId != null) {
+      legacyRoot = byId[legacyRoot]!.parentId;
+    }
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Categorías (oficios)',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              children: [
+                for (final o in oficios)
+                  FilterChip(
+                    label: Text(o.name,
+                        style: const TextStyle(fontSize: 11)),
+                    selected: selected.contains(o.id) ||
+                        (selected.isEmpty && o.id == legacyRoot),
+                    onSelected: (_) async {
+                      final current = selected.isEmpty &&
+                              legacyRoot != null
+                          ? {legacyRoot}
+                          : {...selected};
+                      if (current.contains(o.id)) {
+                        current.remove(o.id);
+                      } else {
+                        current.add(o.id);
+                      }
+                      await ref
+                          .read(catalogRepositoryProvider)
+                          .setModelCategories(
+                              model.id, current.cast<String>());
+                    },
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

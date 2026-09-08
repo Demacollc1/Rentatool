@@ -50,6 +50,48 @@ class CategoryRepository {
     return rowId;
   }
 
+  Future<void> rename(String id, String name) async {
+    await (_db.update(_db.categories)..where((c) => c.id.equals(id)))
+        .write(CategoriesCompanion(
+      name: Value(name),
+      updatedAt: Value(DateTime.now()),
+    ));
+    await _enqueue(id);
+  }
+
+  /// Elimina (soft) si no tiene hijos vivos ni productos vinculados.
+  /// Devuelve null si se eliminó, o el motivo.
+  Future<String?> delete(String id) async {
+    final children = await (_db.select(_db.categories)
+          ..where(
+              (c) => c.parentId.equals(id) & c.deletedAt.isNull()))
+        .get();
+    if (children.isNotEmpty) {
+      return 'Tiene ${children.length} subcategoría(s): elimínalas primero';
+    }
+    final countExp = _db.toolModels.id.count();
+    final q = _db.selectOnly(_db.toolModels)
+      ..addColumns([countExp])
+      ..where(_db.toolModels.categoryId.equals(id) &
+          _db.toolModels.deletedAt.isNull());
+    final direct = (await q.getSingle()).read(countExp) ?? 0;
+    final linkExp = _db.toolModelCategories.id.count();
+    final lq = _db.selectOnly(_db.toolModelCategories)
+      ..addColumns([linkExp])
+      ..where(_db.toolModelCategories.categoryId.equals(id) &
+          _db.toolModelCategories.deletedAt.isNull());
+    final linked = (await lq.getSingle()).read(linkExp) ?? 0;
+    if (direct + linked > 0) {
+      return 'Está en uso por ${direct + linked} producto(s)';
+    }
+    final now = DateTime.now();
+    await (_db.update(_db.categories)..where((c) => c.id.equals(id)))
+        .write(CategoriesCompanion(
+            deletedAt: Value(now), updatedAt: Value(now)));
+    await _enqueue(id);
+    return null;
+  }
+
   Future<void> _enqueue(String id) async {
     final c = await getById(id);
     if (c == null) return;

@@ -180,6 +180,26 @@ List<TableSyncAdapter> buildSyncAdapters() => [
         },
       ),
       TableSyncAdapter(
+        remoteTable: 'tool_model_categories',
+        mergeRemote: (db, r) async {
+          final local = await (db.select(db.toolModelCategories)
+                ..where((x) => x.id.equals(r['id'] as String)))
+              .getSingleOrNull();
+          final remoteUpdated = ts(r['updated_at']);
+          if (!newer(local?.updatedAt, remoteUpdated)) return false;
+          await db.into(db.toolModelCategories).insertOnConflictUpdate(
+                ToolModelCategoriesCompanion(
+                  id: Value(r['id'] as String),
+                  toolModelId: Value(r['tool_model_id'] as String),
+                  categoryId: Value(r['category_id'] as String),
+                  updatedAt: Value(remoteUpdated),
+                  deletedAt: Value(tsN(r['deleted_at'])),
+                ),
+              );
+          return true;
+        },
+      ),
+      TableSyncAdapter(
         remoteTable: 'consumables',
         mergeRemote: (db, r) async {
           final local = await (db.select(db.consumables)

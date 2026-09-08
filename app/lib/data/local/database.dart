@@ -149,6 +149,13 @@ class ToolModelAttributes extends Table with SyncColumns {
   IntColumn get position => integer().withDefault(const Constant(0))();
 }
 
+/// n:m producto ↔ categoría (un producto puede estar en varios
+/// oficios; category_id del modelo queda como principal).
+class ToolModelCategories extends Table with SyncColumns {
+  TextColumn get toolModelId => text()();
+  TextColumn get categoryId => text()();
+}
+
 /// n:m modelo ↔ consumible (el mismo disco sirve a varias sierras).
 class ToolModelConsumables extends Table with SyncColumns {
   TextColumn get toolModelId => text()();
@@ -199,6 +206,7 @@ class SyncState extends Table {
   ToolModels,
   CanonicalAttributes,
   ToolModelAttributes,
+  ToolModelCategories,
   Assets,
   Consumables,
   ToolModelConsumables,
@@ -211,7 +219,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(

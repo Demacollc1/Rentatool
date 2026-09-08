@@ -7,16 +7,51 @@ import 'package:image_picker/image_picker.dart';
 import '../../data/local/database.dart';
 import '../../data/repositories/canonical_repository.dart';
 import '../../data/repositories/catalog_repository.dart';
+import 'categories_admin_screen.dart';
 
-/// Administración: códigos canónicos y sus plantillas de atributos.
-class AdminScreen extends ConsumerStatefulWidget {
+/// Hub de administración.
+class AdminScreen extends StatelessWidget {
   const AdminScreen({super.key});
 
   @override
-  ConsumerState<AdminScreen> createState() => _AdminScreenState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Administración')),
+      body: ListView(children: [
+        ListTile(
+          leading: const Icon(Icons.qr_code_2),
+          title: const Text('Códigos canónicos'),
+          subtitle: const Text('Familias del ERP, íconos y plantillas '
+              'de atributos'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => const CanonicalsAdminScreen())),
+        ),
+        ListTile(
+          leading: const Icon(Icons.category_outlined),
+          title: const Text('Categorías'),
+          subtitle: const Text('Oficios y grupos del catálogo '
+              '(Albañilería, Electricidad…)'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => const CategoriesAdminScreen())),
+        ),
+      ]),
+    );
+  }
 }
 
-class _AdminScreenState extends ConsumerState<AdminScreen> {
+/// Administración de códigos canónicos y sus plantillas de atributos.
+class CanonicalsAdminScreen extends ConsumerStatefulWidget {
+  const CanonicalsAdminScreen({super.key});
+
+  @override
+  ConsumerState<CanonicalsAdminScreen> createState() =>
+      _CanonicalsAdminScreenState();
+}
+
+class _CanonicalsAdminScreenState
+    extends ConsumerState<CanonicalsAdminScreen> {
   String _query = '';
 
   @override
@@ -24,7 +59,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
     final canonicals = ref.watch(canonicalsDbProvider(_query));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Administración · Canónicos')),
+      appBar: AppBar(title: const Text('Canónicos')),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _editCanonical(context, null),
         icon: const Icon(Icons.add),

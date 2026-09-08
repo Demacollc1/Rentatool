@@ -26,6 +26,8 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
     final cats = ref.watch(categoriesProvider);
     final assets = ref.watch(allAssetsProvider);
     final canonicals = ref.watch(canonicalsDbProvider(''));
+    final modelCats =
+        ref.watch(allModelCategoriesProvider).value ?? const {};
     final canonicalByCode = {
       for (final c in canonicals.value ?? <Canonical>[]) c.code: c
     };
@@ -65,16 +67,40 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
               for (final a in assetList) {
                 unitsByModel.putIfAbsent(a.toolModelId, () => []).add(a);
               }
-              // Agrupa por oficio raíz.
+              // Agrupa por oficio: vínculos n:m primero; si el
+              // producto no tiene, cae al oficio raíz del import.
               final byOficio = <String, List<ToolModel>>{};
               for (final m in list) {
-                String? cid = m.categoryId;
-                while (
-                    cid != null && byId[cid]?.parentId != null) {
-                  cid = byId[cid]!.parentId;
+                final links = modelCats[m.id] ?? const <String>{};
+                final roots = <String>{};
+                for (final catId in links) {
+                  String? cid = catId;
+                  while (cid != null &&
+                      byId[cid]?.parentId != null) {
+                    cid = byId[cid]!.parentId;
+                  }
+                  if (cid != null) roots.add(cid);
                 }
-                final name = byId[cid]?.name ?? 'Sin oficio';
-                byOficio.putIfAbsent(name, () => []).add(m);
+                if (roots.isEmpty) {
+                  String? cid = m.categoryId;
+                  while (cid != null &&
+                      byId[cid]?.parentId != null) {
+                    cid = byId[cid]!.parentId;
+                  }
+                  if (cid != null) roots.add(cid);
+                }
+                if (roots.isEmpty) {
+                  byOficio
+                      .putIfAbsent('Sin oficio', () => [])
+                      .add(m);
+                } else {
+                  for (final r in roots) {
+                    byOficio
+                        .putIfAbsent(
+                            byId[r]?.name ?? 'Sin oficio', () => [])
+                        .add(m);
+                  }
+                }
               }
               final oficios = byOficio.keys.toList()..sort();
               if (list.isEmpty) {

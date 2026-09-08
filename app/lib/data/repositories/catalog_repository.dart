@@ -134,6 +134,81 @@ class CatalogRepository {
     });
   }
 
+  // ═══════════ Categorías múltiples ═══════════
+
+  /// Ids de categorías vinculadas al producto (vivas).
+  Stream<Set<String>> watchModelCategoryIds(String modelId) =>
+      (_db.select(_db.toolModelCategories)
+            ..where((l) =>
+                l.toolModelId.equals(modelId) & l.deletedAt.isNull()))
+          .watch()
+          .map((rows) => {for (final r in rows) r.categoryId});
+
+  /// Mapa producto → categorías (para agrupar el catálogo).
+  Stream<Map<String, Set<String>>> watchAllModelCategories() =>
+      (_db.select(_db.toolModelCategories)
+            ..where((l) => l.deletedAt.isNull()))
+          .watch()
+          .map((rows) {
+        final map = <String, Set<String>>{};
+        for (final r in rows) {
+          map.putIfAbsent(r.toolModelId, () => {}).add(r.categoryId);
+        }
+        return map;
+      });
+
+  /// Fija el conjunto de categorías del producto (alta y baja suave).
+  Future<void> setModelCategories(
+      String modelId, Set<String> categoryIds) async {
+    final existing = await (_db.select(_db.toolModelCategories)
+          ..where((l) => l.toolModelId.equals(modelId)))
+        .get();
+    final now = DateTime.now();
+    for (final row in existing) {
+      final shouldLive = categoryIds.contains(row.categoryId);
+      final isLive = row.deletedAt == null;
+      if (shouldLive == isLive) continue;
+      await (_db.update(_db.toolModelCategories)
+            ..where((l) => l.id.equals(row.id)))
+          .write(ToolModelCategoriesCompanion(
+        deletedAt: Value(shouldLive ? null : now),
+        updatedAt: Value(now),
+      ));
+      await _sync.enqueue(
+          table: 'tool_model_categories',
+          rowId: row.id,
+          op: 'upsert',
+          row: {
+            'id': row.id,
+            'tool_model_id': row.toolModelId,
+            'category_id': row.categoryId,
+            'updated_at': isoTs(now),
+            'deleted_at': shouldLive ? null : isoTs(now),
+          });
+    }
+    final have = {for (final r in existing) r.categoryId};
+    for (final catId in categoryIds.difference(have)) {
+      final rowId = const Uuid().v4();
+      await _db.into(_db.toolModelCategories).insert(
+          ToolModelCategoriesCompanion.insert(
+              id: rowId,
+              toolModelId: modelId,
+              categoryId: catId,
+              updatedAt: Value(now)));
+      await _sync.enqueue(
+          table: 'tool_model_categories',
+          rowId: rowId,
+          op: 'upsert',
+          row: {
+            'id': rowId,
+            'tool_model_id': modelId,
+            'category_id': catId,
+            'updated_at': isoTs(now),
+            'deleted_at': null,
+          });
+    }
+  }
+
   // ═══════════ Atributos ═══════════
 
   /// Plantilla de la familia: qué atributos importan en este canónico.
@@ -625,6 +700,15 @@ final modelConsumablesProvider = StreamProvider.autoDispose
     .family<List<Consumable>, String>((ref, modelId) => ref
         .watch(catalogRepositoryProvider)
         .watchModelConsumables(modelId));
+
+final modelCategoryIdsProvider = StreamProvider.autoDispose
+    .family<Set<String>, String>((ref, modelId) => ref
+        .watch(catalogRepositoryProvider)
+        .watchModelCategoryIds(modelId));
+
+final allModelCategoriesProvider =
+    StreamProvider.autoDispose<Map<String, Set<String>>>((ref) =>
+        ref.watch(catalogRepositoryProvider).watchAllModelCategories());
 
 final canonicalAttrsProvider = StreamProvider.autoDispose
     .family<List<CanonicalAttribute>, String>((ref, code) => ref

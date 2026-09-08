@@ -4023,6 +4023,376 @@ class ToolModelAttributesCompanion extends UpdateCompanion<ToolModelAttribute> {
   }
 }
 
+class $ToolModelCategoriesTable extends ToolModelCategories
+    with TableInfo<$ToolModelCategoriesTable, ToolModelCategory> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ToolModelCategoriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _toolModelIdMeta = const VerificationMeta(
+    'toolModelId',
+  );
+  @override
+  late final GeneratedColumn<String> toolModelId = GeneratedColumn<String>(
+    'tool_model_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _categoryIdMeta = const VerificationMeta(
+    'categoryId',
+  );
+  @override
+  late final GeneratedColumn<String> categoryId = GeneratedColumn<String>(
+    'category_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    updatedAt,
+    deletedAt,
+    toolModelId,
+    categoryId,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'tool_model_categories';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ToolModelCategory> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('tool_model_id')) {
+      context.handle(
+        _toolModelIdMeta,
+        toolModelId.isAcceptableOrUnknown(
+          data['tool_model_id']!,
+          _toolModelIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_toolModelIdMeta);
+    }
+    if (data.containsKey('category_id')) {
+      context.handle(
+        _categoryIdMeta,
+        categoryId.isAcceptableOrUnknown(data['category_id']!, _categoryIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ToolModelCategory map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ToolModelCategory(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      toolModelId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tool_model_id'],
+      )!,
+      categoryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category_id'],
+      )!,
+    );
+  }
+
+  @override
+  $ToolModelCategoriesTable createAlias(String alias) {
+    return $ToolModelCategoriesTable(attachedDatabase, alias);
+  }
+}
+
+class ToolModelCategory extends DataClass
+    implements Insertable<ToolModelCategory> {
+  final String id;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final String toolModelId;
+  final String categoryId;
+  const ToolModelCategory({
+    required this.id,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.toolModelId,
+    required this.categoryId,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['tool_model_id'] = Variable<String>(toolModelId);
+    map['category_id'] = Variable<String>(categoryId);
+    return map;
+  }
+
+  ToolModelCategoriesCompanion toCompanion(bool nullToAbsent) {
+    return ToolModelCategoriesCompanion(
+      id: Value(id),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      toolModelId: Value(toolModelId),
+      categoryId: Value(categoryId),
+    );
+  }
+
+  factory ToolModelCategory.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ToolModelCategory(
+      id: serializer.fromJson<String>(json['id']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      toolModelId: serializer.fromJson<String>(json['toolModelId']),
+      categoryId: serializer.fromJson<String>(json['categoryId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'toolModelId': serializer.toJson<String>(toolModelId),
+      'categoryId': serializer.toJson<String>(categoryId),
+    };
+  }
+
+  ToolModelCategory copyWith({
+    String? id,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    String? toolModelId,
+    String? categoryId,
+  }) => ToolModelCategory(
+    id: id ?? this.id,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    toolModelId: toolModelId ?? this.toolModelId,
+    categoryId: categoryId ?? this.categoryId,
+  );
+  ToolModelCategory copyWithCompanion(ToolModelCategoriesCompanion data) {
+    return ToolModelCategory(
+      id: data.id.present ? data.id.value : this.id,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      toolModelId: data.toolModelId.present
+          ? data.toolModelId.value
+          : this.toolModelId,
+      categoryId: data.categoryId.present
+          ? data.categoryId.value
+          : this.categoryId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ToolModelCategory(')
+          ..write('id: $id, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('toolModelId: $toolModelId, ')
+          ..write('categoryId: $categoryId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, updatedAt, deletedAt, toolModelId, categoryId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ToolModelCategory &&
+          other.id == this.id &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.toolModelId == this.toolModelId &&
+          other.categoryId == this.categoryId);
+}
+
+class ToolModelCategoriesCompanion extends UpdateCompanion<ToolModelCategory> {
+  final Value<String> id;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String> toolModelId;
+  final Value<String> categoryId;
+  final Value<int> rowid;
+  const ToolModelCategoriesCompanion({
+    this.id = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.toolModelId = const Value.absent(),
+    this.categoryId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ToolModelCategoriesCompanion.insert({
+    required String id,
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    required String toolModelId,
+    required String categoryId,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       toolModelId = Value(toolModelId),
+       categoryId = Value(categoryId);
+  static Insertable<ToolModelCategory> custom({
+    Expression<String>? id,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? toolModelId,
+    Expression<String>? categoryId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (toolModelId != null) 'tool_model_id': toolModelId,
+      if (categoryId != null) 'category_id': categoryId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ToolModelCategoriesCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<String>? toolModelId,
+    Value<String>? categoryId,
+    Value<int>? rowid,
+  }) {
+    return ToolModelCategoriesCompanion(
+      id: id ?? this.id,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      toolModelId: toolModelId ?? this.toolModelId,
+      categoryId: categoryId ?? this.categoryId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (toolModelId.present) {
+      map['tool_model_id'] = Variable<String>(toolModelId.value);
+    }
+    if (categoryId.present) {
+      map['category_id'] = Variable<String>(categoryId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ToolModelCategoriesCompanion(')
+          ..write('id: $id, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('toolModelId: $toolModelId, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -7453,6 +7823,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $CanonicalAttributesTable(this);
   late final $ToolModelAttributesTable toolModelAttributes =
       $ToolModelAttributesTable(this);
+  late final $ToolModelCategoriesTable toolModelCategories =
+      $ToolModelCategoriesTable(this);
   late final $AssetsTable assets = $AssetsTable(this);
   late final $ConsumablesTable consumables = $ConsumablesTable(this);
   late final $ToolModelConsumablesTable toolModelConsumables =
@@ -7473,6 +7845,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     toolModels,
     canonicalAttributes,
     toolModelAttributes,
+    toolModelCategories,
     assets,
     consumables,
     toolModelConsumables,
@@ -9549,6 +9922,237 @@ typedef $$ToolModelAttributesTableProcessedTableManager =
       ToolModelAttribute,
       PrefetchHooks Function()
     >;
+typedef $$ToolModelCategoriesTableCreateCompanionBuilder =
+    ToolModelCategoriesCompanion Function({
+      required String id,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      required String toolModelId,
+      required String categoryId,
+      Value<int> rowid,
+    });
+typedef $$ToolModelCategoriesTableUpdateCompanionBuilder =
+    ToolModelCategoriesCompanion Function({
+      Value<String> id,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<String> toolModelId,
+      Value<String> categoryId,
+      Value<int> rowid,
+    });
+
+class $$ToolModelCategoriesTableFilterComposer
+    extends Composer<_$AppDatabase, $ToolModelCategoriesTable> {
+  $$ToolModelCategoriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get toolModelId => $composableBuilder(
+    column: $table.toolModelId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ToolModelCategoriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $ToolModelCategoriesTable> {
+  $$ToolModelCategoriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get toolModelId => $composableBuilder(
+    column: $table.toolModelId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ToolModelCategoriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ToolModelCategoriesTable> {
+  $$ToolModelCategoriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get toolModelId => $composableBuilder(
+    column: $table.toolModelId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => column,
+  );
+}
+
+class $$ToolModelCategoriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ToolModelCategoriesTable,
+          ToolModelCategory,
+          $$ToolModelCategoriesTableFilterComposer,
+          $$ToolModelCategoriesTableOrderingComposer,
+          $$ToolModelCategoriesTableAnnotationComposer,
+          $$ToolModelCategoriesTableCreateCompanionBuilder,
+          $$ToolModelCategoriesTableUpdateCompanionBuilder,
+          (
+            ToolModelCategory,
+            BaseReferences<
+              _$AppDatabase,
+              $ToolModelCategoriesTable,
+              ToolModelCategory
+            >,
+          ),
+          ToolModelCategory,
+          PrefetchHooks Function()
+        > {
+  $$ToolModelCategoriesTableTableManager(
+    _$AppDatabase db,
+    $ToolModelCategoriesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ToolModelCategoriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ToolModelCategoriesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ToolModelCategoriesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> toolModelId = const Value.absent(),
+                Value<String> categoryId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ToolModelCategoriesCompanion(
+                id: id,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                toolModelId: toolModelId,
+                categoryId: categoryId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required String toolModelId,
+                required String categoryId,
+                Value<int> rowid = const Value.absent(),
+              }) => ToolModelCategoriesCompanion.insert(
+                id: id,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                toolModelId: toolModelId,
+                categoryId: categoryId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ToolModelCategoriesTable, ToolModelCategory>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $ToolModelCategoriesTable,
+                    ToolModelCategory
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ToolModelCategoriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ToolModelCategoriesTable,
+      ToolModelCategory,
+      $$ToolModelCategoriesTableFilterComposer,
+      $$ToolModelCategoriesTableOrderingComposer,
+      $$ToolModelCategoriesTableAnnotationComposer,
+      $$ToolModelCategoriesTableCreateCompanionBuilder,
+      $$ToolModelCategoriesTableUpdateCompanionBuilder,
+      (
+        ToolModelCategory,
+        BaseReferences<
+          _$AppDatabase,
+          $ToolModelCategoriesTable,
+          ToolModelCategory
+        >,
+      ),
+      ToolModelCategory,
+      PrefetchHooks Function()
+    >;
 typedef $$AssetsTableCreateCompanionBuilder =
     AssetsCompanion Function({
       required String id,
@@ -11343,6 +11947,8 @@ class $AppDatabaseManager {
       $$CanonicalAttributesTableTableManager(_db, _db.canonicalAttributes);
   $$ToolModelAttributesTableTableManager get toolModelAttributes =>
       $$ToolModelAttributesTableTableManager(_db, _db.toolModelAttributes);
+  $$ToolModelCategoriesTableTableManager get toolModelCategories =>
+      $$ToolModelCategoriesTableTableManager(_db, _db.toolModelCategories);
   $$AssetsTableTableManager get assets =>
       $$AssetsTableTableManager(_db, _db.assets);
   $$ConsumablesTableTableManager get consumables =>
