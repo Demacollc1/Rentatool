@@ -2,6 +2,7 @@ import 'package:drift/drift.dart' hide Column, Table;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -11,6 +12,7 @@ import '../../data/local/database.dart';
 import '../../data/repositories/catalog_repository.dart';
 import '../../data/sync/sync_service.dart';
 import '../../data/repositories/rental_repository.dart';
+import 'closure_pdf.dart';
 import 'contract_pdf.dart';
 import 'customer_picker.dart';
 import 'rentals_screen.dart' show statusLabel;
@@ -42,6 +44,12 @@ class ContractDetailScreen extends ConsumerWidget {
           appBar: AppBar(
             title: Text(c.contractNumber),
             actions: [
+              if (c.status == 'closed')
+                IconButton(
+                  icon: const Icon(Icons.task_outlined),
+                  tooltip: 'Comprobante de cierre',
+                  onPressed: () => _shareClosure(context, ref),
+                ),
               IconButton(
                 icon: const Icon(Icons.picture_as_pdf_outlined),
                 tooltip: 'Contrato PDF',
@@ -122,8 +130,31 @@ class ContractDetailScreen extends ConsumerWidget {
                     if (c.deposit > 0)
                       ListTile(
                         dense: true,
-                        title: const Text('Garantía recibida'),
+                        title: Text(c.depositReleasedAt == null
+                            ? 'Garantía recibida'
+                            : 'Garantía liberada '
+                                '${DateFormat('dd/MM').format(c.depositReleasedAt!)}'
+                                '${c.depositRetained > 0 ? ' · retenida ${money.format(c.depositRetained)}' : ''}'),
+                        subtitle: c.depositNotes == null
+                            ? null
+                            : Text(c.depositNotes!,
+                                style:
+                                    const TextStyle(fontSize: 11)),
                         trailing: Text(money.format(c.deposit)),
+                      ),
+                    if (c.status == 'closed' &&
+                        c.deposit > 0 &&
+                        c.depositReleasedAt == null)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 4),
+                        child: FilledButton.tonalIcon(
+                          onPressed: () =>
+                              _releaseDeposit(context, ref, c),
+                          icon: const Icon(Icons.savings),
+                          label: const Text(
+                              'Liberar garantía y cerrar'),
+                        ),
                       ),
                   ]);
                 },
@@ -191,6 +222,64 @@ class ContractDetailScreen extends ConsumerWidget {
       return;
     }
     await SharePlus.instance.share(ShareParams(files: [XFile(path)]));
+  }
+
+  Future<void> _shareClosure(BuildContext context, WidgetRef ref) async {
+    final path = await buildClosurePdf(ref, contractId);
+    if (path == null) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('No se pudo generar el comprobante')));
+      }
+      return;
+    }
+    await SharePlus.instance.share(ShareParams(files: [XFile(path)]));
+  }
+
+  Future<void> _releaseDeposit(
+      BuildContext context, WidgetRef ref, RentalContract c) async {
+    final retained = TextEditingController();
+    final notes = TextEditingController();
+    final money = NumberFormat.currency(symbol: r'$');
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Liberar garantía'),
+        content: Column(mainAxisSize: MainAxisSize.min, children: [
+          Text('Garantía recibida: ${money.format(c.deposit)}'),
+          TextField(
+              controller: retained,
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(
+                  labelText: 'Monto retenido (0 si se devuelve todo)')),
+          TextField(
+              controller: notes,
+              decoration: const InputDecoration(
+                  labelText: 'Motivo de la retención')),
+        ]),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancelar')),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Liberar')),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    final err = await ref.read(rentalRepositoryProvider).releaseDeposit(
+        contractId,
+        retained: double.tryParse(
+                retained.text.replaceAll(',', '.').trim()) ??
+            0,
+        notes: notes.text.trim().isEmpty ? null : notes.text.trim());
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(err ??
+              'Garantía liberada ✔ — genera el comprobante de cierre')));
+    }
   }
 }
 
@@ -672,6 +761,10 @@ class _LineTile extends ConsumerWidget {
                               fontSize: 11, color: Colors.green)),
                   ]),
             ),
+            _PhotoButton(
+                contractId: contract.id,
+                line: l,
+                enabled: draft || contract.status == 'active'),
             if (draft)
               IconButton(
                   icon: const Icon(Icons.close, size: 18),
@@ -816,6 +909,68 @@ class _LineTile extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text('Unidad recibida ✔ (kardex registrado)')));
       }
+    }
+  }
+}
+
+/// Botón de evidencias: toma foto del estado al entregar/recibir y
+/// muestra cuántas hay.
+class _PhotoButton extends ConsumerWidget {
+  const _PhotoButton(
+      {required this.contractId,
+      required this.line,
+      required this.enabled});
+
+  final String contractId;
+  final RentalLine line;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final photos = ref.watch(linePhotosProvider(line.id)).value ?? [];
+    return Stack(alignment: Alignment.topRight, children: [
+      PopupMenuButton<String>(
+        enabled: enabled,
+        icon: Icon(Icons.photo_camera_outlined,
+            size: 20,
+            color: photos.isEmpty ? null : Colors.green),
+        tooltip: 'Fotos de evidencia',
+        onSelected: (kind) => _takePhoto(context, ref, kind),
+        itemBuilder: (_) => const [
+          PopupMenuItem(
+              value: 'delivery',
+              child: Text('Foto al ENTREGAR')),
+          PopupMenuItem(
+              value: 'return', child: Text('Foto al RECIBIR')),
+        ],
+      ),
+      if (photos.isNotEmpty)
+        Container(
+          padding: const EdgeInsets.all(3),
+          decoration: const BoxDecoration(
+              color: Colors.green, shape: BoxShape.circle),
+          child: Text('${photos.length}',
+              style: const TextStyle(
+                  fontSize: 9, color: Colors.white)),
+        ),
+    ]);
+  }
+
+  Future<void> _takePhoto(
+      BuildContext context, WidgetRef ref, String kind) async {
+    final picked = await ImagePicker().pickImage(
+        source: ImageSource.camera, maxWidth: 1600, imageQuality: 80);
+    if (picked == null) return;
+    await ref.read(rentalRepositoryProvider).addLinePhoto(
+        contractId: contractId,
+        lineId: line.id,
+        kind: kind,
+        pickedPath: picked.path);
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(kind == 'delivery'
+              ? 'Evidencia de entrega guardada ✔ (sube en el sync)'
+              : 'Evidencia de recepción guardada ✔ (sube en el sync)')));
     }
   }
 }

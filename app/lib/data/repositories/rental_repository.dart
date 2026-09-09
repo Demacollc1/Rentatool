@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path/path.dart' as pth;
+import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
 import '../local/database.dart';
@@ -604,6 +608,85 @@ class RentalRepository {
     return null;
   }
 
+  // ---------------- evidencias fotográficas ----------------
+
+  Stream<List<RentalLinePhoto>> watchLinePhotos(String lineId) =>
+      (_db.select(_db.rentalLinePhotos)
+            ..where((p) =>
+                p.lineId.equals(lineId) & p.deletedAt.isNull())
+            ..orderBy([(p) => OrderingTerm.asc(p.updatedAt)]))
+          .watch();
+
+  /// Registra una foto de evidencia (entrega o devolución): copia el
+  /// archivo a documentos y deja la subida para el próximo sync.
+  Future<void> addLinePhoto({
+    required String contractId,
+    required String lineId,
+    required String kind, // delivery | return
+    required String pickedPath,
+  }) async {
+    final rowId = const Uuid().v4();
+    final dir = await getApplicationDocumentsDirectory();
+    final outDir =
+        Directory(pth.join(dir.path, 'evidencias', contractId));
+    await outDir.create(recursive: true);
+    final localPath = pth.join(outDir.path, '$rowId.jpg');
+    await File(pickedPath).copy(localPath);
+    final remotePath = 'contratos/$contractId/evidencias/$rowId.jpg';
+    final now = DateTime.now();
+    await _db.into(_db.rentalLinePhotos).insert(
+          RentalLinePhotosCompanion.insert(
+            id: rowId,
+            lineId: lineId,
+            kind: kind,
+            photoPath: Value(remotePath),
+            localPath: Value(localPath),
+            updatedAt: Value(now),
+          ),
+        );
+    await _sync.enqueue(
+        table: 'rental_line_photos',
+        rowId: rowId,
+        op: 'upsert',
+        row: {
+          'id': rowId,
+          'line_id': lineId,
+          'kind': kind,
+          'photo_path': remotePath,
+          'updated_at': isoTs(now),
+          'deleted_at': null,
+        });
+  }
+
+  // ---------------- garantía ----------------
+
+  /// Libera la garantía al cierre (retención parcial/total opcional).
+  Future<String?> releaseDeposit(String contractId,
+      {double retained = 0, String? notes}) async {
+    final c = await getContract(contractId);
+    if (c == null) return 'Contrato no encontrado';
+    if (c.status != 'closed') {
+      return 'La garantía se libera al cerrar el contrato';
+    }
+    if (c.depositReleasedAt != null) {
+      return 'La garantía ya fue liberada';
+    }
+    if (retained < 0 || retained > c.deposit) {
+      return 'La retención debe estar entre 0 y la garantía recibida';
+    }
+    final now = DateTime.now();
+    await (_db.update(_db.rentalContracts)
+          ..where((x) => x.id.equals(contractId)))
+        .write(RentalContractsCompanion(
+      depositReleasedAt: Value(now),
+      depositRetained: Value(retained),
+      depositNotes: notes == null ? const Value.absent() : Value(notes),
+      updatedAt: Value(now),
+    ));
+    await _enqueueContract(contractId);
+    return null;
+  }
+
   // ---------------- sync ----------------
 
   Future<void> _enqueueContract(String id) async {
@@ -624,6 +707,9 @@ class RentalRepository {
       'site_id': c.siteId,
       'contact_id': c.contactId,
       'delivery_fee': c.deliveryFee,
+      'deposit_released_at': isoTsN(c.depositReleasedAt),
+      'deposit_retained': c.depositRetained,
+      'deposit_notes': c.depositNotes,
       // Solo si lo conocemos: si el server ya generó uno (contratos
       // viejos) no hay que pisarlo con null.
       if (c.acceptanceToken != null)
@@ -717,6 +803,10 @@ final siteContactProvider =
   return (db.select(db.siteContacts)..where((c) => c.id.equals(id)))
       .watchSingleOrNull();
 });
+
+final linePhotosProvider = StreamProvider.autoDispose
+    .family<List<RentalLinePhoto>, String>((ref, lineId) =>
+        ref.watch(rentalRepositoryProvider).watchLinePhotos(lineId));
 
 /// Aceptación documental del contrato (llega por pull tras firmar).
 final acceptanceProvider = StreamProvider.autoDispose

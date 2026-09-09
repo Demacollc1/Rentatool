@@ -267,8 +267,28 @@ class RentalContracts extends Table with SyncColumns {
 
   /// Secreto del link público del portal de aceptación (F2b).
   TextColumn get acceptanceToken => text().nullable()();
+
+  /// Ciclo de la garantía: se libera (o retiene) al cierre.
+  DateTimeColumn get depositReleasedAt => dateTime().nullable()();
+  RealColumn get depositRetained =>
+      real().withDefault(const Constant(0))();
+  TextColumn get depositNotes => text().nullable()();
   TextColumn get notes => text().nullable()();
   TextColumn get createdBy => text().nullable()();
+}
+
+/// Foto de evidencia del estado del equipo al entregar o recibir.
+/// localPath/uploadedAt son solo locales (patrón de íconos): el
+/// archivo sube al bucket docs en el próximo sync.
+class RentalLinePhotos extends Table with SyncColumns {
+  TextColumn get lineId => text()();
+
+  /// delivery = al entregar · return = al recibir.
+  TextColumn get kind => text()();
+  TextColumn get photoPath => text().nullable()(); // ruta remota (docs)
+  TextColumn get localPath => text().nullable()();
+  DateTimeColumn get uploadedAt => dateTime().nullable()();
+  TextColumn get notes => text().nullable()();
 }
 
 /// Aceptación documental del cliente (la escribe SOLO la Edge Function
@@ -342,6 +362,7 @@ class SyncState extends Table {
   SiteContacts,
   RentalContracts,
   RentalLines,
+  RentalLinePhotos,
   ContractAcceptances,
   SyncQueue,
   SyncState,
@@ -351,7 +372,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 14; // v13 responsables · v14 fichas completas
+  int get schemaVersion => 15; // v14 fichas · v15 evidencias y garantía
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -398,6 +419,14 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from >= 9 && from < 13) {
             await m.addColumn(rentalContracts, rentalContracts.contactId);
+          }
+          if (from >= 9 && from < 15) {
+            await m.addColumn(
+                rentalContracts, rentalContracts.depositReleasedAt);
+            await m.addColumn(
+                rentalContracts, rentalContracts.depositRetained);
+            await m.addColumn(
+                rentalContracts, rentalContracts.depositNotes);
           }
           if (from >= 9 && from < 14) {
             await m.addColumn(customers, customers.tradeName);

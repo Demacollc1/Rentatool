@@ -441,6 +441,32 @@ BOSCH GWS14-125
       expect(sites.single.name, 'Edificio Norte');
     });
 
+    test('garantía: se libera al cierre con retención opcional',
+        () async {
+      final (contractId, assetId) = await armaContrato();
+      await rentals.updateContract(contractId, deposit: 100);
+      await rentals.addLine(contractId, assetId);
+      // Antes de cerrar no se puede liberar.
+      expect(await rentals.releaseDeposit(contractId),
+          contains('al cerrar'));
+      await rentals.deliver(contractId);
+      final lines = await rentals.watchLines(contractId).first;
+      await rentals.returnLine(lines.single.line.id);
+      // Retención mayor a la garantía es inválida.
+      expect(await rentals.releaseDeposit(contractId, retained: 150),
+          contains('entre 0'));
+      expect(
+          await rentals.releaseDeposit(contractId,
+              retained: 25, notes: 'disco dañado'),
+          isNull);
+      final c = await rentals.getContract(contractId);
+      expect(c!.depositReleasedAt, isNotNull);
+      expect(c.depositRetained, 25);
+      // No se libera dos veces.
+      expect(await rentals.releaseDeposit(contractId),
+          contains('ya fue liberada'));
+    });
+
     test('entregar sin líneas o dos veces falla con motivo', () async {
       final (contractId, assetId) = await armaContrato();
       expect(await rentals.deliver(contractId),

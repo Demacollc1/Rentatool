@@ -133,6 +133,7 @@ class SyncService {
 
   Future<(int, String?)> _push(String org) async {
     await _uploadPendingCanonicalIcons(org);
+    await _uploadPendingLinePhotos();
     final entries = await (_db.select(_db.syncQueue)
           ..orderBy([(q) => OrderingTerm.asc(q.seq)]))
         .get();
@@ -190,6 +191,31 @@ class SyncService {
           .write(CanonicalsCompanion(
         iconPath: Value(remotePath),
         iconUploadedAt: Value(DateTime.now()),
+      ));
+    }
+  }
+
+  /// Sube las fotos de evidencia pendientes al bucket docs (la fila
+  /// ya viaja por la cola con su photo_path definitivo).
+  Future<void> _uploadPendingLinePhotos() async {
+    final pending = await (_db.select(_db.rentalLinePhotos)
+          ..where((p) =>
+              p.uploadedAt.isNull() &
+              p.localPath.isNotNull() &
+              p.photoPath.isNotNull()))
+        .get();
+    for (final p in pending) {
+      final file = File(p.localPath!);
+      if (!file.existsSync()) continue;
+      await _remote.storage.from('docs').upload(
+            p.photoPath!,
+            file,
+            fileOptions: const FileOptions(upsert: true),
+          );
+      await (_db.update(_db.rentalLinePhotos)
+            ..where((x) => x.id.equals(p.id)))
+          .write(RentalLinePhotosCompanion(
+        uploadedAt: Value(DateTime.now()),
       ));
     }
   }

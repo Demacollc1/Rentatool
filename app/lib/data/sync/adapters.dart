@@ -435,8 +435,37 @@ List<TableSyncAdapter> buildSyncAdapters() => [
                   deliveryFee: Value(_d(r['delivery_fee'])),
                   acceptanceToken:
                       Value(r['acceptance_token'] as String?),
+                  depositReleasedAt:
+                      Value(tsN(r['deposit_released_at'])),
+                  depositRetained: Value(_d(r['deposit_retained'])),
+                  depositNotes: Value(r['deposit_notes'] as String?),
                   notes: Value(r['notes'] as String?),
                   createdBy: Value(r['created_by'] as String?),
+                  updatedAt: Value(remoteUpdated),
+                  deletedAt: Value(tsN(r['deleted_at'])),
+                ),
+              );
+          return true;
+        },
+      ),
+      TableSyncAdapter(
+        remoteTable: 'rental_line_photos',
+        mergeRemote: (db, r) async {
+          final local = await (db.select(db.rentalLinePhotos)
+                ..where((x) => x.id.equals(r['id'] as String)))
+              .getSingleOrNull();
+          final remoteUpdated = ts(r['updated_at']);
+          if (!newer(local?.updatedAt, remoteUpdated)) return false;
+          await db.into(db.rentalLinePhotos).insertOnConflictUpdate(
+                RentalLinePhotosCompanion(
+                  id: Value(r['id'] as String),
+                  lineId: Value(r['line_id'] as String),
+                  kind: Value(r['kind'] as String),
+                  photoPath: Value(r['photo_path'] as String?),
+                  // localPath/uploadedAt se conservan si existen.
+                  localPath: Value(local?.localPath),
+                  uploadedAt: Value(local?.uploadedAt),
+                  notes: Value(r['notes'] as String?),
                   updatedAt: Value(remoteUpdated),
                   deletedAt: Value(tsN(r['deleted_at'])),
                 ),

@@ -9932,6 +9932,41 @@ class $RentalContractsTable extends RentalContracts
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _depositReleasedAtMeta = const VerificationMeta(
+    'depositReleasedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> depositReleasedAt =
+      GeneratedColumn<DateTime>(
+        'deposit_released_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _depositRetainedMeta = const VerificationMeta(
+    'depositRetained',
+  );
+  @override
+  late final GeneratedColumn<double> depositRetained = GeneratedColumn<double>(
+    'deposit_retained',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _depositNotesMeta = const VerificationMeta(
+    'depositNotes',
+  );
+  @override
+  late final GeneratedColumn<String> depositNotes = GeneratedColumn<String>(
+    'deposit_notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _notesMeta = const VerificationMeta('notes');
   @override
   late final GeneratedColumn<String> notes = GeneratedColumn<String>(
@@ -9970,6 +10005,9 @@ class $RentalContractsTable extends RentalContracts
     contactId,
     deliveryFee,
     acceptanceToken,
+    depositReleasedAt,
+    depositRetained,
+    depositNotes,
     notes,
     createdBy,
   ];
@@ -10096,6 +10134,33 @@ class $RentalContractsTable extends RentalContracts
         ),
       );
     }
+    if (data.containsKey('deposit_released_at')) {
+      context.handle(
+        _depositReleasedAtMeta,
+        depositReleasedAt.isAcceptableOrUnknown(
+          data['deposit_released_at']!,
+          _depositReleasedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('deposit_retained')) {
+      context.handle(
+        _depositRetainedMeta,
+        depositRetained.isAcceptableOrUnknown(
+          data['deposit_retained']!,
+          _depositRetainedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('deposit_notes')) {
+      context.handle(
+        _depositNotesMeta,
+        depositNotes.isAcceptableOrUnknown(
+          data['deposit_notes']!,
+          _depositNotesMeta,
+        ),
+      );
+    }
     if (data.containsKey('notes')) {
       context.handle(
         _notesMeta,
@@ -10181,6 +10246,18 @@ class $RentalContractsTable extends RentalContracts
         DriftSqlType.string,
         data['${effectivePrefix}acceptance_token'],
       ),
+      depositReleasedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deposit_released_at'],
+      ),
+      depositRetained: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}deposit_retained'],
+      )!,
+      depositNotes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}deposit_notes'],
+      ),
       notes: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}notes'],
@@ -10231,6 +10308,11 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
 
   /// Secreto del link público del portal de aceptación (F2b).
   final String? acceptanceToken;
+
+  /// Ciclo de la garantía: se libera (o retiene) al cierre.
+  final DateTime? depositReleasedAt;
+  final double depositRetained;
+  final String? depositNotes;
   final String? notes;
   final String? createdBy;
   const RentalContract({
@@ -10250,6 +10332,9 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
     this.contactId,
     required this.deliveryFee,
     this.acceptanceToken,
+    this.depositReleasedAt,
+    required this.depositRetained,
+    this.depositNotes,
     this.notes,
     this.createdBy,
   });
@@ -10287,6 +10372,13 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
     map['delivery_fee'] = Variable<double>(deliveryFee);
     if (!nullToAbsent || acceptanceToken != null) {
       map['acceptance_token'] = Variable<String>(acceptanceToken);
+    }
+    if (!nullToAbsent || depositReleasedAt != null) {
+      map['deposit_released_at'] = Variable<DateTime>(depositReleasedAt);
+    }
+    map['deposit_retained'] = Variable<double>(depositRetained);
+    if (!nullToAbsent || depositNotes != null) {
+      map['deposit_notes'] = Variable<String>(depositNotes);
     }
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
@@ -10331,6 +10423,13 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
       acceptanceToken: acceptanceToken == null && nullToAbsent
           ? const Value.absent()
           : Value(acceptanceToken),
+      depositReleasedAt: depositReleasedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(depositReleasedAt),
+      depositRetained: Value(depositRetained),
+      depositNotes: depositNotes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(depositNotes),
       notes: notes == null && nullToAbsent
           ? const Value.absent()
           : Value(notes),
@@ -10362,6 +10461,11 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
       contactId: serializer.fromJson<String?>(json['contactId']),
       deliveryFee: serializer.fromJson<double>(json['deliveryFee']),
       acceptanceToken: serializer.fromJson<String?>(json['acceptanceToken']),
+      depositReleasedAt: serializer.fromJson<DateTime?>(
+        json['depositReleasedAt'],
+      ),
+      depositRetained: serializer.fromJson<double>(json['depositRetained']),
+      depositNotes: serializer.fromJson<String?>(json['depositNotes']),
       notes: serializer.fromJson<String?>(json['notes']),
       createdBy: serializer.fromJson<String?>(json['createdBy']),
     );
@@ -10386,6 +10490,9 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
       'contactId': serializer.toJson<String?>(contactId),
       'deliveryFee': serializer.toJson<double>(deliveryFee),
       'acceptanceToken': serializer.toJson<String?>(acceptanceToken),
+      'depositReleasedAt': serializer.toJson<DateTime?>(depositReleasedAt),
+      'depositRetained': serializer.toJson<double>(depositRetained),
+      'depositNotes': serializer.toJson<String?>(depositNotes),
       'notes': serializer.toJson<String?>(notes),
       'createdBy': serializer.toJson<String?>(createdBy),
     };
@@ -10408,6 +10515,9 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
     Value<String?> contactId = const Value.absent(),
     double? deliveryFee,
     Value<String?> acceptanceToken = const Value.absent(),
+    Value<DateTime?> depositReleasedAt = const Value.absent(),
+    double? depositRetained,
+    Value<String?> depositNotes = const Value.absent(),
     Value<String?> notes = const Value.absent(),
     Value<String?> createdBy = const Value.absent(),
   }) => RentalContract(
@@ -10429,6 +10539,11 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
     acceptanceToken: acceptanceToken.present
         ? acceptanceToken.value
         : this.acceptanceToken,
+    depositReleasedAt: depositReleasedAt.present
+        ? depositReleasedAt.value
+        : this.depositReleasedAt,
+    depositRetained: depositRetained ?? this.depositRetained,
+    depositNotes: depositNotes.present ? depositNotes.value : this.depositNotes,
     notes: notes.present ? notes.value : this.notes,
     createdBy: createdBy.present ? createdBy.value : this.createdBy,
   );
@@ -10462,6 +10577,15 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
       acceptanceToken: data.acceptanceToken.present
           ? data.acceptanceToken.value
           : this.acceptanceToken,
+      depositReleasedAt: data.depositReleasedAt.present
+          ? data.depositReleasedAt.value
+          : this.depositReleasedAt,
+      depositRetained: data.depositRetained.present
+          ? data.depositRetained.value
+          : this.depositRetained,
+      depositNotes: data.depositNotes.present
+          ? data.depositNotes.value
+          : this.depositNotes,
       notes: data.notes.present ? data.notes.value : this.notes,
       createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
     );
@@ -10486,6 +10610,9 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
           ..write('contactId: $contactId, ')
           ..write('deliveryFee: $deliveryFee, ')
           ..write('acceptanceToken: $acceptanceToken, ')
+          ..write('depositReleasedAt: $depositReleasedAt, ')
+          ..write('depositRetained: $depositRetained, ')
+          ..write('depositNotes: $depositNotes, ')
           ..write('notes: $notes, ')
           ..write('createdBy: $createdBy')
           ..write(')'))
@@ -10493,7 +10620,7 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     updatedAt,
     deletedAt,
@@ -10510,9 +10637,12 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
     contactId,
     deliveryFee,
     acceptanceToken,
+    depositReleasedAt,
+    depositRetained,
+    depositNotes,
     notes,
     createdBy,
-  );
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -10533,6 +10663,9 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
           other.contactId == this.contactId &&
           other.deliveryFee == this.deliveryFee &&
           other.acceptanceToken == this.acceptanceToken &&
+          other.depositReleasedAt == this.depositReleasedAt &&
+          other.depositRetained == this.depositRetained &&
+          other.depositNotes == this.depositNotes &&
           other.notes == this.notes &&
           other.createdBy == this.createdBy);
 }
@@ -10554,6 +10687,9 @@ class RentalContractsCompanion extends UpdateCompanion<RentalContract> {
   final Value<String?> contactId;
   final Value<double> deliveryFee;
   final Value<String?> acceptanceToken;
+  final Value<DateTime?> depositReleasedAt;
+  final Value<double> depositRetained;
+  final Value<String?> depositNotes;
   final Value<String?> notes;
   final Value<String?> createdBy;
   final Value<int> rowid;
@@ -10574,6 +10710,9 @@ class RentalContractsCompanion extends UpdateCompanion<RentalContract> {
     this.contactId = const Value.absent(),
     this.deliveryFee = const Value.absent(),
     this.acceptanceToken = const Value.absent(),
+    this.depositReleasedAt = const Value.absent(),
+    this.depositRetained = const Value.absent(),
+    this.depositNotes = const Value.absent(),
     this.notes = const Value.absent(),
     this.createdBy = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -10595,6 +10734,9 @@ class RentalContractsCompanion extends UpdateCompanion<RentalContract> {
     this.contactId = const Value.absent(),
     this.deliveryFee = const Value.absent(),
     this.acceptanceToken = const Value.absent(),
+    this.depositReleasedAt = const Value.absent(),
+    this.depositRetained = const Value.absent(),
+    this.depositNotes = const Value.absent(),
     this.notes = const Value.absent(),
     this.createdBy = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -10618,6 +10760,9 @@ class RentalContractsCompanion extends UpdateCompanion<RentalContract> {
     Expression<String>? contactId,
     Expression<double>? deliveryFee,
     Expression<String>? acceptanceToken,
+    Expression<DateTime>? depositReleasedAt,
+    Expression<double>? depositRetained,
+    Expression<String>? depositNotes,
     Expression<String>? notes,
     Expression<String>? createdBy,
     Expression<int>? rowid,
@@ -10639,6 +10784,9 @@ class RentalContractsCompanion extends UpdateCompanion<RentalContract> {
       if (contactId != null) 'contact_id': contactId,
       if (deliveryFee != null) 'delivery_fee': deliveryFee,
       if (acceptanceToken != null) 'acceptance_token': acceptanceToken,
+      if (depositReleasedAt != null) 'deposit_released_at': depositReleasedAt,
+      if (depositRetained != null) 'deposit_retained': depositRetained,
+      if (depositNotes != null) 'deposit_notes': depositNotes,
       if (notes != null) 'notes': notes,
       if (createdBy != null) 'created_by': createdBy,
       if (rowid != null) 'rowid': rowid,
@@ -10662,6 +10810,9 @@ class RentalContractsCompanion extends UpdateCompanion<RentalContract> {
     Value<String?>? contactId,
     Value<double>? deliveryFee,
     Value<String?>? acceptanceToken,
+    Value<DateTime?>? depositReleasedAt,
+    Value<double>? depositRetained,
+    Value<String?>? depositNotes,
     Value<String?>? notes,
     Value<String?>? createdBy,
     Value<int>? rowid,
@@ -10683,6 +10834,9 @@ class RentalContractsCompanion extends UpdateCompanion<RentalContract> {
       contactId: contactId ?? this.contactId,
       deliveryFee: deliveryFee ?? this.deliveryFee,
       acceptanceToken: acceptanceToken ?? this.acceptanceToken,
+      depositReleasedAt: depositReleasedAt ?? this.depositReleasedAt,
+      depositRetained: depositRetained ?? this.depositRetained,
+      depositNotes: depositNotes ?? this.depositNotes,
       notes: notes ?? this.notes,
       createdBy: createdBy ?? this.createdBy,
       rowid: rowid ?? this.rowid,
@@ -10740,6 +10894,15 @@ class RentalContractsCompanion extends UpdateCompanion<RentalContract> {
     if (acceptanceToken.present) {
       map['acceptance_token'] = Variable<String>(acceptanceToken.value);
     }
+    if (depositReleasedAt.present) {
+      map['deposit_released_at'] = Variable<DateTime>(depositReleasedAt.value);
+    }
+    if (depositRetained.present) {
+      map['deposit_retained'] = Variable<double>(depositRetained.value);
+    }
+    if (depositNotes.present) {
+      map['deposit_notes'] = Variable<String>(depositNotes.value);
+    }
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
     }
@@ -10771,6 +10934,9 @@ class RentalContractsCompanion extends UpdateCompanion<RentalContract> {
           ..write('contactId: $contactId, ')
           ..write('deliveryFee: $deliveryFee, ')
           ..write('acceptanceToken: $acceptanceToken, ')
+          ..write('depositReleasedAt: $depositReleasedAt, ')
+          ..write('depositRetained: $depositRetained, ')
+          ..write('depositNotes: $depositNotes, ')
           ..write('notes: $notes, ')
           ..write('createdBy: $createdBy, ')
           ..write('rowid: $rowid')
@@ -11636,6 +11802,567 @@ class RentalLinesCompanion extends UpdateCompanion<RentalLine> {
           ..write('returnedAt: $returnedAt, ')
           ..write('conditionOut: $conditionOut, ')
           ..write('conditionIn: $conditionIn, ')
+          ..write('notes: $notes, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $RentalLinePhotosTable extends RentalLinePhotos
+    with TableInfo<$RentalLinePhotosTable, RentalLinePhoto> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RentalLinePhotosTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lineIdMeta = const VerificationMeta('lineId');
+  @override
+  late final GeneratedColumn<String> lineId = GeneratedColumn<String>(
+    'line_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _photoPathMeta = const VerificationMeta(
+    'photoPath',
+  );
+  @override
+  late final GeneratedColumn<String> photoPath = GeneratedColumn<String>(
+    'photo_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _localPathMeta = const VerificationMeta(
+    'localPath',
+  );
+  @override
+  late final GeneratedColumn<String> localPath = GeneratedColumn<String>(
+    'local_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _uploadedAtMeta = const VerificationMeta(
+    'uploadedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> uploadedAt = GeneratedColumn<DateTime>(
+    'uploaded_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    updatedAt,
+    deletedAt,
+    lineId,
+    kind,
+    photoPath,
+    localPath,
+    uploadedAt,
+    notes,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'rental_line_photos';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<RentalLinePhoto> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('line_id')) {
+      context.handle(
+        _lineIdMeta,
+        lineId.isAcceptableOrUnknown(data['line_id']!, _lineIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_lineIdMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('photo_path')) {
+      context.handle(
+        _photoPathMeta,
+        photoPath.isAcceptableOrUnknown(data['photo_path']!, _photoPathMeta),
+      );
+    }
+    if (data.containsKey('local_path')) {
+      context.handle(
+        _localPathMeta,
+        localPath.isAcceptableOrUnknown(data['local_path']!, _localPathMeta),
+      );
+    }
+    if (data.containsKey('uploaded_at')) {
+      context.handle(
+        _uploadedAtMeta,
+        uploadedAt.isAcceptableOrUnknown(data['uploaded_at']!, _uploadedAtMeta),
+      );
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  RentalLinePhoto map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RentalLinePhoto(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      lineId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}line_id'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      photoPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}photo_path'],
+      ),
+      localPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}local_path'],
+      ),
+      uploadedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}uploaded_at'],
+      ),
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
+    );
+  }
+
+  @override
+  $RentalLinePhotosTable createAlias(String alias) {
+    return $RentalLinePhotosTable(attachedDatabase, alias);
+  }
+}
+
+class RentalLinePhoto extends DataClass implements Insertable<RentalLinePhoto> {
+  final String id;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final String lineId;
+
+  /// delivery = al entregar · return = al recibir.
+  final String kind;
+  final String? photoPath;
+  final String? localPath;
+  final DateTime? uploadedAt;
+  final String? notes;
+  const RentalLinePhoto({
+    required this.id,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.lineId,
+    required this.kind,
+    this.photoPath,
+    this.localPath,
+    this.uploadedAt,
+    this.notes,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['line_id'] = Variable<String>(lineId);
+    map['kind'] = Variable<String>(kind);
+    if (!nullToAbsent || photoPath != null) {
+      map['photo_path'] = Variable<String>(photoPath);
+    }
+    if (!nullToAbsent || localPath != null) {
+      map['local_path'] = Variable<String>(localPath);
+    }
+    if (!nullToAbsent || uploadedAt != null) {
+      map['uploaded_at'] = Variable<DateTime>(uploadedAt);
+    }
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    return map;
+  }
+
+  RentalLinePhotosCompanion toCompanion(bool nullToAbsent) {
+    return RentalLinePhotosCompanion(
+      id: Value(id),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      lineId: Value(lineId),
+      kind: Value(kind),
+      photoPath: photoPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(photoPath),
+      localPath: localPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(localPath),
+      uploadedAt: uploadedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(uploadedAt),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
+    );
+  }
+
+  factory RentalLinePhoto.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RentalLinePhoto(
+      id: serializer.fromJson<String>(json['id']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      lineId: serializer.fromJson<String>(json['lineId']),
+      kind: serializer.fromJson<String>(json['kind']),
+      photoPath: serializer.fromJson<String?>(json['photoPath']),
+      localPath: serializer.fromJson<String?>(json['localPath']),
+      uploadedAt: serializer.fromJson<DateTime?>(json['uploadedAt']),
+      notes: serializer.fromJson<String?>(json['notes']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'lineId': serializer.toJson<String>(lineId),
+      'kind': serializer.toJson<String>(kind),
+      'photoPath': serializer.toJson<String?>(photoPath),
+      'localPath': serializer.toJson<String?>(localPath),
+      'uploadedAt': serializer.toJson<DateTime?>(uploadedAt),
+      'notes': serializer.toJson<String?>(notes),
+    };
+  }
+
+  RentalLinePhoto copyWith({
+    String? id,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    String? lineId,
+    String? kind,
+    Value<String?> photoPath = const Value.absent(),
+    Value<String?> localPath = const Value.absent(),
+    Value<DateTime?> uploadedAt = const Value.absent(),
+    Value<String?> notes = const Value.absent(),
+  }) => RentalLinePhoto(
+    id: id ?? this.id,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    lineId: lineId ?? this.lineId,
+    kind: kind ?? this.kind,
+    photoPath: photoPath.present ? photoPath.value : this.photoPath,
+    localPath: localPath.present ? localPath.value : this.localPath,
+    uploadedAt: uploadedAt.present ? uploadedAt.value : this.uploadedAt,
+    notes: notes.present ? notes.value : this.notes,
+  );
+  RentalLinePhoto copyWithCompanion(RentalLinePhotosCompanion data) {
+    return RentalLinePhoto(
+      id: data.id.present ? data.id.value : this.id,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      lineId: data.lineId.present ? data.lineId.value : this.lineId,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      photoPath: data.photoPath.present ? data.photoPath.value : this.photoPath,
+      localPath: data.localPath.present ? data.localPath.value : this.localPath,
+      uploadedAt: data.uploadedAt.present
+          ? data.uploadedAt.value
+          : this.uploadedAt,
+      notes: data.notes.present ? data.notes.value : this.notes,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RentalLinePhoto(')
+          ..write('id: $id, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('lineId: $lineId, ')
+          ..write('kind: $kind, ')
+          ..write('photoPath: $photoPath, ')
+          ..write('localPath: $localPath, ')
+          ..write('uploadedAt: $uploadedAt, ')
+          ..write('notes: $notes')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    updatedAt,
+    deletedAt,
+    lineId,
+    kind,
+    photoPath,
+    localPath,
+    uploadedAt,
+    notes,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RentalLinePhoto &&
+          other.id == this.id &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.lineId == this.lineId &&
+          other.kind == this.kind &&
+          other.photoPath == this.photoPath &&
+          other.localPath == this.localPath &&
+          other.uploadedAt == this.uploadedAt &&
+          other.notes == this.notes);
+}
+
+class RentalLinePhotosCompanion extends UpdateCompanion<RentalLinePhoto> {
+  final Value<String> id;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String> lineId;
+  final Value<String> kind;
+  final Value<String?> photoPath;
+  final Value<String?> localPath;
+  final Value<DateTime?> uploadedAt;
+  final Value<String?> notes;
+  final Value<int> rowid;
+  const RentalLinePhotosCompanion({
+    this.id = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.lineId = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.photoPath = const Value.absent(),
+    this.localPath = const Value.absent(),
+    this.uploadedAt = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  RentalLinePhotosCompanion.insert({
+    required String id,
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    required String lineId,
+    required String kind,
+    this.photoPath = const Value.absent(),
+    this.localPath = const Value.absent(),
+    this.uploadedAt = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       lineId = Value(lineId),
+       kind = Value(kind);
+  static Insertable<RentalLinePhoto> custom({
+    Expression<String>? id,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? lineId,
+    Expression<String>? kind,
+    Expression<String>? photoPath,
+    Expression<String>? localPath,
+    Expression<DateTime>? uploadedAt,
+    Expression<String>? notes,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (lineId != null) 'line_id': lineId,
+      if (kind != null) 'kind': kind,
+      if (photoPath != null) 'photo_path': photoPath,
+      if (localPath != null) 'local_path': localPath,
+      if (uploadedAt != null) 'uploaded_at': uploadedAt,
+      if (notes != null) 'notes': notes,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  RentalLinePhotosCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<String>? lineId,
+    Value<String>? kind,
+    Value<String?>? photoPath,
+    Value<String?>? localPath,
+    Value<DateTime?>? uploadedAt,
+    Value<String?>? notes,
+    Value<int>? rowid,
+  }) {
+    return RentalLinePhotosCompanion(
+      id: id ?? this.id,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      lineId: lineId ?? this.lineId,
+      kind: kind ?? this.kind,
+      photoPath: photoPath ?? this.photoPath,
+      localPath: localPath ?? this.localPath,
+      uploadedAt: uploadedAt ?? this.uploadedAt,
+      notes: notes ?? this.notes,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (lineId.present) {
+      map['line_id'] = Variable<String>(lineId.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (photoPath.present) {
+      map['photo_path'] = Variable<String>(photoPath.value);
+    }
+    if (localPath.present) {
+      map['local_path'] = Variable<String>(localPath.value);
+    }
+    if (uploadedAt.present) {
+      map['uploaded_at'] = Variable<DateTime>(uploadedAt.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RentalLinePhotosCompanion(')
+          ..write('id: $id, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('lineId: $lineId, ')
+          ..write('kind: $kind, ')
+          ..write('photoPath: $photoPath, ')
+          ..write('localPath: $localPath, ')
+          ..write('uploadedAt: $uploadedAt, ')
           ..write('notes: $notes, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -12970,6 +13697,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     this,
   );
   late final $RentalLinesTable rentalLines = $RentalLinesTable(this);
+  late final $RentalLinePhotosTable rentalLinePhotos = $RentalLinePhotosTable(
+    this,
+  );
   late final $ContractAcceptancesTable contractAcceptances =
       $ContractAcceptancesTable(this);
   late final $SyncQueueTable syncQueue = $SyncQueueTable(this);
@@ -12997,6 +13727,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     siteContacts,
     rentalContracts,
     rentalLines,
+    rentalLinePhotos,
     contractAcceptances,
     syncQueue,
     syncState,
@@ -17989,6 +18720,9 @@ typedef $$RentalContractsTableCreateCompanionBuilder =
       Value<String?> contactId,
       Value<double> deliveryFee,
       Value<String?> acceptanceToken,
+      Value<DateTime?> depositReleasedAt,
+      Value<double> depositRetained,
+      Value<String?> depositNotes,
       Value<String?> notes,
       Value<String?> createdBy,
       Value<int> rowid,
@@ -18011,6 +18745,9 @@ typedef $$RentalContractsTableUpdateCompanionBuilder =
       Value<String?> contactId,
       Value<double> deliveryFee,
       Value<String?> acceptanceToken,
+      Value<DateTime?> depositReleasedAt,
+      Value<double> depositRetained,
+      Value<String?> depositNotes,
       Value<String?> notes,
       Value<String?> createdBy,
       Value<int> rowid,
@@ -18102,6 +18839,21 @@ class $$RentalContractsTableFilterComposer
 
   ColumnFilters<String> get acceptanceToken => $composableBuilder(
     column: $table.acceptanceToken,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get depositReleasedAt => $composableBuilder(
+    column: $table.depositReleasedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get depositRetained => $composableBuilder(
+    column: $table.depositRetained,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get depositNotes => $composableBuilder(
+    column: $table.depositNotes,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -18205,6 +18957,21 @@ class $$RentalContractsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<DateTime> get depositReleasedAt => $composableBuilder(
+    column: $table.depositReleasedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get depositRetained => $composableBuilder(
+    column: $table.depositRetained,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get depositNotes => $composableBuilder(
+    column: $table.depositNotes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get notes => $composableBuilder(
     column: $table.notes,
     builder: (column) => ColumnOrderings(column),
@@ -18285,6 +19052,21 @@ class $$RentalContractsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<DateTime> get depositReleasedAt => $composableBuilder(
+    column: $table.depositReleasedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get depositRetained => $composableBuilder(
+    column: $table.depositRetained,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get depositNotes => $composableBuilder(
+    column: $table.depositNotes,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get notes =>
       $composableBuilder(column: $table.notes, builder: (column) => column);
 
@@ -18345,6 +19127,9 @@ class $$RentalContractsTableTableManager
                 Value<String?> contactId = const Value.absent(),
                 Value<double> deliveryFee = const Value.absent(),
                 Value<String?> acceptanceToken = const Value.absent(),
+                Value<DateTime?> depositReleasedAt = const Value.absent(),
+                Value<double> depositRetained = const Value.absent(),
+                Value<String?> depositNotes = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<String?> createdBy = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -18365,6 +19150,9 @@ class $$RentalContractsTableTableManager
                 contactId: contactId,
                 deliveryFee: deliveryFee,
                 acceptanceToken: acceptanceToken,
+                depositReleasedAt: depositReleasedAt,
+                depositRetained: depositRetained,
+                depositNotes: depositNotes,
                 notes: notes,
                 createdBy: createdBy,
                 rowid: rowid,
@@ -18387,6 +19175,9 @@ class $$RentalContractsTableTableManager
                 Value<String?> contactId = const Value.absent(),
                 Value<double> deliveryFee = const Value.absent(),
                 Value<String?> acceptanceToken = const Value.absent(),
+                Value<DateTime?> depositReleasedAt = const Value.absent(),
+                Value<double> depositRetained = const Value.absent(),
+                Value<String?> depositNotes = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<String?> createdBy = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -18407,6 +19198,9 @@ class $$RentalContractsTableTableManager
                 contactId: contactId,
                 deliveryFee: deliveryFee,
                 acceptanceToken: acceptanceToken,
+                depositReleasedAt: depositReleasedAt,
+                depositRetained: depositRetained,
+                depositNotes: depositNotes,
                 notes: notes,
                 createdBy: createdBy,
                 rowid: rowid,
@@ -18854,6 +19648,299 @@ typedef $$RentalLinesTableProcessedTableManager =
         BaseReferences<_$AppDatabase, $RentalLinesTable, RentalLine>,
       ),
       RentalLine,
+      PrefetchHooks Function()
+    >;
+typedef $$RentalLinePhotosTableCreateCompanionBuilder =
+    RentalLinePhotosCompanion Function({
+      required String id,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      required String lineId,
+      required String kind,
+      Value<String?> photoPath,
+      Value<String?> localPath,
+      Value<DateTime?> uploadedAt,
+      Value<String?> notes,
+      Value<int> rowid,
+    });
+typedef $$RentalLinePhotosTableUpdateCompanionBuilder =
+    RentalLinePhotosCompanion Function({
+      Value<String> id,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<String> lineId,
+      Value<String> kind,
+      Value<String?> photoPath,
+      Value<String?> localPath,
+      Value<DateTime?> uploadedAt,
+      Value<String?> notes,
+      Value<int> rowid,
+    });
+
+class $$RentalLinePhotosTableFilterComposer
+    extends Composer<_$AppDatabase, $RentalLinePhotosTable> {
+  $$RentalLinePhotosTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lineId => $composableBuilder(
+    column: $table.lineId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get photoPath => $composableBuilder(
+    column: $table.photoPath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get localPath => $composableBuilder(
+    column: $table.localPath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get uploadedAt => $composableBuilder(
+    column: $table.uploadedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$RentalLinePhotosTableOrderingComposer
+    extends Composer<_$AppDatabase, $RentalLinePhotosTable> {
+  $$RentalLinePhotosTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lineId => $composableBuilder(
+    column: $table.lineId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get photoPath => $composableBuilder(
+    column: $table.photoPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get localPath => $composableBuilder(
+    column: $table.localPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get uploadedAt => $composableBuilder(
+    column: $table.uploadedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$RentalLinePhotosTableAnnotationComposer
+    extends Composer<_$AppDatabase, $RentalLinePhotosTable> {
+  $$RentalLinePhotosTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get lineId =>
+      $composableBuilder(column: $table.lineId, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get photoPath =>
+      $composableBuilder(column: $table.photoPath, builder: (column) => column);
+
+  GeneratedColumn<String> get localPath =>
+      $composableBuilder(column: $table.localPath, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get uploadedAt => $composableBuilder(
+    column: $table.uploadedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+}
+
+class $$RentalLinePhotosTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $RentalLinePhotosTable,
+          RentalLinePhoto,
+          $$RentalLinePhotosTableFilterComposer,
+          $$RentalLinePhotosTableOrderingComposer,
+          $$RentalLinePhotosTableAnnotationComposer,
+          $$RentalLinePhotosTableCreateCompanionBuilder,
+          $$RentalLinePhotosTableUpdateCompanionBuilder,
+          (
+            RentalLinePhoto,
+            BaseReferences<
+              _$AppDatabase,
+              $RentalLinePhotosTable,
+              RentalLinePhoto
+            >,
+          ),
+          RentalLinePhoto,
+          PrefetchHooks Function()
+        > {
+  $$RentalLinePhotosTableTableManager(
+    _$AppDatabase db,
+    $RentalLinePhotosTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RentalLinePhotosTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RentalLinePhotosTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RentalLinePhotosTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> lineId = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String?> photoPath = const Value.absent(),
+                Value<String?> localPath = const Value.absent(),
+                Value<DateTime?> uploadedAt = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => RentalLinePhotosCompanion(
+                id: id,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                lineId: lineId,
+                kind: kind,
+                photoPath: photoPath,
+                localPath: localPath,
+                uploadedAt: uploadedAt,
+                notes: notes,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required String lineId,
+                required String kind,
+                Value<String?> photoPath = const Value.absent(),
+                Value<String?> localPath = const Value.absent(),
+                Value<DateTime?> uploadedAt = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => RentalLinePhotosCompanion.insert(
+                id: id,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                lineId: lineId,
+                kind: kind,
+                photoPath: photoPath,
+                localPath: localPath,
+                uploadedAt: uploadedAt,
+                notes: notes,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$RentalLinePhotosTable, RentalLinePhoto>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $RentalLinePhotosTable,
+                    RentalLinePhoto
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$RentalLinePhotosTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $RentalLinePhotosTable,
+      RentalLinePhoto,
+      $$RentalLinePhotosTableFilterComposer,
+      $$RentalLinePhotosTableOrderingComposer,
+      $$RentalLinePhotosTableAnnotationComposer,
+      $$RentalLinePhotosTableCreateCompanionBuilder,
+      $$RentalLinePhotosTableUpdateCompanionBuilder,
+      (
+        RentalLinePhoto,
+        BaseReferences<_$AppDatabase, $RentalLinePhotosTable, RentalLinePhoto>,
+      ),
+      RentalLinePhoto,
       PrefetchHooks Function()
     >;
 typedef $$ContractAcceptancesTableCreateCompanionBuilder =
@@ -19623,6 +20710,8 @@ class $AppDatabaseManager {
       $$RentalContractsTableTableManager(_db, _db.rentalContracts);
   $$RentalLinesTableTableManager get rentalLines =>
       $$RentalLinesTableTableManager(_db, _db.rentalLines);
+  $$RentalLinePhotosTableTableManager get rentalLinePhotos =>
+      $$RentalLinePhotosTableTableManager(_db, _db.rentalLinePhotos);
   $$ContractAcceptancesTableTableManager get contractAcceptances =>
       $$ContractAcceptancesTableTableManager(_db, _db.contractAcceptances);
   $$SyncQueueTableTableManager get syncQueue =>
