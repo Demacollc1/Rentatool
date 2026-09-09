@@ -84,8 +84,15 @@ class SyncService {
   }
 
   Future<SyncResult> syncAll() async {
-    if (!_online) {
-      return const SyncResult(error: 'Sin conexión con el servidor');
+    if (!AppConfig.hasSupabase) {
+      // Build sin --dart-define-from-file: no hay URL/key embebidas.
+      return const SyncResult(
+          error: 'Este APK no trae credenciales del servidor: '
+              'instala la versión oficial más reciente');
+    }
+    if (_remote.auth.currentSession == null) {
+      return const SyncResult(
+          error: 'Inicia sesión para poder sincronizar');
     }
     try {
       final org = await _orgId();
