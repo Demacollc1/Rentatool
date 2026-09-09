@@ -57,9 +57,6 @@ class SyncService {
 
   SupabaseClient get _remote => Supabase.instance.client;
 
-  bool get _online =>
-      AppConfig.hasSupabase && _remote.auth.currentSession != null;
-
   List<String> get _tableOrder =>
       [for (final a in _adapters) a.remoteTable];
 
