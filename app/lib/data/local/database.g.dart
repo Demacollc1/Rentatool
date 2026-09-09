@@ -7313,6 +7313,26 @@ class $CustomersTable extends Customers
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _tradeNameMeta = const VerificationMeta(
+    'tradeName',
+  );
+  @override
+  late final GeneratedColumn<String> tradeName = GeneratedColumn<String>(
+    'trade_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _idNumberMeta = const VerificationMeta(
     'idNumber',
   );
@@ -7368,6 +7388,8 @@ class $CustomersTable extends Customers
     updatedAt,
     deletedAt,
     name,
+    tradeName,
+    kind,
     idNumber,
     phone,
     email,
@@ -7410,6 +7432,18 @@ class $CustomersTable extends Customers
       );
     } else if (isInserting) {
       context.missing(_nameMeta);
+    }
+    if (data.containsKey('trade_name')) {
+      context.handle(
+        _tradeNameMeta,
+        tradeName.isAcceptableOrUnknown(data['trade_name']!, _tradeNameMeta),
+      );
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
     }
     if (data.containsKey('id_number')) {
       context.handle(
@@ -7466,6 +7500,14 @@ class $CustomersTable extends Customers
         DriftSqlType.string,
         data['${effectivePrefix}name'],
       )!,
+      tradeName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}trade_name'],
+      ),
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      ),
       idNumber: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id_number'],
@@ -7500,6 +7542,8 @@ class Customer extends DataClass implements Insertable<Customer> {
   final DateTime updatedAt;
   final DateTime? deletedAt;
   final String name;
+  final String? tradeName;
+  final String? kind;
   final String? idNumber;
   final String? phone;
   final String? email;
@@ -7510,6 +7554,8 @@ class Customer extends DataClass implements Insertable<Customer> {
     required this.updatedAt,
     this.deletedAt,
     required this.name,
+    this.tradeName,
+    this.kind,
     this.idNumber,
     this.phone,
     this.email,
@@ -7525,6 +7571,12 @@ class Customer extends DataClass implements Insertable<Customer> {
       map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
     map['name'] = Variable<String>(name);
+    if (!nullToAbsent || tradeName != null) {
+      map['trade_name'] = Variable<String>(tradeName);
+    }
+    if (!nullToAbsent || kind != null) {
+      map['kind'] = Variable<String>(kind);
+    }
     if (!nullToAbsent || idNumber != null) {
       map['id_number'] = Variable<String>(idNumber);
     }
@@ -7551,6 +7603,10 @@ class Customer extends DataClass implements Insertable<Customer> {
           ? const Value.absent()
           : Value(deletedAt),
       name: Value(name),
+      tradeName: tradeName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(tradeName),
+      kind: kind == null && nullToAbsent ? const Value.absent() : Value(kind),
       idNumber: idNumber == null && nullToAbsent
           ? const Value.absent()
           : Value(idNumber),
@@ -7579,6 +7635,8 @@ class Customer extends DataClass implements Insertable<Customer> {
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       name: serializer.fromJson<String>(json['name']),
+      tradeName: serializer.fromJson<String?>(json['tradeName']),
+      kind: serializer.fromJson<String?>(json['kind']),
       idNumber: serializer.fromJson<String?>(json['idNumber']),
       phone: serializer.fromJson<String?>(json['phone']),
       email: serializer.fromJson<String?>(json['email']),
@@ -7594,6 +7652,8 @@ class Customer extends DataClass implements Insertable<Customer> {
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'name': serializer.toJson<String>(name),
+      'tradeName': serializer.toJson<String?>(tradeName),
+      'kind': serializer.toJson<String?>(kind),
       'idNumber': serializer.toJson<String?>(idNumber),
       'phone': serializer.toJson<String?>(phone),
       'email': serializer.toJson<String?>(email),
@@ -7607,6 +7667,8 @@ class Customer extends DataClass implements Insertable<Customer> {
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
     String? name,
+    Value<String?> tradeName = const Value.absent(),
+    Value<String?> kind = const Value.absent(),
     Value<String?> idNumber = const Value.absent(),
     Value<String?> phone = const Value.absent(),
     Value<String?> email = const Value.absent(),
@@ -7617,6 +7679,8 @@ class Customer extends DataClass implements Insertable<Customer> {
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
     name: name ?? this.name,
+    tradeName: tradeName.present ? tradeName.value : this.tradeName,
+    kind: kind.present ? kind.value : this.kind,
     idNumber: idNumber.present ? idNumber.value : this.idNumber,
     phone: phone.present ? phone.value : this.phone,
     email: email.present ? email.value : this.email,
@@ -7629,6 +7693,8 @@ class Customer extends DataClass implements Insertable<Customer> {
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       name: data.name.present ? data.name.value : this.name,
+      tradeName: data.tradeName.present ? data.tradeName.value : this.tradeName,
+      kind: data.kind.present ? data.kind.value : this.kind,
       idNumber: data.idNumber.present ? data.idNumber.value : this.idNumber,
       phone: data.phone.present ? data.phone.value : this.phone,
       email: data.email.present ? data.email.value : this.email,
@@ -7644,6 +7710,8 @@ class Customer extends DataClass implements Insertable<Customer> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('name: $name, ')
+          ..write('tradeName: $tradeName, ')
+          ..write('kind: $kind, ')
           ..write('idNumber: $idNumber, ')
           ..write('phone: $phone, ')
           ..write('email: $email, ')
@@ -7659,6 +7727,8 @@ class Customer extends DataClass implements Insertable<Customer> {
     updatedAt,
     deletedAt,
     name,
+    tradeName,
+    kind,
     idNumber,
     phone,
     email,
@@ -7673,6 +7743,8 @@ class Customer extends DataClass implements Insertable<Customer> {
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
           other.name == this.name &&
+          other.tradeName == this.tradeName &&
+          other.kind == this.kind &&
           other.idNumber == this.idNumber &&
           other.phone == this.phone &&
           other.email == this.email &&
@@ -7685,6 +7757,8 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
   final Value<String> name;
+  final Value<String?> tradeName;
+  final Value<String?> kind;
   final Value<String?> idNumber;
   final Value<String?> phone;
   final Value<String?> email;
@@ -7696,6 +7770,8 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.name = const Value.absent(),
+    this.tradeName = const Value.absent(),
+    this.kind = const Value.absent(),
     this.idNumber = const Value.absent(),
     this.phone = const Value.absent(),
     this.email = const Value.absent(),
@@ -7708,6 +7784,8 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     required String name,
+    this.tradeName = const Value.absent(),
+    this.kind = const Value.absent(),
     this.idNumber = const Value.absent(),
     this.phone = const Value.absent(),
     this.email = const Value.absent(),
@@ -7721,6 +7799,8 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
     Expression<String>? name,
+    Expression<String>? tradeName,
+    Expression<String>? kind,
     Expression<String>? idNumber,
     Expression<String>? phone,
     Expression<String>? email,
@@ -7733,6 +7813,8 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (name != null) 'name': name,
+      if (tradeName != null) 'trade_name': tradeName,
+      if (kind != null) 'kind': kind,
       if (idNumber != null) 'id_number': idNumber,
       if (phone != null) 'phone': phone,
       if (email != null) 'email': email,
@@ -7747,6 +7829,8 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
     Value<String>? name,
+    Value<String?>? tradeName,
+    Value<String?>? kind,
     Value<String?>? idNumber,
     Value<String?>? phone,
     Value<String?>? email,
@@ -7759,6 +7843,8 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
       name: name ?? this.name,
+      tradeName: tradeName ?? this.tradeName,
+      kind: kind ?? this.kind,
       idNumber: idNumber ?? this.idNumber,
       phone: phone ?? this.phone,
       email: email ?? this.email,
@@ -7782,6 +7868,12 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
+    }
+    if (tradeName.present) {
+      map['trade_name'] = Variable<String>(tradeName.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
     }
     if (idNumber.present) {
       map['id_number'] = Variable<String>(idNumber.value);
@@ -7811,11 +7903,416 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('name: $name, ')
+          ..write('tradeName: $tradeName, ')
+          ..write('kind: $kind, ')
           ..write('idNumber: $idNumber, ')
           ..write('phone: $phone, ')
           ..write('email: $email, ')
           ..write('address: $address, ')
           ..write('notes: $notes, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PostalCodesTable extends PostalCodes
+    with TableInfo<$PostalCodesTable, PostalCode> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PostalCodesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _codeMeta = const VerificationMeta('code');
+  @override
+  late final GeneratedColumn<String> code = GeneratedColumn<String>(
+    'code',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _cityMeta = const VerificationMeta('city');
+  @override
+  late final GeneratedColumn<String> city = GeneratedColumn<String>(
+    'city',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _parishMeta = const VerificationMeta('parish');
+  @override
+  late final GeneratedColumn<String> parish = GeneratedColumn<String>(
+    'parish',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    updatedAt,
+    deletedAt,
+    code,
+    city,
+    parish,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'postal_codes';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PostalCode> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('code')) {
+      context.handle(
+        _codeMeta,
+        code.isAcceptableOrUnknown(data['code']!, _codeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_codeMeta);
+    }
+    if (data.containsKey('city')) {
+      context.handle(
+        _cityMeta,
+        city.isAcceptableOrUnknown(data['city']!, _cityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_cityMeta);
+    }
+    if (data.containsKey('parish')) {
+      context.handle(
+        _parishMeta,
+        parish.isAcceptableOrUnknown(data['parish']!, _parishMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PostalCode map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PostalCode(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      code: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}code'],
+      )!,
+      city: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}city'],
+      )!,
+      parish: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}parish'],
+      ),
+    );
+  }
+
+  @override
+  $PostalCodesTable createAlias(String alias) {
+    return $PostalCodesTable(attachedDatabase, alias);
+  }
+}
+
+class PostalCode extends DataClass implements Insertable<PostalCode> {
+  final String id;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final String code;
+  final String city;
+  final String? parish;
+  const PostalCode({
+    required this.id,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.code,
+    required this.city,
+    this.parish,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['code'] = Variable<String>(code);
+    map['city'] = Variable<String>(city);
+    if (!nullToAbsent || parish != null) {
+      map['parish'] = Variable<String>(parish);
+    }
+    return map;
+  }
+
+  PostalCodesCompanion toCompanion(bool nullToAbsent) {
+    return PostalCodesCompanion(
+      id: Value(id),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      code: Value(code),
+      city: Value(city),
+      parish: parish == null && nullToAbsent
+          ? const Value.absent()
+          : Value(parish),
+    );
+  }
+
+  factory PostalCode.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PostalCode(
+      id: serializer.fromJson<String>(json['id']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      code: serializer.fromJson<String>(json['code']),
+      city: serializer.fromJson<String>(json['city']),
+      parish: serializer.fromJson<String?>(json['parish']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'code': serializer.toJson<String>(code),
+      'city': serializer.toJson<String>(city),
+      'parish': serializer.toJson<String?>(parish),
+    };
+  }
+
+  PostalCode copyWith({
+    String? id,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    String? code,
+    String? city,
+    Value<String?> parish = const Value.absent(),
+  }) => PostalCode(
+    id: id ?? this.id,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    code: code ?? this.code,
+    city: city ?? this.city,
+    parish: parish.present ? parish.value : this.parish,
+  );
+  PostalCode copyWithCompanion(PostalCodesCompanion data) {
+    return PostalCode(
+      id: data.id.present ? data.id.value : this.id,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      code: data.code.present ? data.code.value : this.code,
+      city: data.city.present ? data.city.value : this.city,
+      parish: data.parish.present ? data.parish.value : this.parish,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PostalCode(')
+          ..write('id: $id, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('code: $code, ')
+          ..write('city: $city, ')
+          ..write('parish: $parish')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, updatedAt, deletedAt, code, city, parish);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PostalCode &&
+          other.id == this.id &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.code == this.code &&
+          other.city == this.city &&
+          other.parish == this.parish);
+}
+
+class PostalCodesCompanion extends UpdateCompanion<PostalCode> {
+  final Value<String> id;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String> code;
+  final Value<String> city;
+  final Value<String?> parish;
+  final Value<int> rowid;
+  const PostalCodesCompanion({
+    this.id = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.code = const Value.absent(),
+    this.city = const Value.absent(),
+    this.parish = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PostalCodesCompanion.insert({
+    required String id,
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    required String code,
+    required String city,
+    this.parish = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       code = Value(code),
+       city = Value(city);
+  static Insertable<PostalCode> custom({
+    Expression<String>? id,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? code,
+    Expression<String>? city,
+    Expression<String>? parish,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (code != null) 'code': code,
+      if (city != null) 'city': city,
+      if (parish != null) 'parish': parish,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PostalCodesCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<String>? code,
+    Value<String>? city,
+    Value<String?>? parish,
+    Value<int>? rowid,
+  }) {
+    return PostalCodesCompanion(
+      id: id ?? this.id,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      code: code ?? this.code,
+      city: city ?? this.city,
+      parish: parish ?? this.parish,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (code.present) {
+      map['code'] = Variable<String>(code.value);
+    }
+    if (city.present) {
+      map['city'] = Variable<String>(city.value);
+    }
+    if (parish.present) {
+      map['parish'] = Variable<String>(parish.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PostalCodesCompanion(')
+          ..write('id: $id, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('code: $code, ')
+          ..write('city: $city, ')
+          ..write('parish: $parish, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -7891,6 +8388,35 @@ class $CustomerSitesTable extends CustomerSites
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _postalCodeMeta = const VerificationMeta(
+    'postalCode',
+  );
+  @override
+  late final GeneratedColumn<String> postalCode = GeneratedColumn<String>(
+    'postal_code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _gpsLatMeta = const VerificationMeta('gpsLat');
+  @override
+  late final GeneratedColumn<double> gpsLat = GeneratedColumn<double>(
+    'gps_lat',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _gpsLngMeta = const VerificationMeta('gpsLng');
+  @override
+  late final GeneratedColumn<double> gpsLng = GeneratedColumn<double>(
+    'gps_lng',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _contactNameMeta = const VerificationMeta(
     'contactName',
   );
@@ -7913,6 +8439,40 @@ class $CustomerSitesTable extends CustomerSites
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _contactEmailMeta = const VerificationMeta(
+    'contactEmail',
+  );
+  @override
+  late final GeneratedColumn<String> contactEmail = GeneratedColumn<String>(
+    'contact_email',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _purchaseOrderMeta = const VerificationMeta(
+    'purchaseOrder',
+  );
+  @override
+  late final GeneratedColumn<String> purchaseOrder = GeneratedColumn<String>(
+    'purchase_order',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _paymentMethodMeta = const VerificationMeta(
+    'paymentMethod',
+  );
+  @override
+  late final GeneratedColumn<String> paymentMethod = GeneratedColumn<String>(
+    'payment_method',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('prepago'),
+  );
   static const VerificationMeta _notesMeta = const VerificationMeta('notes');
   @override
   late final GeneratedColumn<String> notes = GeneratedColumn<String>(
@@ -7930,8 +8490,14 @@ class $CustomerSitesTable extends CustomerSites
     customerId,
     name,
     address,
+    postalCode,
+    gpsLat,
+    gpsLng,
     contactName,
     contactPhone,
+    contactEmail,
+    purchaseOrder,
+    paymentMethod,
     notes,
   ];
   @override
@@ -7985,6 +8551,24 @@ class $CustomerSitesTable extends CustomerSites
         address.isAcceptableOrUnknown(data['address']!, _addressMeta),
       );
     }
+    if (data.containsKey('postal_code')) {
+      context.handle(
+        _postalCodeMeta,
+        postalCode.isAcceptableOrUnknown(data['postal_code']!, _postalCodeMeta),
+      );
+    }
+    if (data.containsKey('gps_lat')) {
+      context.handle(
+        _gpsLatMeta,
+        gpsLat.isAcceptableOrUnknown(data['gps_lat']!, _gpsLatMeta),
+      );
+    }
+    if (data.containsKey('gps_lng')) {
+      context.handle(
+        _gpsLngMeta,
+        gpsLng.isAcceptableOrUnknown(data['gps_lng']!, _gpsLngMeta),
+      );
+    }
     if (data.containsKey('contact_name')) {
       context.handle(
         _contactNameMeta,
@@ -8000,6 +8584,33 @@ class $CustomerSitesTable extends CustomerSites
         contactPhone.isAcceptableOrUnknown(
           data['contact_phone']!,
           _contactPhoneMeta,
+        ),
+      );
+    }
+    if (data.containsKey('contact_email')) {
+      context.handle(
+        _contactEmailMeta,
+        contactEmail.isAcceptableOrUnknown(
+          data['contact_email']!,
+          _contactEmailMeta,
+        ),
+      );
+    }
+    if (data.containsKey('purchase_order')) {
+      context.handle(
+        _purchaseOrderMeta,
+        purchaseOrder.isAcceptableOrUnknown(
+          data['purchase_order']!,
+          _purchaseOrderMeta,
+        ),
+      );
+    }
+    if (data.containsKey('payment_method')) {
+      context.handle(
+        _paymentMethodMeta,
+        paymentMethod.isAcceptableOrUnknown(
+          data['payment_method']!,
+          _paymentMethodMeta,
         ),
       );
     }
@@ -8042,6 +8653,18 @@ class $CustomerSitesTable extends CustomerSites
         DriftSqlType.string,
         data['${effectivePrefix}address'],
       ),
+      postalCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}postal_code'],
+      ),
+      gpsLat: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}gps_lat'],
+      ),
+      gpsLng: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}gps_lng'],
+      ),
       contactName: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}contact_name'],
@@ -8050,6 +8673,18 @@ class $CustomerSitesTable extends CustomerSites
         DriftSqlType.string,
         data['${effectivePrefix}contact_phone'],
       ),
+      contactEmail: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contact_email'],
+      ),
+      purchaseOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}purchase_order'],
+      ),
+      paymentMethod: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payment_method'],
+      )!,
       notes: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}notes'],
@@ -8070,8 +8705,20 @@ class CustomerSite extends DataClass implements Insertable<CustomerSite> {
   final String customerId;
   final String name;
   final String? address;
+
+  /// Código postal interno DEMACO (ver PostalCodes).
+  final String? postalCode;
+  final double? gpsLat;
+  final double? gpsLng;
   final String? contactName;
   final String? contactPhone;
+  final String? contactEmail;
+
+  /// Nº de orden de compra o documento de solicitud del cliente.
+  final String? purchaseOrder;
+
+  /// credito | prepago.
+  final String paymentMethod;
   final String? notes;
   const CustomerSite({
     required this.id,
@@ -8080,8 +8727,14 @@ class CustomerSite extends DataClass implements Insertable<CustomerSite> {
     required this.customerId,
     required this.name,
     this.address,
+    this.postalCode,
+    this.gpsLat,
+    this.gpsLng,
     this.contactName,
     this.contactPhone,
+    this.contactEmail,
+    this.purchaseOrder,
+    required this.paymentMethod,
     this.notes,
   });
   @override
@@ -8097,12 +8750,28 @@ class CustomerSite extends DataClass implements Insertable<CustomerSite> {
     if (!nullToAbsent || address != null) {
       map['address'] = Variable<String>(address);
     }
+    if (!nullToAbsent || postalCode != null) {
+      map['postal_code'] = Variable<String>(postalCode);
+    }
+    if (!nullToAbsent || gpsLat != null) {
+      map['gps_lat'] = Variable<double>(gpsLat);
+    }
+    if (!nullToAbsent || gpsLng != null) {
+      map['gps_lng'] = Variable<double>(gpsLng);
+    }
     if (!nullToAbsent || contactName != null) {
       map['contact_name'] = Variable<String>(contactName);
     }
     if (!nullToAbsent || contactPhone != null) {
       map['contact_phone'] = Variable<String>(contactPhone);
     }
+    if (!nullToAbsent || contactEmail != null) {
+      map['contact_email'] = Variable<String>(contactEmail);
+    }
+    if (!nullToAbsent || purchaseOrder != null) {
+      map['purchase_order'] = Variable<String>(purchaseOrder);
+    }
+    map['payment_method'] = Variable<String>(paymentMethod);
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
     }
@@ -8121,12 +8790,28 @@ class CustomerSite extends DataClass implements Insertable<CustomerSite> {
       address: address == null && nullToAbsent
           ? const Value.absent()
           : Value(address),
+      postalCode: postalCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(postalCode),
+      gpsLat: gpsLat == null && nullToAbsent
+          ? const Value.absent()
+          : Value(gpsLat),
+      gpsLng: gpsLng == null && nullToAbsent
+          ? const Value.absent()
+          : Value(gpsLng),
       contactName: contactName == null && nullToAbsent
           ? const Value.absent()
           : Value(contactName),
       contactPhone: contactPhone == null && nullToAbsent
           ? const Value.absent()
           : Value(contactPhone),
+      contactEmail: contactEmail == null && nullToAbsent
+          ? const Value.absent()
+          : Value(contactEmail),
+      purchaseOrder: purchaseOrder == null && nullToAbsent
+          ? const Value.absent()
+          : Value(purchaseOrder),
+      paymentMethod: Value(paymentMethod),
       notes: notes == null && nullToAbsent
           ? const Value.absent()
           : Value(notes),
@@ -8145,8 +8830,14 @@ class CustomerSite extends DataClass implements Insertable<CustomerSite> {
       customerId: serializer.fromJson<String>(json['customerId']),
       name: serializer.fromJson<String>(json['name']),
       address: serializer.fromJson<String?>(json['address']),
+      postalCode: serializer.fromJson<String?>(json['postalCode']),
+      gpsLat: serializer.fromJson<double?>(json['gpsLat']),
+      gpsLng: serializer.fromJson<double?>(json['gpsLng']),
       contactName: serializer.fromJson<String?>(json['contactName']),
       contactPhone: serializer.fromJson<String?>(json['contactPhone']),
+      contactEmail: serializer.fromJson<String?>(json['contactEmail']),
+      purchaseOrder: serializer.fromJson<String?>(json['purchaseOrder']),
+      paymentMethod: serializer.fromJson<String>(json['paymentMethod']),
       notes: serializer.fromJson<String?>(json['notes']),
     );
   }
@@ -8160,8 +8851,14 @@ class CustomerSite extends DataClass implements Insertable<CustomerSite> {
       'customerId': serializer.toJson<String>(customerId),
       'name': serializer.toJson<String>(name),
       'address': serializer.toJson<String?>(address),
+      'postalCode': serializer.toJson<String?>(postalCode),
+      'gpsLat': serializer.toJson<double?>(gpsLat),
+      'gpsLng': serializer.toJson<double?>(gpsLng),
       'contactName': serializer.toJson<String?>(contactName),
       'contactPhone': serializer.toJson<String?>(contactPhone),
+      'contactEmail': serializer.toJson<String?>(contactEmail),
+      'purchaseOrder': serializer.toJson<String?>(purchaseOrder),
+      'paymentMethod': serializer.toJson<String>(paymentMethod),
       'notes': serializer.toJson<String?>(notes),
     };
   }
@@ -8173,8 +8870,14 @@ class CustomerSite extends DataClass implements Insertable<CustomerSite> {
     String? customerId,
     String? name,
     Value<String?> address = const Value.absent(),
+    Value<String?> postalCode = const Value.absent(),
+    Value<double?> gpsLat = const Value.absent(),
+    Value<double?> gpsLng = const Value.absent(),
     Value<String?> contactName = const Value.absent(),
     Value<String?> contactPhone = const Value.absent(),
+    Value<String?> contactEmail = const Value.absent(),
+    Value<String?> purchaseOrder = const Value.absent(),
+    String? paymentMethod,
     Value<String?> notes = const Value.absent(),
   }) => CustomerSite(
     id: id ?? this.id,
@@ -8183,8 +8886,16 @@ class CustomerSite extends DataClass implements Insertable<CustomerSite> {
     customerId: customerId ?? this.customerId,
     name: name ?? this.name,
     address: address.present ? address.value : this.address,
+    postalCode: postalCode.present ? postalCode.value : this.postalCode,
+    gpsLat: gpsLat.present ? gpsLat.value : this.gpsLat,
+    gpsLng: gpsLng.present ? gpsLng.value : this.gpsLng,
     contactName: contactName.present ? contactName.value : this.contactName,
     contactPhone: contactPhone.present ? contactPhone.value : this.contactPhone,
+    contactEmail: contactEmail.present ? contactEmail.value : this.contactEmail,
+    purchaseOrder: purchaseOrder.present
+        ? purchaseOrder.value
+        : this.purchaseOrder,
+    paymentMethod: paymentMethod ?? this.paymentMethod,
     notes: notes.present ? notes.value : this.notes,
   );
   CustomerSite copyWithCompanion(CustomerSitesCompanion data) {
@@ -8197,12 +8908,26 @@ class CustomerSite extends DataClass implements Insertable<CustomerSite> {
           : this.customerId,
       name: data.name.present ? data.name.value : this.name,
       address: data.address.present ? data.address.value : this.address,
+      postalCode: data.postalCode.present
+          ? data.postalCode.value
+          : this.postalCode,
+      gpsLat: data.gpsLat.present ? data.gpsLat.value : this.gpsLat,
+      gpsLng: data.gpsLng.present ? data.gpsLng.value : this.gpsLng,
       contactName: data.contactName.present
           ? data.contactName.value
           : this.contactName,
       contactPhone: data.contactPhone.present
           ? data.contactPhone.value
           : this.contactPhone,
+      contactEmail: data.contactEmail.present
+          ? data.contactEmail.value
+          : this.contactEmail,
+      purchaseOrder: data.purchaseOrder.present
+          ? data.purchaseOrder.value
+          : this.purchaseOrder,
+      paymentMethod: data.paymentMethod.present
+          ? data.paymentMethod.value
+          : this.paymentMethod,
       notes: data.notes.present ? data.notes.value : this.notes,
     );
   }
@@ -8216,8 +8941,14 @@ class CustomerSite extends DataClass implements Insertable<CustomerSite> {
           ..write('customerId: $customerId, ')
           ..write('name: $name, ')
           ..write('address: $address, ')
+          ..write('postalCode: $postalCode, ')
+          ..write('gpsLat: $gpsLat, ')
+          ..write('gpsLng: $gpsLng, ')
           ..write('contactName: $contactName, ')
           ..write('contactPhone: $contactPhone, ')
+          ..write('contactEmail: $contactEmail, ')
+          ..write('purchaseOrder: $purchaseOrder, ')
+          ..write('paymentMethod: $paymentMethod, ')
           ..write('notes: $notes')
           ..write(')'))
         .toString();
@@ -8231,8 +8962,14 @@ class CustomerSite extends DataClass implements Insertable<CustomerSite> {
     customerId,
     name,
     address,
+    postalCode,
+    gpsLat,
+    gpsLng,
     contactName,
     contactPhone,
+    contactEmail,
+    purchaseOrder,
+    paymentMethod,
     notes,
   );
   @override
@@ -8245,8 +8982,14 @@ class CustomerSite extends DataClass implements Insertable<CustomerSite> {
           other.customerId == this.customerId &&
           other.name == this.name &&
           other.address == this.address &&
+          other.postalCode == this.postalCode &&
+          other.gpsLat == this.gpsLat &&
+          other.gpsLng == this.gpsLng &&
           other.contactName == this.contactName &&
           other.contactPhone == this.contactPhone &&
+          other.contactEmail == this.contactEmail &&
+          other.purchaseOrder == this.purchaseOrder &&
+          other.paymentMethod == this.paymentMethod &&
           other.notes == this.notes);
 }
 
@@ -8257,8 +9000,14 @@ class CustomerSitesCompanion extends UpdateCompanion<CustomerSite> {
   final Value<String> customerId;
   final Value<String> name;
   final Value<String?> address;
+  final Value<String?> postalCode;
+  final Value<double?> gpsLat;
+  final Value<double?> gpsLng;
   final Value<String?> contactName;
   final Value<String?> contactPhone;
+  final Value<String?> contactEmail;
+  final Value<String?> purchaseOrder;
+  final Value<String> paymentMethod;
   final Value<String?> notes;
   final Value<int> rowid;
   const CustomerSitesCompanion({
@@ -8268,8 +9017,14 @@ class CustomerSitesCompanion extends UpdateCompanion<CustomerSite> {
     this.customerId = const Value.absent(),
     this.name = const Value.absent(),
     this.address = const Value.absent(),
+    this.postalCode = const Value.absent(),
+    this.gpsLat = const Value.absent(),
+    this.gpsLng = const Value.absent(),
     this.contactName = const Value.absent(),
     this.contactPhone = const Value.absent(),
+    this.contactEmail = const Value.absent(),
+    this.purchaseOrder = const Value.absent(),
+    this.paymentMethod = const Value.absent(),
     this.notes = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -8280,8 +9035,14 @@ class CustomerSitesCompanion extends UpdateCompanion<CustomerSite> {
     required String customerId,
     required String name,
     this.address = const Value.absent(),
+    this.postalCode = const Value.absent(),
+    this.gpsLat = const Value.absent(),
+    this.gpsLng = const Value.absent(),
     this.contactName = const Value.absent(),
     this.contactPhone = const Value.absent(),
+    this.contactEmail = const Value.absent(),
+    this.purchaseOrder = const Value.absent(),
+    this.paymentMethod = const Value.absent(),
     this.notes = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -8294,8 +9055,14 @@ class CustomerSitesCompanion extends UpdateCompanion<CustomerSite> {
     Expression<String>? customerId,
     Expression<String>? name,
     Expression<String>? address,
+    Expression<String>? postalCode,
+    Expression<double>? gpsLat,
+    Expression<double>? gpsLng,
     Expression<String>? contactName,
     Expression<String>? contactPhone,
+    Expression<String>? contactEmail,
+    Expression<String>? purchaseOrder,
+    Expression<String>? paymentMethod,
     Expression<String>? notes,
     Expression<int>? rowid,
   }) {
@@ -8306,8 +9073,14 @@ class CustomerSitesCompanion extends UpdateCompanion<CustomerSite> {
       if (customerId != null) 'customer_id': customerId,
       if (name != null) 'name': name,
       if (address != null) 'address': address,
+      if (postalCode != null) 'postal_code': postalCode,
+      if (gpsLat != null) 'gps_lat': gpsLat,
+      if (gpsLng != null) 'gps_lng': gpsLng,
       if (contactName != null) 'contact_name': contactName,
       if (contactPhone != null) 'contact_phone': contactPhone,
+      if (contactEmail != null) 'contact_email': contactEmail,
+      if (purchaseOrder != null) 'purchase_order': purchaseOrder,
+      if (paymentMethod != null) 'payment_method': paymentMethod,
       if (notes != null) 'notes': notes,
       if (rowid != null) 'rowid': rowid,
     });
@@ -8320,8 +9093,14 @@ class CustomerSitesCompanion extends UpdateCompanion<CustomerSite> {
     Value<String>? customerId,
     Value<String>? name,
     Value<String?>? address,
+    Value<String?>? postalCode,
+    Value<double?>? gpsLat,
+    Value<double?>? gpsLng,
     Value<String?>? contactName,
     Value<String?>? contactPhone,
+    Value<String?>? contactEmail,
+    Value<String?>? purchaseOrder,
+    Value<String>? paymentMethod,
     Value<String?>? notes,
     Value<int>? rowid,
   }) {
@@ -8332,8 +9111,14 @@ class CustomerSitesCompanion extends UpdateCompanion<CustomerSite> {
       customerId: customerId ?? this.customerId,
       name: name ?? this.name,
       address: address ?? this.address,
+      postalCode: postalCode ?? this.postalCode,
+      gpsLat: gpsLat ?? this.gpsLat,
+      gpsLng: gpsLng ?? this.gpsLng,
       contactName: contactName ?? this.contactName,
       contactPhone: contactPhone ?? this.contactPhone,
+      contactEmail: contactEmail ?? this.contactEmail,
+      purchaseOrder: purchaseOrder ?? this.purchaseOrder,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
       notes: notes ?? this.notes,
       rowid: rowid ?? this.rowid,
     );
@@ -8360,11 +9145,29 @@ class CustomerSitesCompanion extends UpdateCompanion<CustomerSite> {
     if (address.present) {
       map['address'] = Variable<String>(address.value);
     }
+    if (postalCode.present) {
+      map['postal_code'] = Variable<String>(postalCode.value);
+    }
+    if (gpsLat.present) {
+      map['gps_lat'] = Variable<double>(gpsLat.value);
+    }
+    if (gpsLng.present) {
+      map['gps_lng'] = Variable<double>(gpsLng.value);
+    }
     if (contactName.present) {
       map['contact_name'] = Variable<String>(contactName.value);
     }
     if (contactPhone.present) {
       map['contact_phone'] = Variable<String>(contactPhone.value);
+    }
+    if (contactEmail.present) {
+      map['contact_email'] = Variable<String>(contactEmail.value);
+    }
+    if (purchaseOrder.present) {
+      map['purchase_order'] = Variable<String>(purchaseOrder.value);
+    }
+    if (paymentMethod.present) {
+      map['payment_method'] = Variable<String>(paymentMethod.value);
     }
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
@@ -8384,8 +9187,14 @@ class CustomerSitesCompanion extends UpdateCompanion<CustomerSite> {
           ..write('customerId: $customerId, ')
           ..write('name: $name, ')
           ..write('address: $address, ')
+          ..write('postalCode: $postalCode, ')
+          ..write('gpsLat: $gpsLat, ')
+          ..write('gpsLng: $gpsLng, ')
           ..write('contactName: $contactName, ')
           ..write('contactPhone: $contactPhone, ')
+          ..write('contactEmail: $contactEmail, ')
+          ..write('purchaseOrder: $purchaseOrder, ')
+          ..write('paymentMethod: $paymentMethod, ')
           ..write('notes: $notes, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -12154,6 +12963,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $InventoryMovementsTable inventoryMovements =
       $InventoryMovementsTable(this);
   late final $CustomersTable customers = $CustomersTable(this);
+  late final $PostalCodesTable postalCodes = $PostalCodesTable(this);
   late final $CustomerSitesTable customerSites = $CustomerSitesTable(this);
   late final $SiteContactsTable siteContacts = $SiteContactsTable(this);
   late final $RentalContractsTable rentalContracts = $RentalContractsTable(
@@ -12182,6 +12992,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     toolModelConsumables,
     inventoryMovements,
     customers,
+    postalCodes,
     customerSites,
     siteContacts,
     rentalContracts,
@@ -15923,6 +16734,8 @@ typedef $$CustomersTableCreateCompanionBuilder =
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
       required String name,
+      Value<String?> tradeName,
+      Value<String?> kind,
       Value<String?> idNumber,
       Value<String?> phone,
       Value<String?> email,
@@ -15936,6 +16749,8 @@ typedef $$CustomersTableUpdateCompanionBuilder =
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
       Value<String> name,
+      Value<String?> tradeName,
+      Value<String?> kind,
       Value<String?> idNumber,
       Value<String?> phone,
       Value<String?> email,
@@ -15970,6 +16785,16 @@ class $$CustomersTableFilterComposer
 
   ColumnFilters<String> get name => $composableBuilder(
     column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get tradeName => $composableBuilder(
+    column: $table.tradeName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -16028,6 +16853,16 @@ class $$CustomersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get tradeName => $composableBuilder(
+    column: $table.tradeName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get idNumber => $composableBuilder(
     column: $table.idNumber,
     builder: (column) => ColumnOrderings(column),
@@ -16074,6 +16909,12 @@ class $$CustomersTableAnnotationComposer
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get tradeName =>
+      $composableBuilder(column: $table.tradeName, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
 
   GeneratedColumn<String> get idNumber =>
       $composableBuilder(column: $table.idNumber, builder: (column) => column);
@@ -16123,6 +16964,8 @@ class $$CustomersTableTableManager
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
                 Value<String> name = const Value.absent(),
+                Value<String?> tradeName = const Value.absent(),
+                Value<String?> kind = const Value.absent(),
                 Value<String?> idNumber = const Value.absent(),
                 Value<String?> phone = const Value.absent(),
                 Value<String?> email = const Value.absent(),
@@ -16134,6 +16977,8 @@ class $$CustomersTableTableManager
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
                 name: name,
+                tradeName: tradeName,
+                kind: kind,
                 idNumber: idNumber,
                 phone: phone,
                 email: email,
@@ -16147,6 +16992,8 @@ class $$CustomersTableTableManager
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
                 required String name,
+                Value<String?> tradeName = const Value.absent(),
+                Value<String?> kind = const Value.absent(),
                 Value<String?> idNumber = const Value.absent(),
                 Value<String?> phone = const Value.absent(),
                 Value<String?> email = const Value.absent(),
@@ -16158,6 +17005,8 @@ class $$CustomersTableTableManager
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
                 name: name,
+                tradeName: tradeName,
+                kind: kind,
                 idNumber: idNumber,
                 phone: phone,
                 email: email,
@@ -16196,6 +17045,234 @@ typedef $$CustomersTableProcessedTableManager =
       Customer,
       PrefetchHooks Function()
     >;
+typedef $$PostalCodesTableCreateCompanionBuilder =
+    PostalCodesCompanion Function({
+      required String id,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      required String code,
+      required String city,
+      Value<String?> parish,
+      Value<int> rowid,
+    });
+typedef $$PostalCodesTableUpdateCompanionBuilder =
+    PostalCodesCompanion Function({
+      Value<String> id,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<String> code,
+      Value<String> city,
+      Value<String?> parish,
+      Value<int> rowid,
+    });
+
+class $$PostalCodesTableFilterComposer
+    extends Composer<_$AppDatabase, $PostalCodesTable> {
+  $$PostalCodesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get code => $composableBuilder(
+    column: $table.code,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get city => $composableBuilder(
+    column: $table.city,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get parish => $composableBuilder(
+    column: $table.parish,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PostalCodesTableOrderingComposer
+    extends Composer<_$AppDatabase, $PostalCodesTable> {
+  $$PostalCodesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get code => $composableBuilder(
+    column: $table.code,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get city => $composableBuilder(
+    column: $table.city,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get parish => $composableBuilder(
+    column: $table.parish,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PostalCodesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PostalCodesTable> {
+  $$PostalCodesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get code =>
+      $composableBuilder(column: $table.code, builder: (column) => column);
+
+  GeneratedColumn<String> get city =>
+      $composableBuilder(column: $table.city, builder: (column) => column);
+
+  GeneratedColumn<String> get parish =>
+      $composableBuilder(column: $table.parish, builder: (column) => column);
+}
+
+class $$PostalCodesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PostalCodesTable,
+          PostalCode,
+          $$PostalCodesTableFilterComposer,
+          $$PostalCodesTableOrderingComposer,
+          $$PostalCodesTableAnnotationComposer,
+          $$PostalCodesTableCreateCompanionBuilder,
+          $$PostalCodesTableUpdateCompanionBuilder,
+          (
+            PostalCode,
+            BaseReferences<_$AppDatabase, $PostalCodesTable, PostalCode>,
+          ),
+          PostalCode,
+          PrefetchHooks Function()
+        > {
+  $$PostalCodesTableTableManager(_$AppDatabase db, $PostalCodesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PostalCodesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PostalCodesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PostalCodesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> code = const Value.absent(),
+                Value<String> city = const Value.absent(),
+                Value<String?> parish = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PostalCodesCompanion(
+                id: id,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                code: code,
+                city: city,
+                parish: parish,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required String code,
+                required String city,
+                Value<String?> parish = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PostalCodesCompanion.insert(
+                id: id,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                code: code,
+                city: city,
+                parish: parish,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$PostalCodesTable, PostalCode>(table),
+                  BaseReferences<_$AppDatabase, $PostalCodesTable, PostalCode>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PostalCodesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PostalCodesTable,
+      PostalCode,
+      $$PostalCodesTableFilterComposer,
+      $$PostalCodesTableOrderingComposer,
+      $$PostalCodesTableAnnotationComposer,
+      $$PostalCodesTableCreateCompanionBuilder,
+      $$PostalCodesTableUpdateCompanionBuilder,
+      (
+        PostalCode,
+        BaseReferences<_$AppDatabase, $PostalCodesTable, PostalCode>,
+      ),
+      PostalCode,
+      PrefetchHooks Function()
+    >;
 typedef $$CustomerSitesTableCreateCompanionBuilder =
     CustomerSitesCompanion Function({
       required String id,
@@ -16204,8 +17281,14 @@ typedef $$CustomerSitesTableCreateCompanionBuilder =
       required String customerId,
       required String name,
       Value<String?> address,
+      Value<String?> postalCode,
+      Value<double?> gpsLat,
+      Value<double?> gpsLng,
       Value<String?> contactName,
       Value<String?> contactPhone,
+      Value<String?> contactEmail,
+      Value<String?> purchaseOrder,
+      Value<String> paymentMethod,
       Value<String?> notes,
       Value<int> rowid,
     });
@@ -16217,8 +17300,14 @@ typedef $$CustomerSitesTableUpdateCompanionBuilder =
       Value<String> customerId,
       Value<String> name,
       Value<String?> address,
+      Value<String?> postalCode,
+      Value<double?> gpsLat,
+      Value<double?> gpsLng,
       Value<String?> contactName,
       Value<String?> contactPhone,
+      Value<String?> contactEmail,
+      Value<String?> purchaseOrder,
+      Value<String> paymentMethod,
       Value<String?> notes,
       Value<int> rowid,
     });
@@ -16262,6 +17351,21 @@ class $$CustomerSitesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get postalCode => $composableBuilder(
+    column: $table.postalCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get gpsLat => $composableBuilder(
+    column: $table.gpsLat,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get gpsLng => $composableBuilder(
+    column: $table.gpsLng,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get contactName => $composableBuilder(
     column: $table.contactName,
     builder: (column) => ColumnFilters(column),
@@ -16269,6 +17373,21 @@ class $$CustomerSitesTableFilterComposer
 
   ColumnFilters<String> get contactPhone => $composableBuilder(
     column: $table.contactPhone,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get contactEmail => $composableBuilder(
+    column: $table.contactEmail,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get purchaseOrder => $composableBuilder(
+    column: $table.purchaseOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get paymentMethod => $composableBuilder(
+    column: $table.paymentMethod,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -16317,6 +17436,21 @@ class $$CustomerSitesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get postalCode => $composableBuilder(
+    column: $table.postalCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get gpsLat => $composableBuilder(
+    column: $table.gpsLat,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get gpsLng => $composableBuilder(
+    column: $table.gpsLng,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get contactName => $composableBuilder(
     column: $table.contactName,
     builder: (column) => ColumnOrderings(column),
@@ -16324,6 +17458,21 @@ class $$CustomerSitesTableOrderingComposer
 
   ColumnOrderings<String> get contactPhone => $composableBuilder(
     column: $table.contactPhone,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get contactEmail => $composableBuilder(
+    column: $table.contactEmail,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get purchaseOrder => $composableBuilder(
+    column: $table.purchaseOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get paymentMethod => $composableBuilder(
+    column: $table.paymentMethod,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -16362,6 +17511,17 @@ class $$CustomerSitesTableAnnotationComposer
   GeneratedColumn<String> get address =>
       $composableBuilder(column: $table.address, builder: (column) => column);
 
+  GeneratedColumn<String> get postalCode => $composableBuilder(
+    column: $table.postalCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get gpsLat =>
+      $composableBuilder(column: $table.gpsLat, builder: (column) => column);
+
+  GeneratedColumn<double> get gpsLng =>
+      $composableBuilder(column: $table.gpsLng, builder: (column) => column);
+
   GeneratedColumn<String> get contactName => $composableBuilder(
     column: $table.contactName,
     builder: (column) => column,
@@ -16369,6 +17529,21 @@ class $$CustomerSitesTableAnnotationComposer
 
   GeneratedColumn<String> get contactPhone => $composableBuilder(
     column: $table.contactPhone,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get contactEmail => $composableBuilder(
+    column: $table.contactEmail,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get purchaseOrder => $composableBuilder(
+    column: $table.purchaseOrder,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get paymentMethod => $composableBuilder(
+    column: $table.paymentMethod,
     builder: (column) => column,
   );
 
@@ -16413,8 +17588,14 @@ class $$CustomerSitesTableTableManager
                 Value<String> customerId = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String?> address = const Value.absent(),
+                Value<String?> postalCode = const Value.absent(),
+                Value<double?> gpsLat = const Value.absent(),
+                Value<double?> gpsLng = const Value.absent(),
                 Value<String?> contactName = const Value.absent(),
                 Value<String?> contactPhone = const Value.absent(),
+                Value<String?> contactEmail = const Value.absent(),
+                Value<String?> purchaseOrder = const Value.absent(),
+                Value<String> paymentMethod = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CustomerSitesCompanion(
@@ -16424,8 +17605,14 @@ class $$CustomerSitesTableTableManager
                 customerId: customerId,
                 name: name,
                 address: address,
+                postalCode: postalCode,
+                gpsLat: gpsLat,
+                gpsLng: gpsLng,
                 contactName: contactName,
                 contactPhone: contactPhone,
+                contactEmail: contactEmail,
+                purchaseOrder: purchaseOrder,
+                paymentMethod: paymentMethod,
                 notes: notes,
                 rowid: rowid,
               ),
@@ -16437,8 +17624,14 @@ class $$CustomerSitesTableTableManager
                 required String customerId,
                 required String name,
                 Value<String?> address = const Value.absent(),
+                Value<String?> postalCode = const Value.absent(),
+                Value<double?> gpsLat = const Value.absent(),
+                Value<double?> gpsLng = const Value.absent(),
                 Value<String?> contactName = const Value.absent(),
                 Value<String?> contactPhone = const Value.absent(),
+                Value<String?> contactEmail = const Value.absent(),
+                Value<String?> purchaseOrder = const Value.absent(),
+                Value<String> paymentMethod = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CustomerSitesCompanion.insert(
@@ -16448,8 +17641,14 @@ class $$CustomerSitesTableTableManager
                 customerId: customerId,
                 name: name,
                 address: address,
+                postalCode: postalCode,
+                gpsLat: gpsLat,
+                gpsLng: gpsLng,
                 contactName: contactName,
                 contactPhone: contactPhone,
+                contactEmail: contactEmail,
+                purchaseOrder: purchaseOrder,
+                paymentMethod: paymentMethod,
                 notes: notes,
                 rowid: rowid,
               ),
@@ -18414,6 +19613,8 @@ class $AppDatabaseManager {
       $$InventoryMovementsTableTableManager(_db, _db.inventoryMovements);
   $$CustomersTableTableManager get customers =>
       $$CustomersTableTableManager(_db, _db.customers);
+  $$PostalCodesTableTableManager get postalCodes =>
+      $$PostalCodesTableTableManager(_db, _db.postalCodes);
   $$CustomerSitesTableTableManager get customerSites =>
       $$CustomerSitesTableTableManager(_db, _db.customerSites);
   $$SiteContactsTableTableManager get siteContacts =>

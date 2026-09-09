@@ -319,11 +319,34 @@ List<TableSyncAdapter> buildSyncAdapters() => [
                 CustomersCompanion(
                   id: Value(r['id'] as String),
                   name: Value(r['name'] as String),
+                  tradeName: Value(r['trade_name'] as String?),
+                  kind: Value(r['kind'] as String?),
                   idNumber: Value(r['id_number'] as String?),
                   phone: Value(r['phone'] as String?),
                   email: Value(r['email'] as String?),
                   address: Value(r['address'] as String?),
                   notes: Value(r['notes'] as String?),
+                  updatedAt: Value(remoteUpdated),
+                  deletedAt: Value(tsN(r['deleted_at'])),
+                ),
+              );
+          return true;
+        },
+      ),
+      TableSyncAdapter(
+        remoteTable: 'postal_codes',
+        mergeRemote: (db, r) async {
+          final local = await (db.select(db.postalCodes)
+                ..where((x) => x.id.equals(r['id'] as String)))
+              .getSingleOrNull();
+          final remoteUpdated = ts(r['updated_at']);
+          if (!newer(local?.updatedAt, remoteUpdated)) return false;
+          await db.into(db.postalCodes).insertOnConflictUpdate(
+                PostalCodesCompanion(
+                  id: Value(r['id'] as String),
+                  code: Value(r['code'] as String),
+                  city: Value(r['city'] as String),
+                  parish: Value(r['parish'] as String?),
                   updatedAt: Value(remoteUpdated),
                   deletedAt: Value(tsN(r['deleted_at'])),
                 ),
@@ -345,8 +368,15 @@ List<TableSyncAdapter> buildSyncAdapters() => [
                   customerId: Value(r['customer_id'] as String),
                   name: Value(r['name'] as String),
                   address: Value(r['address'] as String?),
+                  postalCode: Value(r['postal_code'] as String?),
+                  gpsLat: Value(_dN(r['gps_lat'])),
+                  gpsLng: Value(_dN(r['gps_lng'])),
                   contactName: Value(r['contact_name'] as String?),
                   contactPhone: Value(r['contact_phone'] as String?),
+                  contactEmail: Value(r['contact_email'] as String?),
+                  purchaseOrder: Value(r['purchase_order'] as String?),
+                  paymentMethod:
+                      Value((r['payment_method'] ?? 'prepago') as String),
                   notes: Value(r['notes'] as String?),
                   updatedAt: Value(remoteUpdated),
                   deletedAt: Value(tsN(r['deleted_at'])),

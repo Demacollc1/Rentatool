@@ -182,14 +182,24 @@ class InventoryMovements extends Table with SyncColumns {
   TextColumn get notes => text().nullable()();
 }
 
-/// Cliente de renta (persona o empresa, con cédula/RUC).
+/// Cliente de renta. name = nombre legal; tradeName = comercial.
+/// kind: maestro | constructora | diyer | mantenimiento | obra_eventual.
 class Customers extends Table with SyncColumns {
   TextColumn get name => text()();
+  TextColumn get tradeName => text().nullable()();
+  TextColumn get kind => text().nullable()();
   TextColumn get idNumber => text().nullable()();
   TextColumn get phone => text().nullable()();
   TextColumn get email => text().nullable()();
   TextColumn get address => text().nullable()();
   TextColumn get notes => text().nullable()();
+}
+
+/// Códigos postales INTERNOS de DEMACO: código → ciudad y parroquia.
+class PostalCodes extends Table with SyncColumns {
+  TextColumn get code => text()();
+  TextColumn get city => text()();
+  TextColumn get parish => text().nullable()();
 }
 
 /// Obra/proyecto del cliente: dónde estará la herramienta rentada.
@@ -198,8 +208,21 @@ class CustomerSites extends Table with SyncColumns {
   TextColumn get customerId => text()();
   TextColumn get name => text()();
   TextColumn get address => text().nullable()();
+
+  /// Código postal interno DEMACO (ver PostalCodes).
+  TextColumn get postalCode => text().nullable()();
+  RealColumn get gpsLat => real().nullable()();
+  RealColumn get gpsLng => real().nullable()();
   TextColumn get contactName => text().nullable()();
   TextColumn get contactPhone => text().nullable()();
+  TextColumn get contactEmail => text().nullable()();
+
+  /// Nº de orden de compra o documento de solicitud del cliente.
+  TextColumn get purchaseOrder => text().nullable()();
+
+  /// credito | prepago.
+  TextColumn get paymentMethod =>
+      text().withDefault(const Constant('prepago'))();
   TextColumn get notes => text().nullable()();
 }
 
@@ -314,6 +337,7 @@ class SyncState extends Table {
   ToolModelConsumables,
   InventoryMovements,
   Customers,
+  PostalCodes,
   CustomerSites,
   SiteContacts,
   RentalContracts,
@@ -327,7 +351,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 13; // v9-12 contratos/portal · v13 responsables
+  int get schemaVersion => 14; // v13 responsables · v14 fichas completas
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -374,6 +398,19 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from >= 9 && from < 13) {
             await m.addColumn(rentalContracts, rentalContracts.contactId);
+          }
+          if (from >= 9 && from < 14) {
+            await m.addColumn(customers, customers.tradeName);
+            await m.addColumn(customers, customers.kind);
+            await m.addColumn(customerSites, customerSites.postalCode);
+            await m.addColumn(customerSites, customerSites.gpsLat);
+            await m.addColumn(customerSites, customerSites.gpsLng);
+            await m.addColumn(
+                customerSites, customerSites.contactEmail);
+            await m.addColumn(
+                customerSites, customerSites.purchaseOrder);
+            await m.addColumn(
+                customerSites, customerSites.paymentMethod);
           }
         },
       );

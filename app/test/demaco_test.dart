@@ -384,12 +384,30 @@ BOSCH GWS14-125
 
     test('jerarquía cliente → obra → responsable en el contrato',
         () async {
-      final customerId =
-          await rentals.saveCustomer(name: 'Constructora Sur');
+      final customerId = await rentals.saveCustomer(
+          name: 'Constructora Sur S.A.',
+          tradeName: 'Constructora Sur',
+          kind: 'constructora',
+          idNumber: '0991234567001');
+      await rentals.savePostalCode(
+          code: 'GYE-01', city: 'Guayaquil', parish: 'Tarqui');
       final siteId = await rentals.saveSite(
           customerId: customerId,
           name: 'Torre B',
-          address: 'Av. Loja 456');
+          address: 'Av. Loja 456',
+          postalCode: 'GYE-01',
+          gpsLat: -2.170998,
+          gpsLng: -79.922359,
+          purchaseOrder: 'OC-2026-118',
+          paymentMethod: 'credito');
+      final sites0 = await rentals
+          .watchSites(customerId)
+          .first;
+      expect(sites0.single.paymentMethod, 'credito');
+      expect(sites0.single.postalCode, 'GYE-01');
+      expect(sites0.single.gpsLat, closeTo(-2.170998, 1e-6));
+      final pcs = await rentals.watchPostalCodes(query: 'tarqui').first;
+      expect(pcs.single.city, 'Guayaquil');
       final contactId = await rentals.saveContact(
           siteId: siteId,
           name: 'Pedro Mora',

@@ -48,6 +48,8 @@ class RentalRepository {
   Future<String> saveCustomer({
     String? id,
     required String name,
+    String? tradeName,
+    String? kind,
     String? idNumber,
     String? phone,
     String? email,
@@ -59,6 +61,8 @@ class RentalRepository {
           CustomersCompanion(
             id: Value(rowId),
             name: Value(name),
+            tradeName: Value(tradeName),
+            kind: Value(kind),
             idNumber: Value(idNumber),
             phone: Value(phone),
             email: Value(email),
@@ -69,10 +73,55 @@ class RentalRepository {
     await _sync.enqueue(table: 'customers', rowId: rowId, op: 'upsert', row: {
       'id': rowId,
       'name': name,
+      'trade_name': tradeName,
+      'kind': kind,
       'id_number': idNumber,
       'phone': phone,
       'email': email,
       'address': address,
+      'updated_at': isoTs(now),
+      'deleted_at': null,
+    });
+    return rowId;
+  }
+
+  // ---------------- códigos postales internos ----------------
+
+  Stream<List<PostalCode>> watchPostalCodes({String query = ''}) {
+    final q = _db.select(_db.postalCodes)
+      ..where((c) => c.deletedAt.isNull());
+    if (query.trim().isNotEmpty) {
+      final like = '%${query.trim()}%';
+      q.where((c) =>
+          c.code.like(like) | c.city.like(like) | c.parish.like(like));
+    }
+    q.orderBy([(c) => OrderingTerm.asc(c.code)]);
+    return q.watch();
+  }
+
+  Future<String> savePostalCode({
+    String? id,
+    required String code,
+    required String city,
+    String? parish,
+  }) async {
+    final rowId = id ?? const Uuid().v4();
+    final now = DateTime.now();
+    await _db.into(_db.postalCodes).insertOnConflictUpdate(
+          PostalCodesCompanion(
+            id: Value(rowId),
+            code: Value(code),
+            city: Value(city),
+            parish: Value(parish),
+            updatedAt: Value(now),
+          ),
+        );
+    await _sync
+        .enqueue(table: 'postal_codes', rowId: rowId, op: 'upsert', row: {
+      'id': rowId,
+      'code': code,
+      'city': city,
+      'parish': parish,
       'updated_at': isoTs(now),
       'deleted_at': null,
     });
@@ -93,8 +142,14 @@ class RentalRepository {
     required String customerId,
     required String name,
     String? address,
+    String? postalCode,
+    double? gpsLat,
+    double? gpsLng,
     String? contactName,
     String? contactPhone,
+    String? contactEmail,
+    String? purchaseOrder,
+    String paymentMethod = 'prepago',
   }) async {
     final rowId = id ?? const Uuid().v4();
     final now = DateTime.now();
@@ -104,8 +159,14 @@ class RentalRepository {
             customerId: Value(customerId),
             name: Value(name),
             address: Value(address),
+            postalCode: Value(postalCode),
+            gpsLat: Value(gpsLat),
+            gpsLng: Value(gpsLng),
             contactName: Value(contactName),
             contactPhone: Value(contactPhone),
+            contactEmail: Value(contactEmail),
+            purchaseOrder: Value(purchaseOrder),
+            paymentMethod: Value(paymentMethod),
             updatedAt: Value(now),
           ),
         );
@@ -115,8 +176,14 @@ class RentalRepository {
       'customer_id': customerId,
       'name': name,
       'address': address,
+      'postal_code': postalCode,
+      'gps_lat': gpsLat,
+      'gps_lng': gpsLng,
       'contact_name': contactName,
       'contact_phone': contactPhone,
+      'contact_email': contactEmail,
+      'purchase_order': purchaseOrder,
+      'payment_method': paymentMethod,
       'updated_at': isoTs(now),
       'deleted_at': null,
     });
@@ -624,6 +691,10 @@ final customerProvider =
   return (db.select(db.customers)..where((c) => c.id.equals(id)))
       .watchSingleOrNull();
 });
+
+final postalCodesProvider = StreamProvider.autoDispose
+    .family<List<PostalCode>, String>((ref, query) =>
+        ref.watch(rentalRepositoryProvider).watchPostalCodes(query: query));
 
 final customerSitesProvider = StreamProvider.autoDispose
     .family<List<CustomerSite>, String>((ref, customerId) =>

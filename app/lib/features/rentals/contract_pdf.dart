@@ -100,7 +100,14 @@ Future<String?> buildContractPdf(WidgetRef ref, String contractId) async {
       if (site != null)
         pw.Text(
             'Obra: ${site.name}'
-            '${site.address == null ? '' : ' — ${site.address}'}',
+            '${site.address == null ? '' : ' — ${site.address}'}'
+            '${site.postalCode == null ? '' : ' (CP ${site.postalCode})'}',
+            style: const pw.TextStyle(fontSize: 10)),
+      if (site != null)
+        pw.Text(
+            'Forma de pago: '
+            '${site.paymentMethod == 'credito' ? 'Crédito' : 'Prepago'}'
+            '${site.purchaseOrder == null ? '' : ' · O.C./Doc.: ${site.purchaseOrder}'}',
             style: const pw.TextStyle(fontSize: 10)),
       if (contact != null)
         pw.Text(
