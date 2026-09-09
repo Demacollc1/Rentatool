@@ -368,6 +368,20 @@ BOSCH GWS14-125
       expect(lines.single.line.amount, 40); // 20 × 2
     });
 
+    test('el retiro pactado manda mientras no haya entrega real',
+        () async {
+      final (contractId, assetId) = await armaContrato();
+      // Retiro en 5 días y devolución en 15: la renta dura 10 días.
+      final now = DateTime.now();
+      await rentals.updateContract(contractId,
+          pickupAt: now.add(const Duration(days: 5)),
+          dueAt: now.add(const Duration(days: 15)));
+      await rentals.addLine(contractId, assetId);
+      final lines = await rentals.watchLines(contractId).first;
+      expect(lines.single.line.rateKind, 'week');
+      expect(lines.single.line.periods, 2); // ceil(10/7)
+    });
+
     test('obras por cliente y entrega con transporte', () async {
       final (contractId, _) = await armaContrato();
       final contract = await rentals.getContract(contractId);

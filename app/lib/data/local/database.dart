@@ -209,6 +209,11 @@ class RentalContracts extends Table with SyncColumns {
   TextColumn get contractNumber => text()();
   TextColumn get customerId => text()();
   TextColumn get status => text().withDefault(const Constant('draft'))();
+
+  /// Fecha de retiro PACTADA (para calcular la tarifa por fechas).
+  DateTimeColumn get pickupAt => dateTime().nullable()();
+
+  /// Momento real de la entrega (manda sobre pickupAt si existe).
   DateTimeColumn get startAt => dateTime().nullable()();
   DateTimeColumn get dueAt => dateTime().nullable()();
   DateTimeColumn get returnedAt => dateTime().nullable()();
@@ -289,7 +294,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 10; // v9 contratos · v10 obras y entrega
+  int get schemaVersion => 11; // v9 contratos · v10 obras · v11 retiro
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -326,6 +331,9 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(rentalContracts, rentalContracts.siteId);
             await m.addColumn(
                 rentalContracts, rentalContracts.deliveryFee);
+          }
+          if (from >= 9 && from < 11) {
+            await m.addColumn(rentalContracts, rentalContracts.pickupAt);
           }
         },
       );

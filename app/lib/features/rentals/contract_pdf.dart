@@ -88,7 +88,8 @@ Future<String?> buildContractPdf(WidgetRef ref, String contractId) async {
       pw.SizedBox(height: 4),
       if (contract.dueAt != null)
         pw.Text(
-            'Devolución pactada: '
+            'Retiro: ${DateFormat('dd/MM/yyyy').format(contract.startAt ?? contract.pickupAt ?? DateTime.now())}'
+            ' · Devolución pactada: '
             '${DateFormat('dd/MM/yyyy').format(contract.dueAt!)}',
             style: const pw.TextStyle(fontSize: 10)),
       pw.Text(

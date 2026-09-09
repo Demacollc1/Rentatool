@@ -369,6 +369,7 @@ List<TableSyncAdapter> buildSyncAdapters() => [
                   contractNumber: Value(r['contract_number'] as String),
                   customerId: Value(r['customer_id'] as String),
                   status: Value((r['status'] ?? 'draft') as String),
+                  pickupAt: Value(tsN(r['pickup_at'])),
                   startAt: Value(tsN(r['start_at'])),
                   dueAt: Value(tsN(r['due_at'])),
                   returnedAt: Value(tsN(r['returned_at'])),

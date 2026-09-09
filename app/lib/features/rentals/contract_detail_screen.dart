@@ -242,28 +242,45 @@ class _HeaderCard extends ConsumerWidget {
         ListTile(
           dense: true,
           leading: const Icon(Icons.event, size: 20),
-          title: Text(contract.dueAt == null
-              ? 'Sin fechas — elige la tarifa manualmente por línea'
-              : 'Devolución pactada: ${DateFormat('dd/MM/yyyy').format(contract.dueAt!)}'),
+          title: Text(() {
+            final df = DateFormat('dd/MM/yyyy');
+            final retiro = contract.startAt ?? contract.pickupAt;
+            if (contract.dueAt == null) {
+              return 'Sin fechas — elige la tarifa manualmente por línea';
+            }
+            return 'Retiro ${retiro == null ? '?' : df.format(retiro)} → '
+                'Devolución ${df.format(contract.dueAt!)}';
+          }()),
           subtitle: contract.dueAt == null
-              ? const Text('Si defines la fecha, la tarifa y los '
-                  'períodos se calculan solos',
+              ? const Text('Si defines retiro y devolución, la tarifa '
+                  'y los períodos se calculan solos',
                   style: TextStyle(fontSize: 11))
               : null,
           trailing: editable || contract.status == 'active'
               ? IconButton(
                   icon: const Icon(Icons.edit_calendar, size: 18),
+                  tooltip: 'Fechas de retiro y devolución',
                   onPressed: () async {
-                    final d = await showDatePicker(
+                    final now = DateTime.now();
+                    final range = await showDateRangePicker(
                       context: context,
-                      initialDate: contract.dueAt ?? DateTime.now(),
                       firstDate: DateTime(2026),
                       lastDate: DateTime(2035),
+                      initialDateRange: contract.dueAt == null
+                          ? null
+                          : DateTimeRange(
+                              start: contract.startAt ??
+                                  contract.pickupAt ??
+                                  now,
+                              end: contract.dueAt!),
+                      helpText: 'Retiro → devolución pactada',
+                      saveText: 'Guardar',
                     );
-                    if (d != null) {
+                    if (range != null) {
                       await ref
                           .read(rentalRepositoryProvider)
-                          .updateContract(contract.id, dueAt: d);
+                          .updateContract(contract.id,
+                              pickupAt: range.start, dueAt: range.end);
                     }
                   })
               : null,

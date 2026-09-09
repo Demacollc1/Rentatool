@@ -8463,6 +8463,17 @@ class $RentalContractsTable extends RentalContracts
     requiredDuringInsert: false,
     defaultValue: const Constant('draft'),
   );
+  static const VerificationMeta _pickupAtMeta = const VerificationMeta(
+    'pickupAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> pickupAt = GeneratedColumn<DateTime>(
+    'pickup_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _startAtMeta = const VerificationMeta(
     'startAt',
   );
@@ -8567,6 +8578,7 @@ class $RentalContractsTable extends RentalContracts
     contractNumber,
     customerId,
     status,
+    pickupAt,
     startAt,
     dueAt,
     returnedAt,
@@ -8629,6 +8641,12 @@ class $RentalContractsTable extends RentalContracts
       context.handle(
         _statusMeta,
         status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('pickup_at')) {
+      context.handle(
+        _pickupAtMeta,
+        pickupAt.isAcceptableOrUnknown(data['pickup_at']!, _pickupAtMeta),
       );
     }
     if (data.containsKey('start_at')) {
@@ -8724,6 +8742,10 @@ class $RentalContractsTable extends RentalContracts
         DriftSqlType.string,
         data['${effectivePrefix}status'],
       )!,
+      pickupAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}pickup_at'],
+      ),
       startAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}start_at'],
@@ -8778,6 +8800,11 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
   final String contractNumber;
   final String customerId;
   final String status;
+
+  /// Fecha de retiro PACTADA (para calcular la tarifa por fechas).
+  final DateTime? pickupAt;
+
+  /// Momento real de la entrega (manda sobre pickupAt si existe).
   final DateTime? startAt;
   final DateTime? dueAt;
   final DateTime? returnedAt;
@@ -8800,6 +8827,7 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
     required this.contractNumber,
     required this.customerId,
     required this.status,
+    this.pickupAt,
     this.startAt,
     this.dueAt,
     this.returnedAt,
@@ -8821,6 +8849,9 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
     map['contract_number'] = Variable<String>(contractNumber);
     map['customer_id'] = Variable<String>(customerId);
     map['status'] = Variable<String>(status);
+    if (!nullToAbsent || pickupAt != null) {
+      map['pickup_at'] = Variable<DateTime>(pickupAt);
+    }
     if (!nullToAbsent || startAt != null) {
       map['start_at'] = Variable<DateTime>(startAt);
     }
@@ -8855,6 +8886,9 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
       contractNumber: Value(contractNumber),
       customerId: Value(customerId),
       status: Value(status),
+      pickupAt: pickupAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pickupAt),
       startAt: startAt == null && nullToAbsent
           ? const Value.absent()
           : Value(startAt),
@@ -8891,6 +8925,7 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
       contractNumber: serializer.fromJson<String>(json['contractNumber']),
       customerId: serializer.fromJson<String>(json['customerId']),
       status: serializer.fromJson<String>(json['status']),
+      pickupAt: serializer.fromJson<DateTime?>(json['pickupAt']),
       startAt: serializer.fromJson<DateTime?>(json['startAt']),
       dueAt: serializer.fromJson<DateTime?>(json['dueAt']),
       returnedAt: serializer.fromJson<DateTime?>(json['returnedAt']),
@@ -8912,6 +8947,7 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
       'contractNumber': serializer.toJson<String>(contractNumber),
       'customerId': serializer.toJson<String>(customerId),
       'status': serializer.toJson<String>(status),
+      'pickupAt': serializer.toJson<DateTime?>(pickupAt),
       'startAt': serializer.toJson<DateTime?>(startAt),
       'dueAt': serializer.toJson<DateTime?>(dueAt),
       'returnedAt': serializer.toJson<DateTime?>(returnedAt),
@@ -8931,6 +8967,7 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
     String? contractNumber,
     String? customerId,
     String? status,
+    Value<DateTime?> pickupAt = const Value.absent(),
     Value<DateTime?> startAt = const Value.absent(),
     Value<DateTime?> dueAt = const Value.absent(),
     Value<DateTime?> returnedAt = const Value.absent(),
@@ -8947,6 +8984,7 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
     contractNumber: contractNumber ?? this.contractNumber,
     customerId: customerId ?? this.customerId,
     status: status ?? this.status,
+    pickupAt: pickupAt.present ? pickupAt.value : this.pickupAt,
     startAt: startAt.present ? startAt.value : this.startAt,
     dueAt: dueAt.present ? dueAt.value : this.dueAt,
     returnedAt: returnedAt.present ? returnedAt.value : this.returnedAt,
@@ -8969,6 +9007,7 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
           ? data.customerId.value
           : this.customerId,
       status: data.status.present ? data.status.value : this.status,
+      pickupAt: data.pickupAt.present ? data.pickupAt.value : this.pickupAt,
       startAt: data.startAt.present ? data.startAt.value : this.startAt,
       dueAt: data.dueAt.present ? data.dueAt.value : this.dueAt,
       returnedAt: data.returnedAt.present
@@ -8996,6 +9035,7 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
           ..write('contractNumber: $contractNumber, ')
           ..write('customerId: $customerId, ')
           ..write('status: $status, ')
+          ..write('pickupAt: $pickupAt, ')
           ..write('startAt: $startAt, ')
           ..write('dueAt: $dueAt, ')
           ..write('returnedAt: $returnedAt, ')
@@ -9017,6 +9057,7 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
     contractNumber,
     customerId,
     status,
+    pickupAt,
     startAt,
     dueAt,
     returnedAt,
@@ -9037,6 +9078,7 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
           other.contractNumber == this.contractNumber &&
           other.customerId == this.customerId &&
           other.status == this.status &&
+          other.pickupAt == this.pickupAt &&
           other.startAt == this.startAt &&
           other.dueAt == this.dueAt &&
           other.returnedAt == this.returnedAt &&
@@ -9055,6 +9097,7 @@ class RentalContractsCompanion extends UpdateCompanion<RentalContract> {
   final Value<String> contractNumber;
   final Value<String> customerId;
   final Value<String> status;
+  final Value<DateTime?> pickupAt;
   final Value<DateTime?> startAt;
   final Value<DateTime?> dueAt;
   final Value<DateTime?> returnedAt;
@@ -9072,6 +9115,7 @@ class RentalContractsCompanion extends UpdateCompanion<RentalContract> {
     this.contractNumber = const Value.absent(),
     this.customerId = const Value.absent(),
     this.status = const Value.absent(),
+    this.pickupAt = const Value.absent(),
     this.startAt = const Value.absent(),
     this.dueAt = const Value.absent(),
     this.returnedAt = const Value.absent(),
@@ -9090,6 +9134,7 @@ class RentalContractsCompanion extends UpdateCompanion<RentalContract> {
     required String contractNumber,
     required String customerId,
     this.status = const Value.absent(),
+    this.pickupAt = const Value.absent(),
     this.startAt = const Value.absent(),
     this.dueAt = const Value.absent(),
     this.returnedAt = const Value.absent(),
@@ -9110,6 +9155,7 @@ class RentalContractsCompanion extends UpdateCompanion<RentalContract> {
     Expression<String>? contractNumber,
     Expression<String>? customerId,
     Expression<String>? status,
+    Expression<DateTime>? pickupAt,
     Expression<DateTime>? startAt,
     Expression<DateTime>? dueAt,
     Expression<DateTime>? returnedAt,
@@ -9128,6 +9174,7 @@ class RentalContractsCompanion extends UpdateCompanion<RentalContract> {
       if (contractNumber != null) 'contract_number': contractNumber,
       if (customerId != null) 'customer_id': customerId,
       if (status != null) 'status': status,
+      if (pickupAt != null) 'pickup_at': pickupAt,
       if (startAt != null) 'start_at': startAt,
       if (dueAt != null) 'due_at': dueAt,
       if (returnedAt != null) 'returned_at': returnedAt,
@@ -9148,6 +9195,7 @@ class RentalContractsCompanion extends UpdateCompanion<RentalContract> {
     Value<String>? contractNumber,
     Value<String>? customerId,
     Value<String>? status,
+    Value<DateTime?>? pickupAt,
     Value<DateTime?>? startAt,
     Value<DateTime?>? dueAt,
     Value<DateTime?>? returnedAt,
@@ -9166,6 +9214,7 @@ class RentalContractsCompanion extends UpdateCompanion<RentalContract> {
       contractNumber: contractNumber ?? this.contractNumber,
       customerId: customerId ?? this.customerId,
       status: status ?? this.status,
+      pickupAt: pickupAt ?? this.pickupAt,
       startAt: startAt ?? this.startAt,
       dueAt: dueAt ?? this.dueAt,
       returnedAt: returnedAt ?? this.returnedAt,
@@ -9199,6 +9248,9 @@ class RentalContractsCompanion extends UpdateCompanion<RentalContract> {
     }
     if (status.present) {
       map['status'] = Variable<String>(status.value);
+    }
+    if (pickupAt.present) {
+      map['pickup_at'] = Variable<DateTime>(pickupAt.value);
     }
     if (startAt.present) {
       map['start_at'] = Variable<DateTime>(startAt.value);
@@ -9242,6 +9294,7 @@ class RentalContractsCompanion extends UpdateCompanion<RentalContract> {
           ..write('contractNumber: $contractNumber, ')
           ..write('customerId: $customerId, ')
           ..write('status: $status, ')
+          ..write('pickupAt: $pickupAt, ')
           ..write('startAt: $startAt, ')
           ..write('dueAt: $dueAt, ')
           ..write('returnedAt: $returnedAt, ')
@@ -15079,6 +15132,7 @@ typedef $$RentalContractsTableCreateCompanionBuilder =
       required String contractNumber,
       required String customerId,
       Value<String> status,
+      Value<DateTime?> pickupAt,
       Value<DateTime?> startAt,
       Value<DateTime?> dueAt,
       Value<DateTime?> returnedAt,
@@ -15098,6 +15152,7 @@ typedef $$RentalContractsTableUpdateCompanionBuilder =
       Value<String> contractNumber,
       Value<String> customerId,
       Value<String> status,
+      Value<DateTime?> pickupAt,
       Value<DateTime?> startAt,
       Value<DateTime?> dueAt,
       Value<DateTime?> returnedAt,
@@ -15146,6 +15201,11 @@ class $$RentalContractsTableFilterComposer
 
   ColumnFilters<String> get status => $composableBuilder(
     column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get pickupAt => $composableBuilder(
+    column: $table.pickupAt,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -15234,6 +15294,11 @@ class $$RentalContractsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<DateTime> get pickupAt => $composableBuilder(
+    column: $table.pickupAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get startAt => $composableBuilder(
     column: $table.startAt,
     builder: (column) => ColumnOrderings(column),
@@ -15310,6 +15375,9 @@ class $$RentalContractsTableAnnotationComposer
 
   GeneratedColumn<String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get pickupAt =>
+      $composableBuilder(column: $table.pickupAt, builder: (column) => column);
 
   GeneratedColumn<DateTime> get startAt =>
       $composableBuilder(column: $table.startAt, builder: (column) => column);
@@ -15388,6 +15456,7 @@ class $$RentalContractsTableTableManager
                 Value<String> contractNumber = const Value.absent(),
                 Value<String> customerId = const Value.absent(),
                 Value<String> status = const Value.absent(),
+                Value<DateTime?> pickupAt = const Value.absent(),
                 Value<DateTime?> startAt = const Value.absent(),
                 Value<DateTime?> dueAt = const Value.absent(),
                 Value<DateTime?> returnedAt = const Value.absent(),
@@ -15405,6 +15474,7 @@ class $$RentalContractsTableTableManager
                 contractNumber: contractNumber,
                 customerId: customerId,
                 status: status,
+                pickupAt: pickupAt,
                 startAt: startAt,
                 dueAt: dueAt,
                 returnedAt: returnedAt,
@@ -15424,6 +15494,7 @@ class $$RentalContractsTableTableManager
                 required String contractNumber,
                 required String customerId,
                 Value<String> status = const Value.absent(),
+                Value<DateTime?> pickupAt = const Value.absent(),
                 Value<DateTime?> startAt = const Value.absent(),
                 Value<DateTime?> dueAt = const Value.absent(),
                 Value<DateTime?> returnedAt = const Value.absent(),
@@ -15441,6 +15512,7 @@ class $$RentalContractsTableTableManager
                 contractNumber: contractNumber,
                 customerId: customerId,
                 status: status,
+                pickupAt: pickupAt,
                 startAt: startAt,
                 dueAt: dueAt,
                 returnedAt: returnedAt,

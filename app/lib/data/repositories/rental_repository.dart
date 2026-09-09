@@ -169,6 +169,7 @@ class RentalRepository {
 
   Future<void> updateContract(
     String id, {
+    DateTime? pickupAt,
     DateTime? dueAt,
     double? deposit,
     String? notes,
@@ -179,6 +180,8 @@ class RentalRepository {
   }) async {
     await (_db.update(_db.rentalContracts)..where((c) => c.id.equals(id)))
         .write(RentalContractsCompanion(
+      pickupAt:
+          pickupAt == null ? const Value.absent() : Value(pickupAt),
       dueAt: dueAt == null ? const Value.absent() : Value(dueAt),
       deposit: deposit == null ? const Value.absent() : Value(deposit),
       notes: notes == null ? const Value.absent() : Value(notes),
@@ -193,7 +196,9 @@ class RentalRepository {
           : Value(deliveryFee),
       updatedAt: Value(DateTime.now()),
     ));
-    if (dueAt != null) await recalcLinesFromDates(id);
+    if (dueAt != null || pickupAt != null) {
+      await recalcLinesFromDates(id);
+    }
     await _enqueueContract(id);
   }
 
@@ -270,8 +275,8 @@ class RentalRepository {
     final c = await getContract(contractId);
     if (c == null || c.dueAt == null) return;
     if (c.status != 'draft' && c.status != 'active') return;
-    final (kind, periods) =
-        rentalKindForDates(c.startAt ?? DateTime.now(), c.dueAt!);
+    final (kind, periods) = rentalKindForDates(
+        c.startAt ?? c.pickupAt ?? DateTime.now(), c.dueAt!);
     for (final l in await _livingLines(contractId)) {
       if (l.returnedAt != null) continue;
       final model = await _catalog.getModel(l.toolModelId);
@@ -315,7 +320,8 @@ class RentalRepository {
     var periods = 1.0;
     if (contract?.dueAt != null) {
       (kind, periods) = rentalKindForDates(
-          contract!.startAt ?? DateTime.now(), contract.dueAt!);
+          contract!.startAt ?? contract.pickupAt ?? DateTime.now(),
+          contract.dueAt!);
     }
     final rate = rateFor(model, kind);
     final rowId = const Uuid().v4();
@@ -488,6 +494,7 @@ class RentalRepository {
       'contract_number': c.contractNumber,
       'customer_id': c.customerId,
       'status': c.status,
+      'pickup_at': isoTsN(c.pickupAt),
       'start_at': isoTsN(c.startAt),
       'due_at': isoTsN(c.dueAt),
       'returned_at': isoTsN(c.returnedAt),
