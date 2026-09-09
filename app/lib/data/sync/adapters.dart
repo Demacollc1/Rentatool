@@ -378,8 +378,39 @@ List<TableSyncAdapter> buildSyncAdapters() => [
                       Value((r['delivery_method'] ?? 'pickup') as String),
                   siteId: Value(r['site_id'] as String?),
                   deliveryFee: Value(_d(r['delivery_fee'])),
+                  acceptanceToken:
+                      Value(r['acceptance_token'] as String?),
                   notes: Value(r['notes'] as String?),
                   createdBy: Value(r['created_by'] as String?),
+                  updatedAt: Value(remoteUpdated),
+                  deletedAt: Value(tsN(r['deleted_at'])),
+                ),
+              );
+          return true;
+        },
+      ),
+      TableSyncAdapter(
+        remoteTable: 'contract_acceptances',
+        mergeRemote: (db, r) async {
+          final local = await (db.select(db.contractAcceptances)
+                ..where((x) => x.id.equals(r['id'] as String)))
+              .getSingleOrNull();
+          final remoteUpdated = ts(r['updated_at']);
+          if (!newer(local?.updatedAt, remoteUpdated)) return false;
+          await db.into(db.contractAcceptances).insertOnConflictUpdate(
+                ContractAcceptancesCompanion(
+                  id: Value(r['id'] as String),
+                  contractId: Value(r['contract_id'] as String),
+                  acceptedAt: Value(tsN(r['accepted_at'])),
+                  signerName: Value(r['signer_name'] as String?),
+                  signerIdNumber:
+                      Value(r['signer_id_number'] as String?),
+                  termsAccepted:
+                      Value((r['terms_accepted'] ?? false) as bool),
+                  receiptConfirmed:
+                      Value((r['receipt_confirmed'] ?? false) as bool),
+                  signaturePath: Value(r['signature_path'] as String?),
+                  idPhotoPath: Value(r['id_photo_path'] as String?),
                   updatedAt: Value(remoteUpdated),
                   deletedAt: Value(tsN(r['deleted_at'])),
                 ),

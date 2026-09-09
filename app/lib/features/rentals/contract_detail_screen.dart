@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../data/local/database.dart';
@@ -65,6 +66,8 @@ class ContractDetailScreen extends ConsumerWidget {
             padding: const EdgeInsets.only(bottom: 96),
             children: [
               _HeaderCard(contract: c, editable: draft),
+              if (c.status == 'draft' || c.status == 'active')
+                _AcceptanceCard(contract: c),
               lines.when(
                 loading: () => const Padding(
                     padding: EdgeInsets.all(24),
@@ -329,6 +332,129 @@ class _HeaderCard extends ConsumerWidget {
       await ref.read(rentalRepositoryProvider).updateContract(contract.id,
           deposit: double.tryParse(ctrl.text.replaceAll(',', '.')) ?? 0);
     }
+  }
+}
+
+/// Aceptación documental del cliente: QR en mostrador o link por
+/// WhatsApp/email; muestra el checklist cuando el cliente firma.
+class _AcceptanceCard extends ConsumerWidget {
+  const _AcceptanceCard({required this.contract});
+
+  final RentalContract contract;
+
+  static const _portalBase = 'https://demaco-portal.demacollc.workers.dev';
+
+  String? get _url => contract.acceptanceToken == null
+      ? null
+      : '$_portalBase/?t=${contract.acceptanceToken}';
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final acc = ref.watch(acceptanceProvider(contract.id)).value;
+    final firmado = acc?.acceptedAt != null;
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
+        child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(children: [
+                Icon(firmado ? Icons.verified : Icons.pending_actions,
+                    size: 20,
+                    color: firmado ? Colors.green : Colors.orange),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                      firmado
+                          ? 'Aceptado y firmado por el cliente'
+                          : 'Aceptación del cliente pendiente',
+                      style:
+                          const TextStyle(fontWeight: FontWeight.w600)),
+                ),
+                IconButton(
+                    icon: const Icon(Icons.refresh, size: 20),
+                    tooltip: 'Actualizar estado',
+                    onPressed: () async {
+                      await ref
+                          .read(syncServiceProvider)
+                          .syncAll();
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content:
+                                    Text('Estado actualizado')));
+                      }
+                    }),
+              ]),
+              if (firmado) ...[
+                _check('Contrato firmado por ${acc!.signerName ?? ''}'),
+                _check('Términos y condiciones aceptados'),
+                _check('Recepción de herramienta confirmada'),
+                _check(acc.idPhotoPath != null
+                    ? 'Cédula registrada con foto '
+                        '(${acc.signerIdNumber ?? ''})'
+                    : 'Cédula: ${acc.signerIdNumber ?? ''}'),
+              ] else if (_url != null)
+                Row(children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => _showQr(context),
+                      icon: const Icon(Icons.qr_code_2),
+                      label: const Text('QR mostrador'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => SharePlus.instance.share(
+                          ShareParams(
+                              text: 'DEMACO Rent a Tool — contrato '
+                                  '${contract.contractNumber}. Revisa, '
+                                  'acepta y firma aquí: $_url')),
+                      icon: const Icon(Icons.send),
+                      label: const Text('Enviar link'),
+                    ),
+                  ),
+                ])
+              else
+                const Text('Sincroniza una vez para generar el link',
+                    style: TextStyle(fontSize: 12)),
+            ]),
+      ),
+    );
+  }
+
+  Widget _check(String texto) => Padding(
+        padding: const EdgeInsets.only(top: 4),
+        child: Row(children: [
+          const Icon(Icons.check_circle, size: 16, color: Colors.green),
+          const SizedBox(width: 6),
+          Expanded(child: Text(texto, style: const TextStyle(fontSize: 13))),
+        ]),
+      );
+
+  void _showQr(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Escanea con tu teléfono\n'
+            '(${contract.contractNumber})'),
+        content: SizedBox(
+          width: 260,
+          height: 260,
+          child: QrImageView(
+            data: _url!,
+            backgroundColor: Colors.white,
+          ),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cerrar')),
+        ],
+      ),
+    );
   }
 }
 

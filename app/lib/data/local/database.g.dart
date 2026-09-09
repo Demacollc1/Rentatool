@@ -8550,6 +8550,17 @@ class $RentalContractsTable extends RentalContracts
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _acceptanceTokenMeta = const VerificationMeta(
+    'acceptanceToken',
+  );
+  @override
+  late final GeneratedColumn<String> acceptanceToken = GeneratedColumn<String>(
+    'acceptance_token',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _notesMeta = const VerificationMeta('notes');
   @override
   late final GeneratedColumn<String> notes = GeneratedColumn<String>(
@@ -8586,6 +8597,7 @@ class $RentalContractsTable extends RentalContracts
     deliveryMethod,
     siteId,
     deliveryFee,
+    acceptanceToken,
     notes,
     createdBy,
   ];
@@ -8697,6 +8709,15 @@ class $RentalContractsTable extends RentalContracts
         ),
       );
     }
+    if (data.containsKey('acceptance_token')) {
+      context.handle(
+        _acceptanceTokenMeta,
+        acceptanceToken.isAcceptableOrUnknown(
+          data['acceptance_token']!,
+          _acceptanceTokenMeta,
+        ),
+      );
+    }
     if (data.containsKey('notes')) {
       context.handle(
         _notesMeta,
@@ -8774,6 +8795,10 @@ class $RentalContractsTable extends RentalContracts
         DriftSqlType.double,
         data['${effectivePrefix}delivery_fee'],
       )!,
+      acceptanceToken: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}acceptance_token'],
+      ),
       notes: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}notes'],
@@ -8818,6 +8843,9 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
   /// Obra del cliente donde estará la herramienta (si es envío).
   final String? siteId;
   final double deliveryFee;
+
+  /// Secreto del link público del portal de aceptación (F2b).
+  final String? acceptanceToken;
   final String? notes;
   final String? createdBy;
   const RentalContract({
@@ -8835,6 +8863,7 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
     required this.deliveryMethod,
     this.siteId,
     required this.deliveryFee,
+    this.acceptanceToken,
     this.notes,
     this.createdBy,
   });
@@ -8867,6 +8896,9 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
       map['site_id'] = Variable<String>(siteId);
     }
     map['delivery_fee'] = Variable<double>(deliveryFee);
+    if (!nullToAbsent || acceptanceToken != null) {
+      map['acceptance_token'] = Variable<String>(acceptanceToken);
+    }
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
     }
@@ -8904,6 +8936,9 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
           ? const Value.absent()
           : Value(siteId),
       deliveryFee: Value(deliveryFee),
+      acceptanceToken: acceptanceToken == null && nullToAbsent
+          ? const Value.absent()
+          : Value(acceptanceToken),
       notes: notes == null && nullToAbsent
           ? const Value.absent()
           : Value(notes),
@@ -8933,6 +8968,7 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
       deliveryMethod: serializer.fromJson<String>(json['deliveryMethod']),
       siteId: serializer.fromJson<String?>(json['siteId']),
       deliveryFee: serializer.fromJson<double>(json['deliveryFee']),
+      acceptanceToken: serializer.fromJson<String?>(json['acceptanceToken']),
       notes: serializer.fromJson<String?>(json['notes']),
       createdBy: serializer.fromJson<String?>(json['createdBy']),
     );
@@ -8955,6 +8991,7 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
       'deliveryMethod': serializer.toJson<String>(deliveryMethod),
       'siteId': serializer.toJson<String?>(siteId),
       'deliveryFee': serializer.toJson<double>(deliveryFee),
+      'acceptanceToken': serializer.toJson<String?>(acceptanceToken),
       'notes': serializer.toJson<String?>(notes),
       'createdBy': serializer.toJson<String?>(createdBy),
     };
@@ -8975,6 +9012,7 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
     String? deliveryMethod,
     Value<String?> siteId = const Value.absent(),
     double? deliveryFee,
+    Value<String?> acceptanceToken = const Value.absent(),
     Value<String?> notes = const Value.absent(),
     Value<String?> createdBy = const Value.absent(),
   }) => RentalContract(
@@ -8992,6 +9030,9 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
     deliveryMethod: deliveryMethod ?? this.deliveryMethod,
     siteId: siteId.present ? siteId.value : this.siteId,
     deliveryFee: deliveryFee ?? this.deliveryFee,
+    acceptanceToken: acceptanceToken.present
+        ? acceptanceToken.value
+        : this.acceptanceToken,
     notes: notes.present ? notes.value : this.notes,
     createdBy: createdBy.present ? createdBy.value : this.createdBy,
   );
@@ -9021,6 +9062,9 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
       deliveryFee: data.deliveryFee.present
           ? data.deliveryFee.value
           : this.deliveryFee,
+      acceptanceToken: data.acceptanceToken.present
+          ? data.acceptanceToken.value
+          : this.acceptanceToken,
       notes: data.notes.present ? data.notes.value : this.notes,
       createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
     );
@@ -9043,6 +9087,7 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
           ..write('deliveryMethod: $deliveryMethod, ')
           ..write('siteId: $siteId, ')
           ..write('deliveryFee: $deliveryFee, ')
+          ..write('acceptanceToken: $acceptanceToken, ')
           ..write('notes: $notes, ')
           ..write('createdBy: $createdBy')
           ..write(')'))
@@ -9065,6 +9110,7 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
     deliveryMethod,
     siteId,
     deliveryFee,
+    acceptanceToken,
     notes,
     createdBy,
   );
@@ -9086,6 +9132,7 @@ class RentalContract extends DataClass implements Insertable<RentalContract> {
           other.deliveryMethod == this.deliveryMethod &&
           other.siteId == this.siteId &&
           other.deliveryFee == this.deliveryFee &&
+          other.acceptanceToken == this.acceptanceToken &&
           other.notes == this.notes &&
           other.createdBy == this.createdBy);
 }
@@ -9105,6 +9152,7 @@ class RentalContractsCompanion extends UpdateCompanion<RentalContract> {
   final Value<String> deliveryMethod;
   final Value<String?> siteId;
   final Value<double> deliveryFee;
+  final Value<String?> acceptanceToken;
   final Value<String?> notes;
   final Value<String?> createdBy;
   final Value<int> rowid;
@@ -9123,6 +9171,7 @@ class RentalContractsCompanion extends UpdateCompanion<RentalContract> {
     this.deliveryMethod = const Value.absent(),
     this.siteId = const Value.absent(),
     this.deliveryFee = const Value.absent(),
+    this.acceptanceToken = const Value.absent(),
     this.notes = const Value.absent(),
     this.createdBy = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -9142,6 +9191,7 @@ class RentalContractsCompanion extends UpdateCompanion<RentalContract> {
     this.deliveryMethod = const Value.absent(),
     this.siteId = const Value.absent(),
     this.deliveryFee = const Value.absent(),
+    this.acceptanceToken = const Value.absent(),
     this.notes = const Value.absent(),
     this.createdBy = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -9163,6 +9213,7 @@ class RentalContractsCompanion extends UpdateCompanion<RentalContract> {
     Expression<String>? deliveryMethod,
     Expression<String>? siteId,
     Expression<double>? deliveryFee,
+    Expression<String>? acceptanceToken,
     Expression<String>? notes,
     Expression<String>? createdBy,
     Expression<int>? rowid,
@@ -9182,6 +9233,7 @@ class RentalContractsCompanion extends UpdateCompanion<RentalContract> {
       if (deliveryMethod != null) 'delivery_method': deliveryMethod,
       if (siteId != null) 'site_id': siteId,
       if (deliveryFee != null) 'delivery_fee': deliveryFee,
+      if (acceptanceToken != null) 'acceptance_token': acceptanceToken,
       if (notes != null) 'notes': notes,
       if (createdBy != null) 'created_by': createdBy,
       if (rowid != null) 'rowid': rowid,
@@ -9203,6 +9255,7 @@ class RentalContractsCompanion extends UpdateCompanion<RentalContract> {
     Value<String>? deliveryMethod,
     Value<String?>? siteId,
     Value<double>? deliveryFee,
+    Value<String?>? acceptanceToken,
     Value<String?>? notes,
     Value<String?>? createdBy,
     Value<int>? rowid,
@@ -9222,6 +9275,7 @@ class RentalContractsCompanion extends UpdateCompanion<RentalContract> {
       deliveryMethod: deliveryMethod ?? this.deliveryMethod,
       siteId: siteId ?? this.siteId,
       deliveryFee: deliveryFee ?? this.deliveryFee,
+      acceptanceToken: acceptanceToken ?? this.acceptanceToken,
       notes: notes ?? this.notes,
       createdBy: createdBy ?? this.createdBy,
       rowid: rowid ?? this.rowid,
@@ -9273,6 +9327,9 @@ class RentalContractsCompanion extends UpdateCompanion<RentalContract> {
     if (deliveryFee.present) {
       map['delivery_fee'] = Variable<double>(deliveryFee.value);
     }
+    if (acceptanceToken.present) {
+      map['acceptance_token'] = Variable<String>(acceptanceToken.value);
+    }
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
     }
@@ -9302,6 +9359,7 @@ class RentalContractsCompanion extends UpdateCompanion<RentalContract> {
           ..write('deliveryMethod: $deliveryMethod, ')
           ..write('siteId: $siteId, ')
           ..write('deliveryFee: $deliveryFee, ')
+          ..write('acceptanceToken: $acceptanceToken, ')
           ..write('notes: $notes, ')
           ..write('createdBy: $createdBy, ')
           ..write('rowid: $rowid')
@@ -10174,6 +10232,704 @@ class RentalLinesCompanion extends UpdateCompanion<RentalLine> {
   }
 }
 
+class $ContractAcceptancesTable extends ContractAcceptances
+    with TableInfo<$ContractAcceptancesTable, ContractAcceptance> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ContractAcceptancesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _contractIdMeta = const VerificationMeta(
+    'contractId',
+  );
+  @override
+  late final GeneratedColumn<String> contractId = GeneratedColumn<String>(
+    'contract_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _acceptedAtMeta = const VerificationMeta(
+    'acceptedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> acceptedAt = GeneratedColumn<DateTime>(
+    'accepted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _signerNameMeta = const VerificationMeta(
+    'signerName',
+  );
+  @override
+  late final GeneratedColumn<String> signerName = GeneratedColumn<String>(
+    'signer_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _signerIdNumberMeta = const VerificationMeta(
+    'signerIdNumber',
+  );
+  @override
+  late final GeneratedColumn<String> signerIdNumber = GeneratedColumn<String>(
+    'signer_id_number',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _termsAcceptedMeta = const VerificationMeta(
+    'termsAccepted',
+  );
+  @override
+  late final GeneratedColumn<bool> termsAccepted = GeneratedColumn<bool>(
+    'terms_accepted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("terms_accepted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _receiptConfirmedMeta = const VerificationMeta(
+    'receiptConfirmed',
+  );
+  @override
+  late final GeneratedColumn<bool> receiptConfirmed = GeneratedColumn<bool>(
+    'receipt_confirmed',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("receipt_confirmed" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _signaturePathMeta = const VerificationMeta(
+    'signaturePath',
+  );
+  @override
+  late final GeneratedColumn<String> signaturePath = GeneratedColumn<String>(
+    'signature_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _idPhotoPathMeta = const VerificationMeta(
+    'idPhotoPath',
+  );
+  @override
+  late final GeneratedColumn<String> idPhotoPath = GeneratedColumn<String>(
+    'id_photo_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    updatedAt,
+    deletedAt,
+    contractId,
+    acceptedAt,
+    signerName,
+    signerIdNumber,
+    termsAccepted,
+    receiptConfirmed,
+    signaturePath,
+    idPhotoPath,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'contract_acceptances';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ContractAcceptance> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('contract_id')) {
+      context.handle(
+        _contractIdMeta,
+        contractId.isAcceptableOrUnknown(data['contract_id']!, _contractIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contractIdMeta);
+    }
+    if (data.containsKey('accepted_at')) {
+      context.handle(
+        _acceptedAtMeta,
+        acceptedAt.isAcceptableOrUnknown(data['accepted_at']!, _acceptedAtMeta),
+      );
+    }
+    if (data.containsKey('signer_name')) {
+      context.handle(
+        _signerNameMeta,
+        signerName.isAcceptableOrUnknown(data['signer_name']!, _signerNameMeta),
+      );
+    }
+    if (data.containsKey('signer_id_number')) {
+      context.handle(
+        _signerIdNumberMeta,
+        signerIdNumber.isAcceptableOrUnknown(
+          data['signer_id_number']!,
+          _signerIdNumberMeta,
+        ),
+      );
+    }
+    if (data.containsKey('terms_accepted')) {
+      context.handle(
+        _termsAcceptedMeta,
+        termsAccepted.isAcceptableOrUnknown(
+          data['terms_accepted']!,
+          _termsAcceptedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('receipt_confirmed')) {
+      context.handle(
+        _receiptConfirmedMeta,
+        receiptConfirmed.isAcceptableOrUnknown(
+          data['receipt_confirmed']!,
+          _receiptConfirmedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('signature_path')) {
+      context.handle(
+        _signaturePathMeta,
+        signaturePath.isAcceptableOrUnknown(
+          data['signature_path']!,
+          _signaturePathMeta,
+        ),
+      );
+    }
+    if (data.containsKey('id_photo_path')) {
+      context.handle(
+        _idPhotoPathMeta,
+        idPhotoPath.isAcceptableOrUnknown(
+          data['id_photo_path']!,
+          _idPhotoPathMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ContractAcceptance map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ContractAcceptance(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      contractId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contract_id'],
+      )!,
+      acceptedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}accepted_at'],
+      ),
+      signerName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}signer_name'],
+      ),
+      signerIdNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}signer_id_number'],
+      ),
+      termsAccepted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}terms_accepted'],
+      )!,
+      receiptConfirmed: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}receipt_confirmed'],
+      )!,
+      signaturePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}signature_path'],
+      ),
+      idPhotoPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id_photo_path'],
+      ),
+    );
+  }
+
+  @override
+  $ContractAcceptancesTable createAlias(String alias) {
+    return $ContractAcceptancesTable(attachedDatabase, alias);
+  }
+}
+
+class ContractAcceptance extends DataClass
+    implements Insertable<ContractAcceptance> {
+  final String id;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final String contractId;
+  final DateTime? acceptedAt;
+  final String? signerName;
+  final String? signerIdNumber;
+  final bool termsAccepted;
+  final bool receiptConfirmed;
+  final String? signaturePath;
+  final String? idPhotoPath;
+  const ContractAcceptance({
+    required this.id,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.contractId,
+    this.acceptedAt,
+    this.signerName,
+    this.signerIdNumber,
+    required this.termsAccepted,
+    required this.receiptConfirmed,
+    this.signaturePath,
+    this.idPhotoPath,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['contract_id'] = Variable<String>(contractId);
+    if (!nullToAbsent || acceptedAt != null) {
+      map['accepted_at'] = Variable<DateTime>(acceptedAt);
+    }
+    if (!nullToAbsent || signerName != null) {
+      map['signer_name'] = Variable<String>(signerName);
+    }
+    if (!nullToAbsent || signerIdNumber != null) {
+      map['signer_id_number'] = Variable<String>(signerIdNumber);
+    }
+    map['terms_accepted'] = Variable<bool>(termsAccepted);
+    map['receipt_confirmed'] = Variable<bool>(receiptConfirmed);
+    if (!nullToAbsent || signaturePath != null) {
+      map['signature_path'] = Variable<String>(signaturePath);
+    }
+    if (!nullToAbsent || idPhotoPath != null) {
+      map['id_photo_path'] = Variable<String>(idPhotoPath);
+    }
+    return map;
+  }
+
+  ContractAcceptancesCompanion toCompanion(bool nullToAbsent) {
+    return ContractAcceptancesCompanion(
+      id: Value(id),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      contractId: Value(contractId),
+      acceptedAt: acceptedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(acceptedAt),
+      signerName: signerName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(signerName),
+      signerIdNumber: signerIdNumber == null && nullToAbsent
+          ? const Value.absent()
+          : Value(signerIdNumber),
+      termsAccepted: Value(termsAccepted),
+      receiptConfirmed: Value(receiptConfirmed),
+      signaturePath: signaturePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(signaturePath),
+      idPhotoPath: idPhotoPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(idPhotoPath),
+    );
+  }
+
+  factory ContractAcceptance.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ContractAcceptance(
+      id: serializer.fromJson<String>(json['id']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      contractId: serializer.fromJson<String>(json['contractId']),
+      acceptedAt: serializer.fromJson<DateTime?>(json['acceptedAt']),
+      signerName: serializer.fromJson<String?>(json['signerName']),
+      signerIdNumber: serializer.fromJson<String?>(json['signerIdNumber']),
+      termsAccepted: serializer.fromJson<bool>(json['termsAccepted']),
+      receiptConfirmed: serializer.fromJson<bool>(json['receiptConfirmed']),
+      signaturePath: serializer.fromJson<String?>(json['signaturePath']),
+      idPhotoPath: serializer.fromJson<String?>(json['idPhotoPath']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'contractId': serializer.toJson<String>(contractId),
+      'acceptedAt': serializer.toJson<DateTime?>(acceptedAt),
+      'signerName': serializer.toJson<String?>(signerName),
+      'signerIdNumber': serializer.toJson<String?>(signerIdNumber),
+      'termsAccepted': serializer.toJson<bool>(termsAccepted),
+      'receiptConfirmed': serializer.toJson<bool>(receiptConfirmed),
+      'signaturePath': serializer.toJson<String?>(signaturePath),
+      'idPhotoPath': serializer.toJson<String?>(idPhotoPath),
+    };
+  }
+
+  ContractAcceptance copyWith({
+    String? id,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    String? contractId,
+    Value<DateTime?> acceptedAt = const Value.absent(),
+    Value<String?> signerName = const Value.absent(),
+    Value<String?> signerIdNumber = const Value.absent(),
+    bool? termsAccepted,
+    bool? receiptConfirmed,
+    Value<String?> signaturePath = const Value.absent(),
+    Value<String?> idPhotoPath = const Value.absent(),
+  }) => ContractAcceptance(
+    id: id ?? this.id,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    contractId: contractId ?? this.contractId,
+    acceptedAt: acceptedAt.present ? acceptedAt.value : this.acceptedAt,
+    signerName: signerName.present ? signerName.value : this.signerName,
+    signerIdNumber: signerIdNumber.present
+        ? signerIdNumber.value
+        : this.signerIdNumber,
+    termsAccepted: termsAccepted ?? this.termsAccepted,
+    receiptConfirmed: receiptConfirmed ?? this.receiptConfirmed,
+    signaturePath: signaturePath.present
+        ? signaturePath.value
+        : this.signaturePath,
+    idPhotoPath: idPhotoPath.present ? idPhotoPath.value : this.idPhotoPath,
+  );
+  ContractAcceptance copyWithCompanion(ContractAcceptancesCompanion data) {
+    return ContractAcceptance(
+      id: data.id.present ? data.id.value : this.id,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      contractId: data.contractId.present
+          ? data.contractId.value
+          : this.contractId,
+      acceptedAt: data.acceptedAt.present
+          ? data.acceptedAt.value
+          : this.acceptedAt,
+      signerName: data.signerName.present
+          ? data.signerName.value
+          : this.signerName,
+      signerIdNumber: data.signerIdNumber.present
+          ? data.signerIdNumber.value
+          : this.signerIdNumber,
+      termsAccepted: data.termsAccepted.present
+          ? data.termsAccepted.value
+          : this.termsAccepted,
+      receiptConfirmed: data.receiptConfirmed.present
+          ? data.receiptConfirmed.value
+          : this.receiptConfirmed,
+      signaturePath: data.signaturePath.present
+          ? data.signaturePath.value
+          : this.signaturePath,
+      idPhotoPath: data.idPhotoPath.present
+          ? data.idPhotoPath.value
+          : this.idPhotoPath,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ContractAcceptance(')
+          ..write('id: $id, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('contractId: $contractId, ')
+          ..write('acceptedAt: $acceptedAt, ')
+          ..write('signerName: $signerName, ')
+          ..write('signerIdNumber: $signerIdNumber, ')
+          ..write('termsAccepted: $termsAccepted, ')
+          ..write('receiptConfirmed: $receiptConfirmed, ')
+          ..write('signaturePath: $signaturePath, ')
+          ..write('idPhotoPath: $idPhotoPath')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    updatedAt,
+    deletedAt,
+    contractId,
+    acceptedAt,
+    signerName,
+    signerIdNumber,
+    termsAccepted,
+    receiptConfirmed,
+    signaturePath,
+    idPhotoPath,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ContractAcceptance &&
+          other.id == this.id &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.contractId == this.contractId &&
+          other.acceptedAt == this.acceptedAt &&
+          other.signerName == this.signerName &&
+          other.signerIdNumber == this.signerIdNumber &&
+          other.termsAccepted == this.termsAccepted &&
+          other.receiptConfirmed == this.receiptConfirmed &&
+          other.signaturePath == this.signaturePath &&
+          other.idPhotoPath == this.idPhotoPath);
+}
+
+class ContractAcceptancesCompanion extends UpdateCompanion<ContractAcceptance> {
+  final Value<String> id;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String> contractId;
+  final Value<DateTime?> acceptedAt;
+  final Value<String?> signerName;
+  final Value<String?> signerIdNumber;
+  final Value<bool> termsAccepted;
+  final Value<bool> receiptConfirmed;
+  final Value<String?> signaturePath;
+  final Value<String?> idPhotoPath;
+  final Value<int> rowid;
+  const ContractAcceptancesCompanion({
+    this.id = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.contractId = const Value.absent(),
+    this.acceptedAt = const Value.absent(),
+    this.signerName = const Value.absent(),
+    this.signerIdNumber = const Value.absent(),
+    this.termsAccepted = const Value.absent(),
+    this.receiptConfirmed = const Value.absent(),
+    this.signaturePath = const Value.absent(),
+    this.idPhotoPath = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ContractAcceptancesCompanion.insert({
+    required String id,
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    required String contractId,
+    this.acceptedAt = const Value.absent(),
+    this.signerName = const Value.absent(),
+    this.signerIdNumber = const Value.absent(),
+    this.termsAccepted = const Value.absent(),
+    this.receiptConfirmed = const Value.absent(),
+    this.signaturePath = const Value.absent(),
+    this.idPhotoPath = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       contractId = Value(contractId);
+  static Insertable<ContractAcceptance> custom({
+    Expression<String>? id,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? contractId,
+    Expression<DateTime>? acceptedAt,
+    Expression<String>? signerName,
+    Expression<String>? signerIdNumber,
+    Expression<bool>? termsAccepted,
+    Expression<bool>? receiptConfirmed,
+    Expression<String>? signaturePath,
+    Expression<String>? idPhotoPath,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (contractId != null) 'contract_id': contractId,
+      if (acceptedAt != null) 'accepted_at': acceptedAt,
+      if (signerName != null) 'signer_name': signerName,
+      if (signerIdNumber != null) 'signer_id_number': signerIdNumber,
+      if (termsAccepted != null) 'terms_accepted': termsAccepted,
+      if (receiptConfirmed != null) 'receipt_confirmed': receiptConfirmed,
+      if (signaturePath != null) 'signature_path': signaturePath,
+      if (idPhotoPath != null) 'id_photo_path': idPhotoPath,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ContractAcceptancesCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<String>? contractId,
+    Value<DateTime?>? acceptedAt,
+    Value<String?>? signerName,
+    Value<String?>? signerIdNumber,
+    Value<bool>? termsAccepted,
+    Value<bool>? receiptConfirmed,
+    Value<String?>? signaturePath,
+    Value<String?>? idPhotoPath,
+    Value<int>? rowid,
+  }) {
+    return ContractAcceptancesCompanion(
+      id: id ?? this.id,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      contractId: contractId ?? this.contractId,
+      acceptedAt: acceptedAt ?? this.acceptedAt,
+      signerName: signerName ?? this.signerName,
+      signerIdNumber: signerIdNumber ?? this.signerIdNumber,
+      termsAccepted: termsAccepted ?? this.termsAccepted,
+      receiptConfirmed: receiptConfirmed ?? this.receiptConfirmed,
+      signaturePath: signaturePath ?? this.signaturePath,
+      idPhotoPath: idPhotoPath ?? this.idPhotoPath,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (contractId.present) {
+      map['contract_id'] = Variable<String>(contractId.value);
+    }
+    if (acceptedAt.present) {
+      map['accepted_at'] = Variable<DateTime>(acceptedAt.value);
+    }
+    if (signerName.present) {
+      map['signer_name'] = Variable<String>(signerName.value);
+    }
+    if (signerIdNumber.present) {
+      map['signer_id_number'] = Variable<String>(signerIdNumber.value);
+    }
+    if (termsAccepted.present) {
+      map['terms_accepted'] = Variable<bool>(termsAccepted.value);
+    }
+    if (receiptConfirmed.present) {
+      map['receipt_confirmed'] = Variable<bool>(receiptConfirmed.value);
+    }
+    if (signaturePath.present) {
+      map['signature_path'] = Variable<String>(signaturePath.value);
+    }
+    if (idPhotoPath.present) {
+      map['id_photo_path'] = Variable<String>(idPhotoPath.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ContractAcceptancesCompanion(')
+          ..write('id: $id, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('contractId: $contractId, ')
+          ..write('acceptedAt: $acceptedAt, ')
+          ..write('signerName: $signerName, ')
+          ..write('signerIdNumber: $signerIdNumber, ')
+          ..write('termsAccepted: $termsAccepted, ')
+          ..write('receiptConfirmed: $receiptConfirmed, ')
+          ..write('signaturePath: $signaturePath, ')
+          ..write('idPhotoPath: $idPhotoPath, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $SyncQueueTable extends SyncQueue
     with TableInfo<$SyncQueueTable, SyncQueueData> {
   @override
@@ -10801,6 +11557,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     this,
   );
   late final $RentalLinesTable rentalLines = $RentalLinesTable(this);
+  late final $ContractAcceptancesTable contractAcceptances =
+      $ContractAcceptancesTable(this);
   late final $SyncQueueTable syncQueue = $SyncQueueTable(this);
   late final $SyncStateTable syncState = $SyncStateTable(this);
   @override
@@ -10824,6 +11582,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     customerSites,
     rentalContracts,
     rentalLines,
+    contractAcceptances,
     syncQueue,
     syncState,
   ];
@@ -15140,6 +15899,7 @@ typedef $$RentalContractsTableCreateCompanionBuilder =
       Value<String> deliveryMethod,
       Value<String?> siteId,
       Value<double> deliveryFee,
+      Value<String?> acceptanceToken,
       Value<String?> notes,
       Value<String?> createdBy,
       Value<int> rowid,
@@ -15160,6 +15920,7 @@ typedef $$RentalContractsTableUpdateCompanionBuilder =
       Value<String> deliveryMethod,
       Value<String?> siteId,
       Value<double> deliveryFee,
+      Value<String?> acceptanceToken,
       Value<String?> notes,
       Value<String?> createdBy,
       Value<int> rowid,
@@ -15241,6 +16002,11 @@ class $$RentalContractsTableFilterComposer
 
   ColumnFilters<double> get deliveryFee => $composableBuilder(
     column: $table.deliveryFee,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get acceptanceToken => $composableBuilder(
+    column: $table.acceptanceToken,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -15334,6 +16100,11 @@ class $$RentalContractsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get acceptanceToken => $composableBuilder(
+    column: $table.acceptanceToken,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get notes => $composableBuilder(
     column: $table.notes,
     builder: (column) => ColumnOrderings(column),
@@ -15406,6 +16177,11 @@ class $$RentalContractsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get acceptanceToken => $composableBuilder(
+    column: $table.acceptanceToken,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get notes =>
       $composableBuilder(column: $table.notes, builder: (column) => column);
 
@@ -15464,6 +16240,7 @@ class $$RentalContractsTableTableManager
                 Value<String> deliveryMethod = const Value.absent(),
                 Value<String?> siteId = const Value.absent(),
                 Value<double> deliveryFee = const Value.absent(),
+                Value<String?> acceptanceToken = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<String?> createdBy = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -15482,6 +16259,7 @@ class $$RentalContractsTableTableManager
                 deliveryMethod: deliveryMethod,
                 siteId: siteId,
                 deliveryFee: deliveryFee,
+                acceptanceToken: acceptanceToken,
                 notes: notes,
                 createdBy: createdBy,
                 rowid: rowid,
@@ -15502,6 +16280,7 @@ class $$RentalContractsTableTableManager
                 Value<String> deliveryMethod = const Value.absent(),
                 Value<String?> siteId = const Value.absent(),
                 Value<double> deliveryFee = const Value.absent(),
+                Value<String?> acceptanceToken = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<String?> createdBy = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -15520,6 +16299,7 @@ class $$RentalContractsTableTableManager
                 deliveryMethod: deliveryMethod,
                 siteId: siteId,
                 deliveryFee: deliveryFee,
+                acceptanceToken: acceptanceToken,
                 notes: notes,
                 createdBy: createdBy,
                 rowid: rowid,
@@ -15969,6 +16749,363 @@ typedef $$RentalLinesTableProcessedTableManager =
       RentalLine,
       PrefetchHooks Function()
     >;
+typedef $$ContractAcceptancesTableCreateCompanionBuilder =
+    ContractAcceptancesCompanion Function({
+      required String id,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      required String contractId,
+      Value<DateTime?> acceptedAt,
+      Value<String?> signerName,
+      Value<String?> signerIdNumber,
+      Value<bool> termsAccepted,
+      Value<bool> receiptConfirmed,
+      Value<String?> signaturePath,
+      Value<String?> idPhotoPath,
+      Value<int> rowid,
+    });
+typedef $$ContractAcceptancesTableUpdateCompanionBuilder =
+    ContractAcceptancesCompanion Function({
+      Value<String> id,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<String> contractId,
+      Value<DateTime?> acceptedAt,
+      Value<String?> signerName,
+      Value<String?> signerIdNumber,
+      Value<bool> termsAccepted,
+      Value<bool> receiptConfirmed,
+      Value<String?> signaturePath,
+      Value<String?> idPhotoPath,
+      Value<int> rowid,
+    });
+
+class $$ContractAcceptancesTableFilterComposer
+    extends Composer<_$AppDatabase, $ContractAcceptancesTable> {
+  $$ContractAcceptancesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get contractId => $composableBuilder(
+    column: $table.contractId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get acceptedAt => $composableBuilder(
+    column: $table.acceptedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get signerName => $composableBuilder(
+    column: $table.signerName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get signerIdNumber => $composableBuilder(
+    column: $table.signerIdNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get termsAccepted => $composableBuilder(
+    column: $table.termsAccepted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get receiptConfirmed => $composableBuilder(
+    column: $table.receiptConfirmed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get signaturePath => $composableBuilder(
+    column: $table.signaturePath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get idPhotoPath => $composableBuilder(
+    column: $table.idPhotoPath,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ContractAcceptancesTableOrderingComposer
+    extends Composer<_$AppDatabase, $ContractAcceptancesTable> {
+  $$ContractAcceptancesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get contractId => $composableBuilder(
+    column: $table.contractId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get acceptedAt => $composableBuilder(
+    column: $table.acceptedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get signerName => $composableBuilder(
+    column: $table.signerName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get signerIdNumber => $composableBuilder(
+    column: $table.signerIdNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get termsAccepted => $composableBuilder(
+    column: $table.termsAccepted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get receiptConfirmed => $composableBuilder(
+    column: $table.receiptConfirmed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get signaturePath => $composableBuilder(
+    column: $table.signaturePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get idPhotoPath => $composableBuilder(
+    column: $table.idPhotoPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ContractAcceptancesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ContractAcceptancesTable> {
+  $$ContractAcceptancesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get contractId => $composableBuilder(
+    column: $table.contractId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get acceptedAt => $composableBuilder(
+    column: $table.acceptedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get signerName => $composableBuilder(
+    column: $table.signerName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get signerIdNumber => $composableBuilder(
+    column: $table.signerIdNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get termsAccepted => $composableBuilder(
+    column: $table.termsAccepted,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get receiptConfirmed => $composableBuilder(
+    column: $table.receiptConfirmed,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get signaturePath => $composableBuilder(
+    column: $table.signaturePath,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get idPhotoPath => $composableBuilder(
+    column: $table.idPhotoPath,
+    builder: (column) => column,
+  );
+}
+
+class $$ContractAcceptancesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ContractAcceptancesTable,
+          ContractAcceptance,
+          $$ContractAcceptancesTableFilterComposer,
+          $$ContractAcceptancesTableOrderingComposer,
+          $$ContractAcceptancesTableAnnotationComposer,
+          $$ContractAcceptancesTableCreateCompanionBuilder,
+          $$ContractAcceptancesTableUpdateCompanionBuilder,
+          (
+            ContractAcceptance,
+            BaseReferences<
+              _$AppDatabase,
+              $ContractAcceptancesTable,
+              ContractAcceptance
+            >,
+          ),
+          ContractAcceptance,
+          PrefetchHooks Function()
+        > {
+  $$ContractAcceptancesTableTableManager(
+    _$AppDatabase db,
+    $ContractAcceptancesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ContractAcceptancesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ContractAcceptancesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ContractAcceptancesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> contractId = const Value.absent(),
+                Value<DateTime?> acceptedAt = const Value.absent(),
+                Value<String?> signerName = const Value.absent(),
+                Value<String?> signerIdNumber = const Value.absent(),
+                Value<bool> termsAccepted = const Value.absent(),
+                Value<bool> receiptConfirmed = const Value.absent(),
+                Value<String?> signaturePath = const Value.absent(),
+                Value<String?> idPhotoPath = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ContractAcceptancesCompanion(
+                id: id,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                contractId: contractId,
+                acceptedAt: acceptedAt,
+                signerName: signerName,
+                signerIdNumber: signerIdNumber,
+                termsAccepted: termsAccepted,
+                receiptConfirmed: receiptConfirmed,
+                signaturePath: signaturePath,
+                idPhotoPath: idPhotoPath,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required String contractId,
+                Value<DateTime?> acceptedAt = const Value.absent(),
+                Value<String?> signerName = const Value.absent(),
+                Value<String?> signerIdNumber = const Value.absent(),
+                Value<bool> termsAccepted = const Value.absent(),
+                Value<bool> receiptConfirmed = const Value.absent(),
+                Value<String?> signaturePath = const Value.absent(),
+                Value<String?> idPhotoPath = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ContractAcceptancesCompanion.insert(
+                id: id,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                contractId: contractId,
+                acceptedAt: acceptedAt,
+                signerName: signerName,
+                signerIdNumber: signerIdNumber,
+                termsAccepted: termsAccepted,
+                receiptConfirmed: receiptConfirmed,
+                signaturePath: signaturePath,
+                idPhotoPath: idPhotoPath,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ContractAcceptancesTable, ContractAcceptance>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $ContractAcceptancesTable,
+                    ContractAcceptance
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ContractAcceptancesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ContractAcceptancesTable,
+      ContractAcceptance,
+      $$ContractAcceptancesTableFilterComposer,
+      $$ContractAcceptancesTableOrderingComposer,
+      $$ContractAcceptancesTableAnnotationComposer,
+      $$ContractAcceptancesTableCreateCompanionBuilder,
+      $$ContractAcceptancesTableUpdateCompanionBuilder,
+      (
+        ContractAcceptance,
+        BaseReferences<
+          _$AppDatabase,
+          $ContractAcceptancesTable,
+          ContractAcceptance
+        >,
+      ),
+      ContractAcceptance,
+      PrefetchHooks Function()
+    >;
 typedef $$SyncQueueTableCreateCompanionBuilder =
     SyncQueueCompanion Function({
       Value<int> seq,
@@ -16375,6 +17512,8 @@ class $AppDatabaseManager {
       $$RentalContractsTableTableManager(_db, _db.rentalContracts);
   $$RentalLinesTableTableManager get rentalLines =>
       $$RentalLinesTableTableManager(_db, _db.rentalLines);
+  $$ContractAcceptancesTableTableManager get contractAcceptances =>
+      $$ContractAcceptancesTableTableManager(_db, _db.contractAcceptances);
   $$SyncQueueTableTableManager get syncQueue =>
       $$SyncQueueTableTableManager(_db, _db.syncQueue);
   $$SyncStateTableTableManager get syncState =>

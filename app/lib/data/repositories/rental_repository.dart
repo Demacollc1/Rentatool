@@ -156,6 +156,9 @@ class RentalRepository {
             dueAt: Value(dueAt),
             deposit: Value(deposit),
             notes: Value(notes),
+            // Token del portal de aceptación (generado en cliente para
+            // que el QR funcione aun sin haber sincronizado).
+            acceptanceToken: Value(const Uuid().v4()),
             updatedAt: Value(now),
           ),
         );
@@ -502,6 +505,10 @@ class RentalRepository {
       'delivery_method': c.deliveryMethod,
       'site_id': c.siteId,
       'delivery_fee': c.deliveryFee,
+      // Solo si lo conocemos: si el server ya generó uno (contratos
+      // viejos) no hay que pisarlo con null.
+      if (c.acceptanceToken != null)
+        'acceptance_token': c.acceptanceToken,
       'notes': c.notes,
       'created_by': c.createdBy,
       'updated_at': isoTs(c.updatedAt),
@@ -574,5 +581,15 @@ final siteProvider =
     StreamProvider.autoDispose.family<CustomerSite?, String>((ref, id) {
   final db = ref.watch(appDatabaseProvider);
   return (db.select(db.customerSites)..where((s) => s.id.equals(id)))
+      .watchSingleOrNull();
+});
+
+/// Aceptación documental del contrato (llega por pull tras firmar).
+final acceptanceProvider = StreamProvider.autoDispose
+    .family<ContractAcceptance?, String>((ref, contractId) {
+  final db = ref.watch(appDatabaseProvider);
+  return (db.select(db.contractAcceptances)
+        ..where((a) =>
+            a.contractId.equals(contractId) & a.deletedAt.isNull()))
       .watchSingleOrNull();
 });

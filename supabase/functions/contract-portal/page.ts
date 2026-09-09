@@ -1,0 +1,268 @@
+// Generado desde supabase/portal/contrato.html — no editar a mano.
+export const PAGE = `<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>DEMACO — Contrato de renta</title>
+<style>
+  :root { --amarillo:#F2B705; --negro:#151310; --gris:#6b6b6b; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,Roboto,sans-serif;
+         background:#faf7f0; color:var(--negro); }
+  header { background:var(--negro); color:var(--amarillo); padding:14px 16px;
+           font-weight:800; letter-spacing:.5px; }
+  main { padding:16px; max-width:560px; margin:0 auto; }
+  .card { background:#fff; border:1px solid #e8e2d5; border-radius:12px;
+          padding:14px 16px; margin-bottom:14px; }
+  h2 { font-size:15px; margin:0 0 8px; }
+  .muted { color:var(--gris); font-size:13px; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { text-align:left; color:var(--gris); font-weight:600; padding:4px 4px; }
+  td { padding:6px 4px; border-top:1px solid #f0ead9; }
+  .tot { font-size:17px; font-weight:800; text-align:right; margin-top:8px; }
+  label.chk { display:flex; gap:10px; align-items:flex-start; font-size:14px;
+              margin:10px 0; }
+  input[type=checkbox]{ width:20px; height:20px; margin-top:1px; }
+  input[type=text]{ width:100%; padding:10px; border:1px solid #d8d2c2;
+                    border-radius:8px; font-size:15px; margin-top:4px; }
+  ul { margin:6px 0 0; padding-left:18px; font-size:13px; color:#333; }
+  canvas { width:100%; height:160px; background:#fff;
+           border:1.5px dashed #b7ae97; border-radius:8px; touch-action:none; }
+  .btn { display:block; width:100%; padding:14px; border:0; border-radius:10px;
+         background:var(--amarillo); color:var(--negro); font-size:16px;
+         font-weight:800; margin-top:6px; }
+  .btn.sec { background:#eee7d6; font-weight:600; font-size:13px;
+             padding:8px; width:auto; }
+  .ok { color:#1b7a2f; font-weight:700; }
+  .err { color:#b3261e; font-size:14px; margin-top:8px; min-height:18px; }
+  #done { text-align:center; padding:40px 16px; display:none; }
+  #done .big { font-size:52px; }
+  .check { font-size:14px; margin:6px 0; }
+  #foto-prev { max-width:100%; border-radius:8px; margin-top:8px; }
+</style>
+</head>
+<body>
+<header>DEMACO RENT A TOOL</header>
+<main>
+  <div id="cargando" class="card">Cargando contrato…</div>
+
+  <div id="form" style="display:none">
+    <div class="card">
+      <h2 id="titulo"></h2>
+      <div class="muted" id="fechas"></div>
+      <div class="muted" id="entrega"></div>
+      <table id="tabla">
+        <tr><th>Equipo</th><th>Tarifa</th><th style="text-align:right">Importe</th></tr>
+      </table>
+      <div class="tot" id="total"></div>
+      <div class="muted" id="garantia"></div>
+    </div>
+
+    <div class="card">
+      <h2>Tus datos</h2>
+      <label>Nombre completo
+        <input type="text" id="nombre" autocomplete="name"></label>
+      <label style="display:block;margin-top:8px">Cédula / RUC
+        <input type="text" id="cedula" inputmode="numeric"></label>
+      <div id="foto-bloque" style="margin-top:10px">
+        <div class="muted" id="foto-msg">Foto de tu cédula (frontal)</div>
+        <input type="file" id="foto" accept="image/*" capture="environment">
+        <img id="foto-prev" style="display:none">
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Términos y condiciones</h2>
+      <ul>
+        <li>Recibo los equipos en buen estado de funcionamiento y los
+            devuelvo en las mismas condiciones, salvo desgaste normal.</li>
+        <li>Daños, pérdida o robo durante la renta corren por mi cuenta
+            hasta el valor de reposición.</li>
+        <li>La devolución posterior a la fecha pactada genera el cobro de
+            los períodos adicionales a la tarifa contratada.</li>
+        <li>La garantía se devuelve al cierre del contrato, descontando
+            daños o faltantes si los hubiera.</li>
+      </ul>
+      <label class="chk"><input type="checkbox" id="terminos">
+        Acepto los términos y condiciones de la renta.</label>
+      <label class="chk"><input type="checkbox" id="recepcion">
+        Confirmo la recepción de la herramienta y consumibles
+        detallados en este contrato.</label>
+    </div>
+
+    <div class="card">
+      <h2>Firma</h2>
+      <div class="muted">Firma con tu dedo dentro del recuadro.</div>
+      <canvas id="firma"></canvas>
+      <button class="btn sec" id="borrar" type="button">Borrar firma</button>
+    </div>
+
+    <button class="btn" id="guardar" type="button">Aceptar y firmar</button>
+    <div class="err" id="error"></div>
+  </div>
+
+  <div id="done" class="card">
+    <div class="big">✅</div>
+    <h2>Requisitos documentales completos</h2>
+    <div class="check" id="d-firma"></div>
+    <div class="check" id="d-terminos"></div>
+    <div class="check" id="d-recepcion"></div>
+    <div class="check" id="d-cedula"></div>
+    <p class="muted">DEMACO recibió tu aceptación. Conserva este
+      contrato; recibirás el respaldo documental por correo.</p>
+  </div>
+</main>
+
+<script>
+const FN = location.origin + '/functions/v1/contract-portal';
+const token = new URLSearchParams(location.search).get('t') || '';
+const $ = (id) => document.getElementById(id);
+const money = (v) => '$' + Number(v || 0).toFixed(2);
+const KIND = {half_day:'Bloque 4h', day:'Día', week:'Semana', month:'Mes'};
+let clienteRegistrado = false;
+
+function mostrarDone(a) {
+  $('form').style.display = 'none';
+  $('cargando').style.display = 'none';
+  $('done').style.display = 'block';
+  $('d-firma').innerHTML = '✔ Contrato firmado por <b>' +
+      (a.signer_name || '') + '</b>';
+  $('d-terminos').textContent = '✔ Términos y condiciones aceptados';
+  $('d-recepcion').textContent =
+      '✔ Recepción de herramienta y consumibles confirmada';
+  $('d-cedula').textContent = a.id_photo_path
+      ? '✔ Cédula registrada (foto)' : '✔ Cédula: ' + (a.signer_id_number||'');
+}
+
+async function cargar() {
+  try {
+    const r = await fetch(FN + '?token=' + encodeURIComponent(token));
+    if (!r.ok) throw new Error((await r.json()).error || r.status);
+    const d = await r.json();
+    if (d.acceptance && d.acceptance.accepted_at) {
+      mostrarDone(d.acceptance); return;
+    }
+    $('titulo').textContent = 'Contrato ' + d.contract_number;
+    const f = (s) => s ? new Date(s).toLocaleDateString('es-EC') : '—';
+    $('fechas').textContent =
+        'Retiro ' + f(d.pickup_at) + ' → devolución ' + f(d.due_at);
+    $('entrega').textContent = d.delivery_method === 'delivery'
+        ? ('Envío a obra' + (d.site ? ': ' + d.site.name +
+            (d.site.address ? ' — ' + d.site.address : '') : '') +
+            (d.delivery_fee > 0 ? ' · transporte ' + money(d.delivery_fee) : ''))
+        : 'Retiro en el local DEMACO';
+    for (const i of d.items) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td><b>' + (i.tag||'') + '</b> ' + (i.equipo||'') +
+          '<br><span class="muted">' + (i.marca||'') +
+          (i.serie ? ' · SN ' + i.serie : '') + '</span></td>' +
+          '<td>' + (KIND[i.rate_kind]||i.rate_kind) + ' × ' +
+          Number(i.periods) + '</td>' +
+          '<td style="text-align:right">' + money(i.amount) + '</td>';
+      $('tabla').appendChild(tr);
+    }
+    $('total').textContent = 'Total ' + money(d.total);
+    if (d.deposit > 0) {
+      $('garantia').textContent = 'Garantía: ' + money(d.deposit);
+    }
+    $('nombre').value = d.customer.name || '';
+    $('cedula').value = d.customer.id_number || '';
+    clienteRegistrado = d.customer.registered;
+    $('foto-msg').textContent = clienteRegistrado
+        ? 'Foto de tu cédula (opcional, ya estás registrado)'
+        : 'Foto de tu cédula (obligatoria: cliente nuevo)';
+    $('cargando').style.display = 'none';
+    $('form').style.display = 'block';
+  } catch (e) {
+    $('cargando').textContent = 'No se pudo cargar el contrato: ' + e.message;
+  }
+}
+
+// --- firma táctil ---
+const canvas = $('firma');
+let ctx, dibujado = false;
+function initCanvas() {
+  canvas.width = canvas.offsetWidth * 2;
+  canvas.height = canvas.offsetHeight * 2;
+  ctx = canvas.getContext('2d');
+  ctx.scale(2, 2);
+  ctx.lineWidth = 2.2; ctx.lineCap = 'round'; ctx.strokeStyle = '#151310';
+}
+function pos(ev) {
+  const r = canvas.getBoundingClientRect();
+  const t = ev.touches ? ev.touches[0] : ev;
+  return [t.clientX - r.left, t.clientY - r.top];
+}
+let pintando = false;
+function start(ev){ pintando = true; const [x,y]=pos(ev);
+  ctx.beginPath(); ctx.moveTo(x,y); ev.preventDefault(); }
+function move(ev){ if(!pintando) return; const [x,y]=pos(ev);
+  ctx.lineTo(x,y); ctx.stroke(); dibujado = true; ev.preventDefault(); }
+function end(){ pintando = false; }
+canvas.addEventListener('touchstart', start);
+canvas.addEventListener('touchmove', move);
+canvas.addEventListener('touchend', end);
+canvas.addEventListener('mousedown', start);
+canvas.addEventListener('mousemove', move);
+canvas.addEventListener('mouseup', end);
+$('borrar').onclick = () => { initCanvas(); dibujado = false;
+  ctx.clearRect(0,0,canvas.width,canvas.height); };
+
+// --- foto cédula ---
+let fotoB64 = null;
+$('foto').addEventListener('change', () => {
+  const f = $('foto').files[0];
+  if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => { fotoB64 = rd.result;
+    $('foto-prev').src = fotoB64; $('foto-prev').style.display='block'; };
+  rd.readAsDataURL(f);
+});
+
+$('guardar').onclick = async () => {
+  $('error').textContent = '';
+  if (!$('nombre').value.trim() || !$('cedula').value.trim()) {
+    $('error').textContent = 'Completa tu nombre y cédula/RUC.'; return;
+  }
+  if (!$('terminos').checked || !$('recepcion').checked) {
+    $('error').textContent =
+        'Debes aceptar los términos y confirmar la recepción.'; return;
+  }
+  if (!dibujado) { $('error').textContent = 'Falta tu firma.'; return; }
+  if (!clienteRegistrado && !fotoB64) {
+    $('error').textContent = 'Toma la foto de tu cédula.'; return;
+  }
+  $('guardar').disabled = true; $('guardar').textContent = 'Guardando…';
+  try {
+    const r = await fetch(FN, {
+      method: 'POST',
+      headers: {'content-type':'application/json'},
+      body: JSON.stringify({
+        token,
+        signer_name: $('nombre').value.trim(),
+        signer_id_number: $('cedula').value.trim(),
+        terms: true, receipt: true,
+        signature_b64: canvas.toDataURL('image/png'),
+        id_photo_b64: fotoB64,
+      }),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || r.status);
+    mostrarDone({signer_name: $('nombre').value,
+                 signer_id_number: $('cedula').value,
+                 id_photo_path: fotoB64 ? 'x' : null});
+  } catch (e) {
+    $('error').textContent = 'No se pudo guardar: ' + e.message;
+    $('guardar').disabled = false;
+    $('guardar').textContent = 'Aceptar y firmar';
+  }
+};
+
+initCanvas();
+window.addEventListener('resize', initCanvas);
+cargar();
+</script>
+</body>
+</html>
+`;

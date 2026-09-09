@@ -228,8 +228,26 @@ class RentalContracts extends Table with SyncColumns {
   /// Obra del cliente donde estará la herramienta (si es envío).
   TextColumn get siteId => text().nullable()();
   RealColumn get deliveryFee => real().withDefault(const Constant(0))();
+
+  /// Secreto del link público del portal de aceptación (F2b).
+  TextColumn get acceptanceToken => text().nullable()();
   TextColumn get notes => text().nullable()();
   TextColumn get createdBy => text().nullable()();
+}
+
+/// Aceptación documental del cliente (la escribe SOLO la Edge Function
+/// contract-portal; el app la lee vía pull — nunca la encola).
+class ContractAcceptances extends Table with SyncColumns {
+  TextColumn get contractId => text()();
+  DateTimeColumn get acceptedAt => dateTime().nullable()();
+  TextColumn get signerName => text().nullable()();
+  TextColumn get signerIdNumber => text().nullable()();
+  BoolColumn get termsAccepted =>
+      boolean().withDefault(const Constant(false))();
+  BoolColumn get receiptConfirmed =>
+      boolean().withDefault(const Constant(false))();
+  TextColumn get signaturePath => text().nullable()();
+  TextColumn get idPhotoPath => text().nullable()();
 }
 
 /// Línea del contrato: una unidad física con su tarifa y períodos.
@@ -286,6 +304,7 @@ class SyncState extends Table {
   CustomerSites,
   RentalContracts,
   RentalLines,
+  ContractAcceptances,
   SyncQueue,
   SyncState,
 ])
@@ -294,7 +313,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 11; // v9 contratos · v10 obras · v11 retiro
+  int get schemaVersion => 12; // v9-11 contratos · v12 portal aceptación
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -334,6 +353,10 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from >= 9 && from < 11) {
             await m.addColumn(rentalContracts, rentalContracts.pickupAt);
+          }
+          if (from >= 9 && from < 12) {
+            await m.addColumn(
+                rentalContracts, rentalContracts.acceptanceToken);
           }
         },
       );
