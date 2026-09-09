@@ -75,10 +75,7 @@ class ContractDetailScreen extends ConsumerWidget {
                       0, (s, l) => s + l.line.amount);
                   return Column(children: [
                     for (final v in list)
-                      _LineTile(
-                          view: v,
-                          contractStatus: c.status,
-                          contractId: contractId),
+                      _LineTile(view: v, contract: c),
                     if (draft || active)
                       Padding(
                         padding: const EdgeInsets.all(12),
@@ -104,11 +101,17 @@ class ContractDetailScreen extends ConsumerWidget {
                           ],
                         ]),
                       ),
+                    if (c.deliveryFee > 0)
+                      ListTile(
+                        dense: true,
+                        title: const Text('Transporte'),
+                        trailing: Text(money.format(c.deliveryFee)),
+                      ),
                     ListTile(
                       title: const Text('Total',
                           style:
                               TextStyle(fontWeight: FontWeight.bold)),
-                      trailing: Text(money.format(total),
+                      trailing: Text(money.format(total + c.deliveryFee),
                           style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16)),
@@ -240,8 +243,13 @@ class _HeaderCard extends ConsumerWidget {
           dense: true,
           leading: const Icon(Icons.event, size: 20),
           title: Text(contract.dueAt == null
-              ? 'Sin fecha pactada de devolución'
+              ? 'Sin fechas — elige la tarifa manualmente por línea'
               : 'Devolución pactada: ${DateFormat('dd/MM/yyyy').format(contract.dueAt!)}'),
+          subtitle: contract.dueAt == null
+              ? const Text('Si defines la fecha, la tarifa y los '
+                  'períodos se calculan solos',
+                  style: TextStyle(fontSize: 11))
+              : null,
           trailing: editable || contract.status == 'active'
               ? IconButton(
                   icon: const Icon(Icons.edit_calendar, size: 18),
@@ -271,6 +279,7 @@ class _HeaderCard extends ConsumerWidget {
                   onPressed: () => _editDeposit(context, ref))
               : null,
         ),
+        _DeliveryTile(contract: contract, editable: editable),
       ]),
     );
   }
@@ -306,16 +315,232 @@ class _HeaderCard extends ConsumerWidget {
   }
 }
 
+/// Entrega: retiro en local o envío por transporte a una obra.
+class _DeliveryTile extends ConsumerWidget {
+  const _DeliveryTile({required this.contract, required this.editable});
+
+  final RentalContract contract;
+  final bool editable;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final repo = ref.read(rentalRepositoryProvider);
+    final delivery = contract.deliveryMethod == 'delivery';
+    final site = contract.siteId == null
+        ? null
+        : ref.watch(siteProvider(contract.siteId!)).value;
+    final money = NumberFormat.currency(symbol: r'$');
+    return Column(children: [
+      ListTile(
+        dense: true,
+        leading: Icon(
+            delivery ? Icons.local_shipping_outlined : Icons.storefront,
+            size: 20),
+        title: Row(children: [
+          Expanded(
+            child: SegmentedButton<String>(
+              segments: const [
+                ButtonSegment(
+                    value: 'pickup', label: Text('Retiro en local')),
+                ButtonSegment(
+                    value: 'delivery', label: Text('Envío a obra')),
+              ],
+              selected: {contract.deliveryMethod},
+              onSelectionChanged: editable
+                  ? (s) => repo.updateContract(contract.id,
+                      deliveryMethod: s.first)
+                  : null,
+              showSelectedIcon: false,
+            ),
+          ),
+        ]),
+      ),
+      if (delivery)
+        ListTile(
+          dense: true,
+          leading: const Icon(Icons.place_outlined, size: 20),
+          title: Text(site == null
+              ? 'Elige la obra / dirección de entrega'
+              : site.name),
+          subtitle: site?.address == null
+              ? null
+              : Text(site!.address!,
+                  style: const TextStyle(fontSize: 11)),
+          trailing: editable
+              ? const Icon(Icons.chevron_right)
+              : null,
+          onTap: editable
+              ? () async {
+                  final id = await pickSite(
+                      context, ref, contract.customerId);
+                  if (id != null) {
+                    await repo.updateContract(contract.id, siteId: id);
+                  }
+                }
+              : null,
+        ),
+      if (delivery)
+        ListTile(
+          dense: true,
+          leading: const Icon(Icons.attach_money, size: 20),
+          title: Text(
+              'Transporte: ${money.format(contract.deliveryFee)}'),
+          trailing: editable
+              ? IconButton(
+                  icon: const Icon(Icons.edit, size: 18),
+                  onPressed: () => _editFee(context, ref))
+              : null,
+        ),
+    ]);
+  }
+
+  Future<void> _editFee(BuildContext context, WidgetRef ref) async {
+    final ctrl = TextEditingController(
+        text: contract.deliveryFee == 0
+            ? ''
+            : contract.deliveryFee.toStringAsFixed(2));
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Costo de transporte (USD)'),
+        content: TextField(
+            controller: ctrl,
+            autofocus: true,
+            keyboardType:
+                const TextInputType.numberWithOptions(decimal: true)),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancelar')),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Guardar')),
+        ],
+      ),
+    );
+    if (ok == true) {
+      await ref.read(rentalRepositoryProvider).updateContract(contract.id,
+          deliveryFee:
+              double.tryParse(ctrl.text.replaceAll(',', '.')) ?? 0);
+    }
+  }
+}
+
+/// Selector de obra del cliente con alta rápida.
+Future<String?> pickSite(
+    BuildContext context, WidgetRef ref, String customerId) {
+  return showModalBottomSheet<String>(
+    context: context,
+    isScrollControlled: true,
+    builder: (_) => Consumer(builder: (ctx, ref, _) {
+      final sites = ref.watch(customerSitesProvider(customerId));
+      return DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.6,
+        builder: (ctx2, scroll) => ListView(
+          controller: scroll,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.add_location_alt_outlined),
+              title: const Text('Crear obra nueva'),
+              onTap: () async {
+                final id =
+                    await _createSite(ctx2, ref, customerId);
+                if (id != null && ctx2.mounted) {
+                  Navigator.pop(ctx2, id);
+                }
+              },
+            ),
+            const Divider(height: 1),
+            ...sites.when(
+              loading: () => [
+                const Padding(
+                    padding: EdgeInsets.all(24),
+                    child:
+                        Center(child: CircularProgressIndicator()))
+              ],
+              error: (e, _) => [Text('Error: $e')],
+              data: (list) => [
+                for (final s in list)
+                  ListTile(
+                    leading: const Icon(Icons.place_outlined),
+                    title: Text(s.name),
+                    subtitle: s.address == null
+                        ? null
+                        : Text(s.address!,
+                            style: const TextStyle(fontSize: 11)),
+                    onTap: () => Navigator.pop(ctx2, s.id),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }),
+  );
+}
+
+Future<String?> _createSite(
+    BuildContext context, WidgetRef ref, String customerId) async {
+  final name = TextEditingController();
+  final address = TextEditingController();
+  final contact = TextEditingController();
+  final phone = TextEditingController();
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('Nueva obra del cliente'),
+      content: SingleChildScrollView(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          TextField(
+              controller: name,
+              autofocus: true,
+              decoration: const InputDecoration(
+                  labelText: 'Nombre de la obra *',
+                  hintText: 'Ej. Edificio Norte')),
+          TextField(
+              controller: address,
+              decoration:
+                  const InputDecoration(labelText: 'Dirección')),
+          TextField(
+              controller: contact,
+              decoration: const InputDecoration(
+                  labelText: 'Contacto en obra')),
+          TextField(
+              controller: phone,
+              keyboardType: TextInputType.phone,
+              decoration: const InputDecoration(labelText: 'Teléfono')),
+        ]),
+      ),
+      actions: [
+        TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar')),
+        FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Crear')),
+      ],
+    ),
+  );
+  if (ok != true || name.text.trim().isEmpty) return null;
+  return ref.read(rentalRepositoryProvider).saveSite(
+        customerId: customerId,
+        name: name.text.trim(),
+        address:
+            address.text.trim().isEmpty ? null : address.text.trim(),
+        contactName:
+            contact.text.trim().isEmpty ? null : contact.text.trim(),
+        contactPhone:
+            phone.text.trim().isEmpty ? null : phone.text.trim(),
+      );
+}
+
 /// Línea: unidad + tarifa (kind/períodos editables) + devolver.
 class _LineTile extends ConsumerWidget {
-  const _LineTile(
-      {required this.view,
-      required this.contractStatus,
-      required this.contractId});
+  const _LineTile({required this.view, required this.contract});
 
   final LineView view;
-  final String contractStatus;
-  final String contractId;
+  final RentalContract contract;
 
   static const _kinds = [
     ('half_day', '4h'),
@@ -328,8 +553,11 @@ class _LineTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = view.line;
     final money = NumberFormat.currency(symbol: r'$');
-    final draft = contractStatus == 'draft';
+    final draft = contract.status == 'draft';
     final returned = l.returnedAt != null;
+    // Con fechas definidas la tarifa se calcula sola y no se toca.
+    final byDates = contract.dueAt != null;
+    final manual = draft && !byDates;
     final repo = ref.read(rentalRepositoryProvider);
 
     return Card(
@@ -371,7 +599,7 @@ class _LineTile extends ConsumerWidget {
                   icon: const Icon(Icons.close, size: 18),
                   tooltip: 'Quitar',
                   onPressed: () => repo.removeLine(l.id)),
-            if (contractStatus == 'active' && !returned)
+            if (contract.status == 'active' && !returned)
               FilledButton.tonalIcon(
                 onPressed: () => _returnDialog(context, ref),
                 icon: const Icon(Icons.assignment_return, size: 18),
@@ -387,7 +615,7 @@ class _LineTile extends ConsumerWidget {
                 for (final (v, label) in _kinds)
                   DropdownMenuItem(value: v, child: Text(label)),
               ],
-              onChanged: draft
+              onChanged: manual
                   ? (v) =>
                       v == null ? null : repo.updateLine(l.id, rateKind: v)
                   : null,
@@ -395,20 +623,20 @@ class _LineTile extends ConsumerWidget {
             const SizedBox(width: 12),
             IconButton(
                 icon: const Icon(Icons.remove_circle_outline, size: 20),
-                onPressed: draft && l.periods > 1
+                onPressed: manual && l.periods > 1
                     ? () =>
                         repo.updateLine(l.id, periods: l.periods - 1)
                     : null),
             Text(l.periods.toStringAsFixed(0)),
             IconButton(
                 icon: const Icon(Icons.add_circle_outline, size: 20),
-                onPressed: draft
+                onPressed: manual
                     ? () =>
                         repo.updateLine(l.id, periods: l.periods + 1)
                     : null),
             const Spacer(),
             GestureDetector(
-              onTap: draft ? () => _editRate(context, ref) : null,
+              onTap: manual ? () => _editRate(context, ref) : null,
               child: Text(
                   '${money.format(l.rate)} × '
                   '${l.periods.toStringAsFixed(0)} = '
@@ -416,6 +644,14 @@ class _LineTile extends ConsumerWidget {
                   style: const TextStyle(fontWeight: FontWeight.w600)),
             ),
           ]),
+          if (byDates && !returned)
+            const Padding(
+              padding: EdgeInsets.only(top: 2),
+              child: Text(
+                  'Tarifa calculada por las fechas retiro → devolución',
+                  style:
+                      TextStyle(fontSize: 10, color: Colors.blueGrey)),
+            ),
         ]),
       ),
     );

@@ -26,11 +26,16 @@ Future<String?> buildContractPdf(WidgetRef ref, String contractId) async {
   final customer = await (db.select(db.customers)
         ..where((c) => c.id.equals(contract.customerId)))
       .getSingleOrNull();
+  final site = contract.siteId == null
+      ? null
+      : await (db.select(db.customerSites)
+            ..where((s) => s.id.equals(contract.siteId!)))
+          .getSingleOrNull();
   final lines = await repo.watchLines(contractId).first;
   final money = NumberFormat.currency(symbol: r'$');
   final df = DateFormat('dd/MM/yyyy HH:mm');
-  final total =
-      lines.fold<double>(0, (s, l) => s + l.line.amount);
+  final total = lines.fold<double>(0, (s, l) => s + l.line.amount) +
+      contract.deliveryFee;
 
   final doc = pw.Document();
   doc.addPage(pw.MultiPage(
@@ -86,6 +91,13 @@ Future<String?> buildContractPdf(WidgetRef ref, String contractId) async {
             'Devolución pactada: '
             '${DateFormat('dd/MM/yyyy').format(contract.dueAt!)}',
             style: const pw.TextStyle(fontSize: 10)),
+      pw.Text(
+          contract.deliveryMethod == 'delivery'
+              ? 'Entrega: envío por transporte'
+                  '${site == null ? '' : ' a ${site.name}'
+                      '${site.address == null ? '' : ' — ${site.address}'}'}'
+              : 'Entrega: retiro en el local',
+          style: const pw.TextStyle(fontSize: 10)),
       pw.SizedBox(height: 12),
       pw.TableHelper.fromTextArray(
         headers: [
@@ -132,6 +144,9 @@ Future<String?> buildContractPdf(WidgetRef ref, String contractId) async {
       pw.SizedBox(height: 8),
       pw.Row(mainAxisAlignment: pw.MainAxisAlignment.end, children: [
         pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.end, children: [
+          if (contract.deliveryFee > 0)
+            pw.Text('Transporte: ${money.format(contract.deliveryFee)}',
+                style: const pw.TextStyle(fontSize: 10)),
           pw.Text('TOTAL ${money.format(total)}',
               style: pw.TextStyle(
                   fontSize: 13, fontWeight: pw.FontWeight.bold)),

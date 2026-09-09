@@ -336,6 +336,56 @@ BOSCH GWS14-125
       expect(contract!.status, 'closed');
     });
 
+    test('tarifa derivada de las fechas retiro → devolución', () {
+      final r = RentalRepository(db,
+          SyncService(db, buildSyncAdapters()), catalog);
+      final d0 = DateTime(2026, 9, 9, 10);
+      (String, double) f(int dias) =>
+          r.rentalKindForDates(d0, d0.add(Duration(days: dias)));
+      expect(f(0), ('day', 1.0)); // mismo día = 1 día
+      expect(f(3), ('day', 3.0));
+      expect(f(10), ('week', 2.0));
+      expect(f(30), ('month', 1.0));
+      expect(f(45), ('month', 2.0));
+    });
+
+    test('con fecha pactada la línea se calcula sola y se recalcula',
+        () async {
+      final (contractId, assetId) = await armaContrato();
+      await rentals.updateContract(contractId,
+          dueAt: DateTime.now().add(const Duration(days: 10)));
+      await rentals.addLine(contractId, assetId);
+      var lines = await rentals.watchLines(contractId).first;
+      expect(lines.single.line.rateKind, 'week');
+      expect(lines.single.line.periods, 2);
+      expect(lines.single.line.amount, 140); // 70 × 2
+
+      // Acortar la renta recalcula a días.
+      await rentals.updateContract(contractId,
+          dueAt: DateTime.now().add(const Duration(days: 2)));
+      lines = await rentals.watchLines(contractId).first;
+      expect(lines.single.line.rateKind, 'day');
+      expect(lines.single.line.amount, 40); // 20 × 2
+    });
+
+    test('obras por cliente y entrega con transporte', () async {
+      final (contractId, _) = await armaContrato();
+      final contract = await rentals.getContract(contractId);
+      final siteId = await rentals.saveSite(
+          customerId: contract!.customerId,
+          name: 'Edificio Norte',
+          address: 'Av. Siempre Viva 123');
+      await rentals.updateContract(contractId,
+          deliveryMethod: 'delivery', siteId: siteId, deliveryFee: 15);
+      final c2 = await rentals.getContract(contractId);
+      expect(c2!.deliveryMethod, 'delivery');
+      expect(c2.siteId, siteId);
+      expect(c2.deliveryFee, 15);
+      final sites =
+          await rentals.watchSites(contract.customerId).first;
+      expect(sites.single.name, 'Edificio Norte');
+    });
+
     test('entregar sin líneas o dos veces falla con motivo', () async {
       final (contractId, assetId) = await armaContrato();
       expect(await rentals.deliver(contractId),

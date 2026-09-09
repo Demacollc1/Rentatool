@@ -79,6 +79,50 @@ class RentalRepository {
     return rowId;
   }
 
+  // ---------------- obras del cliente ----------------
+
+  Stream<List<CustomerSite>> watchSites(String customerId) =>
+      (_db.select(_db.customerSites)
+            ..where((s) =>
+                s.customerId.equals(customerId) & s.deletedAt.isNull())
+            ..orderBy([(s) => OrderingTerm.asc(s.name)]))
+          .watch();
+
+  Future<String> saveSite({
+    String? id,
+    required String customerId,
+    required String name,
+    String? address,
+    String? contactName,
+    String? contactPhone,
+  }) async {
+    final rowId = id ?? const Uuid().v4();
+    final now = DateTime.now();
+    await _db.into(_db.customerSites).insertOnConflictUpdate(
+          CustomerSitesCompanion(
+            id: Value(rowId),
+            customerId: Value(customerId),
+            name: Value(name),
+            address: Value(address),
+            contactName: Value(contactName),
+            contactPhone: Value(contactPhone),
+            updatedAt: Value(now),
+          ),
+        );
+    await _sync
+        .enqueue(table: 'customer_sites', rowId: rowId, op: 'upsert', row: {
+      'id': rowId,
+      'customer_id': customerId,
+      'name': name,
+      'address': address,
+      'contact_name': contactName,
+      'contact_phone': contactPhone,
+      'updated_at': isoTs(now),
+      'deleted_at': null,
+    });
+    return rowId;
+  }
+
   // ---------------- contratos ----------------
 
   /// Siguiente correlativo CTR-0001 (por máximo local, igual que DEM-).
@@ -129,6 +173,9 @@ class RentalRepository {
     double? deposit,
     String? notes,
     String? customerId,
+    String? deliveryMethod,
+    String? siteId,
+    double? deliveryFee,
   }) async {
     await (_db.update(_db.rentalContracts)..where((c) => c.id.equals(id)))
         .write(RentalContractsCompanion(
@@ -137,8 +184,16 @@ class RentalRepository {
       notes: notes == null ? const Value.absent() : Value(notes),
       customerId:
           customerId == null ? const Value.absent() : Value(customerId),
+      deliveryMethod: deliveryMethod == null
+          ? const Value.absent()
+          : Value(deliveryMethod),
+      siteId: siteId == null ? const Value.absent() : Value(siteId),
+      deliveryFee: deliveryFee == null
+          ? const Value.absent()
+          : Value(deliveryFee),
       updatedAt: Value(DateTime.now()),
     ));
+    if (dueAt != null) await recalcLinesFromDates(id);
     await _enqueueContract(id);
   }
 
@@ -197,6 +252,42 @@ class RentalRepository {
         _ => m.rateDay ?? 0,
       };
 
+  /// Tipo de renta y períodos derivados del rango retiro→devolución
+  /// (granularidad de días; el bloque 4h solo se elige manualmente).
+  (String, double) rentalKindForDates(DateTime from, DateTime to) {
+    final d0 = DateTime(from.year, from.month, from.day);
+    final d1 = DateTime(to.year, to.month, to.day);
+    var days = d1.difference(d0).inDays;
+    if (days < 1) days = 1;
+    if (days < 7) return ('day', days.toDouble());
+    if (days < 30) return ('week', (days / 7).ceil().toDouble());
+    return ('month', (days / 30).ceil().toDouble());
+  }
+
+  /// Recalcula tarifa y períodos de las líneas no devueltas según las
+  /// fechas del contrato (retiro = start_at o hoy; fin = due_at).
+  Future<void> recalcLinesFromDates(String contractId) async {
+    final c = await getContract(contractId);
+    if (c == null || c.dueAt == null) return;
+    if (c.status != 'draft' && c.status != 'active') return;
+    final (kind, periods) =
+        rentalKindForDates(c.startAt ?? DateTime.now(), c.dueAt!);
+    for (final l in await _livingLines(contractId)) {
+      if (l.returnedAt != null) continue;
+      final model = await _catalog.getModel(l.toolModelId);
+      final rate = model == null ? l.rate : rateFor(model, kind);
+      await (_db.update(_db.rentalLines)..where((x) => x.id.equals(l.id)))
+          .write(RentalLinesCompanion(
+        rateKind: Value(kind),
+        rate: Value(rate),
+        periods: Value(periods),
+        amount: Value(rate * periods),
+        updatedAt: Value(DateTime.now()),
+      ));
+      await _enqueueLine(l.id);
+    }
+  }
+
   /// Agrega una unidad al contrato. Devuelve null si se agregó, o el
   /// motivo si no se pudo (no disponible / repetida).
   Future<String?> addLine(String contractId, String assetId,
@@ -217,7 +308,16 @@ class RentalRepository {
 
     final model = await _catalog.getModel(asset.toolModelId);
     if (model == null) return 'Producto no encontrado';
-    final rate = rateFor(model, rateKind);
+    // Con fechas definidas, el tipo y los períodos salen del rango
+    // retiro→devolución; sin fechas, manual (día por defecto).
+    final contract = await getContract(contractId);
+    var kind = rateKind;
+    var periods = 1.0;
+    if (contract?.dueAt != null) {
+      (kind, periods) = rentalKindForDates(
+          contract!.startAt ?? DateTime.now(), contract.dueAt!);
+    }
+    final rate = rateFor(model, kind);
     final rowId = const Uuid().v4();
     final now = DateTime.now();
     await _db.into(_db.rentalLines).insert(RentalLinesCompanion.insert(
@@ -225,10 +325,10 @@ class RentalRepository {
           contractId: contractId,
           assetId: assetId,
           toolModelId: asset.toolModelId,
-          rateKind: Value(rateKind),
+          rateKind: Value(kind),
           rate: Value(rate),
-          periods: const Value(1),
-          amount: Value(rate),
+          periods: Value(periods),
+          amount: Value(rate * periods),
           conditionOut: Value(asset.condition),
           updatedAt: Value(now),
         ));
@@ -306,6 +406,8 @@ class RentalRepository {
       startAt: Value(now),
       updatedAt: Value(now),
     ));
+    // Con fecha pactada, los períodos se recalculan desde el retiro real.
+    await recalcLinesFromDates(contractId);
     await _enqueueContract(contractId);
     return null;
   }
@@ -390,6 +492,9 @@ class RentalRepository {
       'due_at': isoTsN(c.dueAt),
       'returned_at': isoTsN(c.returnedAt),
       'deposit': c.deposit,
+      'delivery_method': c.deliveryMethod,
+      'site_id': c.siteId,
+      'delivery_fee': c.deliveryFee,
       'notes': c.notes,
       'created_by': c.createdBy,
       'updated_at': isoTs(c.updatedAt),
@@ -451,5 +556,16 @@ final customerProvider =
     StreamProvider.autoDispose.family<Customer?, String>((ref, id) {
   final db = ref.watch(appDatabaseProvider);
   return (db.select(db.customers)..where((c) => c.id.equals(id)))
+      .watchSingleOrNull();
+});
+
+final customerSitesProvider = StreamProvider.autoDispose
+    .family<List<CustomerSite>, String>((ref, customerId) =>
+        ref.watch(rentalRepositoryProvider).watchSites(customerId));
+
+final siteProvider =
+    StreamProvider.autoDispose.family<CustomerSite?, String>((ref, id) {
+  final db = ref.watch(appDatabaseProvider);
+  return (db.select(db.customerSites)..where((s) => s.id.equals(id)))
       .watchSingleOrNull();
 });

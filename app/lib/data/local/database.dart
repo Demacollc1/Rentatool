@@ -192,6 +192,17 @@ class Customers extends Table with SyncColumns {
   TextColumn get notes => text().nullable()();
 }
 
+/// Obra/proyecto del cliente: dónde estará la herramienta rentada.
+/// Un cliente puede tener varias obras.
+class CustomerSites extends Table with SyncColumns {
+  TextColumn get customerId => text()();
+  TextColumn get name => text()();
+  TextColumn get address => text().nullable()();
+  TextColumn get contactName => text().nullable()();
+  TextColumn get contactPhone => text().nullable()();
+  TextColumn get notes => text().nullable()();
+}
+
 /// Contrato de renta: draft → active (entregado) → closed (devuelto).
 class RentalContracts extends Table with SyncColumns {
   /// Correlativo humano: CTR-0001…
@@ -204,6 +215,14 @@ class RentalContracts extends Table with SyncColumns {
 
   /// Garantía recibida (se devuelve al cierre).
   RealColumn get deposit => real().withDefault(const Constant(0))();
+
+  /// pickup = retiro en el local · delivery = envío por transporte.
+  TextColumn get deliveryMethod =>
+      text().withDefault(const Constant('pickup'))();
+
+  /// Obra del cliente donde estará la herramienta (si es envío).
+  TextColumn get siteId => text().nullable()();
+  RealColumn get deliveryFee => real().withDefault(const Constant(0))();
   TextColumn get notes => text().nullable()();
   TextColumn get createdBy => text().nullable()();
 }
@@ -259,6 +278,7 @@ class SyncState extends Table {
   ToolModelConsumables,
   InventoryMovements,
   Customers,
+  CustomerSites,
   RentalContracts,
   RentalLines,
   SyncQueue,
@@ -269,7 +289,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 9; // v9: contratos de renta (F2)
+  int get schemaVersion => 10; // v9 contratos · v10 obras y entrega
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -299,6 +319,13 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(canonicals, canonicals.iconPath);
             await m.addColumn(canonicals, canonicals.iconLocalPath);
             await m.addColumn(canonicals, canonicals.iconUploadedAt);
+          }
+          if (from == 9) {
+            await m.addColumn(
+                rentalContracts, rentalContracts.deliveryMethod);
+            await m.addColumn(rentalContracts, rentalContracts.siteId);
+            await m.addColumn(
+                rentalContracts, rentalContracts.deliveryFee);
           }
         },
       );
