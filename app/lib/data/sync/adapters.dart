@@ -307,4 +307,85 @@ List<TableSyncAdapter> buildSyncAdapters() => [
           return true;
         },
       ),
+      TableSyncAdapter(
+        remoteTable: 'customers',
+        mergeRemote: (db, r) async {
+          final local = await (db.select(db.customers)
+                ..where((x) => x.id.equals(r['id'] as String)))
+              .getSingleOrNull();
+          final remoteUpdated = ts(r['updated_at']);
+          if (!newer(local?.updatedAt, remoteUpdated)) return false;
+          await db.into(db.customers).insertOnConflictUpdate(
+                CustomersCompanion(
+                  id: Value(r['id'] as String),
+                  name: Value(r['name'] as String),
+                  idNumber: Value(r['id_number'] as String?),
+                  phone: Value(r['phone'] as String?),
+                  email: Value(r['email'] as String?),
+                  address: Value(r['address'] as String?),
+                  notes: Value(r['notes'] as String?),
+                  updatedAt: Value(remoteUpdated),
+                  deletedAt: Value(tsN(r['deleted_at'])),
+                ),
+              );
+          return true;
+        },
+      ),
+      TableSyncAdapter(
+        remoteTable: 'rental_contracts',
+        mergeRemote: (db, r) async {
+          final local = await (db.select(db.rentalContracts)
+                ..where((x) => x.id.equals(r['id'] as String)))
+              .getSingleOrNull();
+          final remoteUpdated = ts(r['updated_at']);
+          if (!newer(local?.updatedAt, remoteUpdated)) return false;
+          await db.into(db.rentalContracts).insertOnConflictUpdate(
+                RentalContractsCompanion(
+                  id: Value(r['id'] as String),
+                  contractNumber: Value(r['contract_number'] as String),
+                  customerId: Value(r['customer_id'] as String),
+                  status: Value((r['status'] ?? 'draft') as String),
+                  startAt: Value(tsN(r['start_at'])),
+                  dueAt: Value(tsN(r['due_at'])),
+                  returnedAt: Value(tsN(r['returned_at'])),
+                  deposit: Value(_d(r['deposit'])),
+                  notes: Value(r['notes'] as String?),
+                  createdBy: Value(r['created_by'] as String?),
+                  updatedAt: Value(remoteUpdated),
+                  deletedAt: Value(tsN(r['deleted_at'])),
+                ),
+              );
+          return true;
+        },
+      ),
+      TableSyncAdapter(
+        remoteTable: 'rental_lines',
+        mergeRemote: (db, r) async {
+          final local = await (db.select(db.rentalLines)
+                ..where((x) => x.id.equals(r['id'] as String)))
+              .getSingleOrNull();
+          final remoteUpdated = ts(r['updated_at']);
+          if (!newer(local?.updatedAt, remoteUpdated)) return false;
+          await db.into(db.rentalLines).insertOnConflictUpdate(
+                RentalLinesCompanion(
+                  id: Value(r['id'] as String),
+                  contractId: Value(r['contract_id'] as String),
+                  assetId: Value(r['asset_id'] as String),
+                  toolModelId: Value(r['tool_model_id'] as String),
+                  rateKind: Value((r['rate_kind'] ?? 'day') as String),
+                  rate: Value(_d(r['rate'])),
+                  periods: Value(_d(r['periods'])),
+                  amount: Value(_d(r['amount'])),
+                  deliveredAt: Value(tsN(r['delivered_at'])),
+                  returnedAt: Value(tsN(r['returned_at'])),
+                  conditionOut: Value(r['condition_out'] as String?),
+                  conditionIn: Value(r['condition_in'] as String?),
+                  notes: Value(r['notes'] as String?),
+                  updatedAt: Value(remoteUpdated),
+                  deletedAt: Value(tsN(r['deleted_at'])),
+                ),
+              );
+          return true;
+        },
+      ),
     ];

@@ -477,7 +477,7 @@ class CatalogRepository {
 
   /// Cambia el estado de la unidad registrando el movimiento acorde.
   Future<void> setAssetStatus(String id, String status,
-      {String? notes}) async {
+      {String? contractRef, String? notes}) async {
     final asset = await getAsset(id);
     if (asset == null || asset.status == status) return;
     await (_db.update(_db.assets)..where((a) => a.id.equals(id))).write(
@@ -496,7 +496,8 @@ class CatalogRepository {
         'maintenance_return',
       _ => 'adjust',
     };
-    await _recordMovement(assetId: id, kind: kind, notes: notes);
+    await _recordMovement(
+        assetId: id, kind: kind, contractRef: contractRef, notes: notes);
   }
 
   Future<void> _enqueueAsset(String id) async {
@@ -637,6 +638,7 @@ class CatalogRepository {
     double quantity = 1,
     String? fromLocationId,
     String? toLocationId,
+    String? contractRef,
     String? notes,
   }) async {
     final rowId = const Uuid().v4();
@@ -650,6 +652,7 @@ class CatalogRepository {
             quantity: Value(quantity),
             fromLocationId: Value(fromLocationId),
             toLocationId: Value(toLocationId),
+            contractRef: Value(contractRef),
             movedAt: now,
             notes: Value(notes),
             updatedAt: Value(now),
@@ -667,6 +670,7 @@ class CatalogRepository {
           'quantity': quantity,
           'from_location_id': fromLocationId,
           'to_location_id': toLocationId,
+          'contract_ref': contractRef,
           'moved_at': isoTs(now),
           'notes': notes,
           'updated_at': isoTs(now),

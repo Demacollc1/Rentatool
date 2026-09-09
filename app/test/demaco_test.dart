@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:drift/drift.dart' hide isNull;
+import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -10,6 +10,7 @@ import 'package:demaco/data/ocr/label_parser.dart';
 import 'package:demaco/data/repositories/catalog_repository.dart';
 import 'package:demaco/data/repositories/category_repository.dart';
 import 'package:demaco/data/repositories/location_repository.dart';
+import 'package:demaco/data/repositories/rental_repository.dart';
 import 'package:demaco/data/seed/portfolio_importer.dart';
 import 'package:demaco/data/sync/adapters.dart';
 import 'package:demaco/data/sync/sync_service.dart';
@@ -234,6 +235,115 @@ BOSCH GWS14-125
     test('specs eléctricas no se confunden con modelo', () {
       final g = parseLabelText('CRAFTSMAN\n120V 60HZ 1500W\nCMES500');
       expect(g.model, 'CMES500');
+    });
+  });
+
+  group('contratos de renta (F2)', () {
+    late AppDatabase db;
+    late CatalogRepository catalog;
+    late RentalRepository rentals;
+
+    setUp(() {
+      db = _db();
+      final sync = SyncService(db, buildSyncAdapters());
+      catalog = CatalogRepository(db, sync);
+      rentals = RentalRepository(db, sync, catalog);
+    });
+
+    tearDown(() => db.close());
+
+    Future<(String contractId, String assetId)> armaContrato() async {
+      final modelId = await catalog.saveModel(
+          name: 'Rotomartillo',
+          listCost: 100,
+          rateHalfDay: 14,
+          rateDay: 20,
+          rateWeek: 70,
+          rateMonth: 200);
+      final assetId = await catalog.createAsset(
+          toolModelId: modelId,
+          assetTag: await catalog.nextAssetTag(),
+          purchaseCost: 100);
+      final customerId = await rentals.saveCustomer(
+          name: 'Constructora Andes', idNumber: '0999999999001');
+      final contractId =
+          await rentals.createContract(customerId: customerId);
+      return (contractId, assetId);
+    }
+
+    test('correlativo CTR avanza', () async {
+      final customerId = await rentals.saveCustomer(name: 'Ana');
+      expect(await rentals.nextContractNumber(), 'CTR-0001');
+      await rentals.createContract(customerId: customerId);
+      expect(await rentals.nextContractNumber(), 'CTR-0002');
+    });
+
+    test('flujo completo: agregar, entregar, devolver, cerrar', () async {
+      final (contractId, assetId) = await armaContrato();
+
+      // Agregar la unidad con tarifa día precargada.
+      expect(await rentals.addLine(contractId, assetId), isNull);
+      expect(await rentals.addLine(contractId, assetId),
+          contains('ya está en el contrato'));
+      var lines = await rentals.watchLines(contractId).first;
+      expect(lines.single.line.rate, 20);
+      expect(lines.single.line.amount, 20);
+
+      // Cambiar a semana × 2 recalcula el importe.
+      await rentals.updateLine(lines.single.line.id,
+          rateKind: 'week', periods: 2);
+      lines = await rentals.watchLines(contractId).first;
+      expect(lines.single.line.amount, 140);
+
+      // Entregar: contrato activo, unidad rentada, kardex rent_out.
+      expect(await rentals.deliver(contractId), isNull);
+      var contract = await rentals.getContract(contractId);
+      expect(contract!.status, 'active');
+      var asset = await catalog.getAsset(assetId);
+      expect(asset!.status, 'rented');
+      var moves = await catalog.watchMovements(assetId: assetId).first;
+      final out = moves.firstWhere((m) => m.kind == 'rent_out');
+      expect(out.contractRef, contract.contractNumber);
+
+      // La misma unidad no puede entrar a otro contrato.
+      final c2 = await rentals.createContract(
+          customerId: contract.customerId);
+      expect(await rentals.addLine(c2, assetId),
+          contains('no está disponible'));
+
+      // Devolver: unidad disponible, línea cerrada, contrato cerrado.
+      await rentals.returnLine(lines.single.line.id);
+      asset = await catalog.getAsset(assetId);
+      expect(asset!.status, 'available');
+      contract = await rentals.getContract(contractId);
+      expect(contract!.status, 'closed');
+      expect(contract.returnedAt, isNotNull);
+      moves = await catalog.watchMovements(assetId: assetId).first;
+      expect(moves.any((m) => m.kind == 'rent_return'), isTrue);
+    });
+
+    test('devolución dañada manda la unidad a mantenimiento', () async {
+      final (contractId, assetId) = await armaContrato();
+      await rentals.addLine(contractId, assetId);
+      await rentals.deliver(contractId);
+      final lines = await rentals.watchLines(contractId).first;
+      await rentals.returnLine(lines.single.line.id,
+          conditionIn: 'poor', notes: 'carbones quemados');
+      final asset = await catalog.getAsset(assetId);
+      expect(asset!.status, 'maintenance');
+      expect(asset.condition, 'poor');
+      final contract = await rentals.getContract(contractId);
+      expect(contract!.status, 'closed');
+    });
+
+    test('entregar sin líneas o dos veces falla con motivo', () async {
+      final (contractId, assetId) = await armaContrato();
+      expect(await rentals.deliver(contractId),
+          contains('al menos una unidad'));
+      await rentals.addLine(contractId, assetId);
+      expect(await rentals.deliver(contractId), isNull);
+      expect(await rentals.deliver(contractId),
+          contains('ya fue entregado'));
     });
   });
 }

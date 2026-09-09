@@ -10,6 +10,8 @@ import '../features/dashboard/dashboard_screen.dart';
 import '../features/import/import_screen.dart';
 import '../features/locations/items_by_location_screen.dart';
 import '../features/locations/locations_screen.dart';
+import '../features/rentals/contract_detail_screen.dart';
+import '../features/rentals/rentals_screen.dart';
 import '../features/scan/scan_screen.dart';
 import '../features/settings/settings_screen.dart';
 
@@ -40,6 +42,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                   icon: Icon(Icons.handyman_outlined),
                   selectedIcon: Icon(Icons.handyman),
                   label: 'Catálogo'),
+              NavigationDestination(
+                  icon: Icon(Icons.receipt_long_outlined),
+                  selectedIcon: Icon(Icons.receipt_long),
+                  label: 'Rentas'),
               NavigationDestination(
                   icon: Icon(Icons.qr_code_scanner),
                   label: 'Escanear'),
@@ -76,6 +82,19 @@ final routerProvider = Provider<GoRouter>((ref) {
                       modelId: state.pathParameters['id']!,
                       highlightAssetId:
                           state.uri.queryParameters['asset']),
+                ),
+              ],
+            ),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: '/rentals',
+              builder: (_, _) => const RentalsScreen(),
+              routes: [
+                GoRoute(
+                  path: 'contract/:id',
+                  builder: (_, state) => ContractDetailScreen(
+                      contractId: state.pathParameters['id']!),
                 ),
               ],
             ),

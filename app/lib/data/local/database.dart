@@ -182,6 +182,50 @@ class InventoryMovements extends Table with SyncColumns {
   TextColumn get notes => text().nullable()();
 }
 
+/// Cliente de renta (persona o empresa, con cédula/RUC).
+class Customers extends Table with SyncColumns {
+  TextColumn get name => text()();
+  TextColumn get idNumber => text().nullable()();
+  TextColumn get phone => text().nullable()();
+  TextColumn get email => text().nullable()();
+  TextColumn get address => text().nullable()();
+  TextColumn get notes => text().nullable()();
+}
+
+/// Contrato de renta: draft → active (entregado) → closed (devuelto).
+class RentalContracts extends Table with SyncColumns {
+  /// Correlativo humano: CTR-0001…
+  TextColumn get contractNumber => text()();
+  TextColumn get customerId => text()();
+  TextColumn get status => text().withDefault(const Constant('draft'))();
+  DateTimeColumn get startAt => dateTime().nullable()();
+  DateTimeColumn get dueAt => dateTime().nullable()();
+  DateTimeColumn get returnedAt => dateTime().nullable()();
+
+  /// Garantía recibida (se devuelve al cierre).
+  RealColumn get deposit => real().withDefault(const Constant(0))();
+  TextColumn get notes => text().nullable()();
+  TextColumn get createdBy => text().nullable()();
+}
+
+/// Línea del contrato: una unidad física con su tarifa y períodos.
+class RentalLines extends Table with SyncColumns {
+  TextColumn get contractId => text()();
+  TextColumn get assetId => text()();
+  TextColumn get toolModelId => text()();
+
+  /// half_day (bloque 4-5h) | day | week | month.
+  TextColumn get rateKind => text().withDefault(const Constant('day'))();
+  RealColumn get rate => real().withDefault(const Constant(0))();
+  RealColumn get periods => real().withDefault(const Constant(1))();
+  RealColumn get amount => real().withDefault(const Constant(0))();
+  DateTimeColumn get deliveredAt => dateTime().nullable()();
+  DateTimeColumn get returnedAt => dateTime().nullable()();
+  TextColumn get conditionOut => text().nullable()();
+  TextColumn get conditionIn => text().nullable()();
+  TextColumn get notes => text().nullable()();
+}
+
 /// Cola de sincronización de subida.
 class SyncQueue extends Table {
   IntColumn get seq => integer().autoIncrement()();
@@ -214,6 +258,9 @@ class SyncState extends Table {
   Consumables,
   ToolModelConsumables,
   InventoryMovements,
+  Customers,
+  RentalContracts,
+  RentalLines,
   SyncQueue,
   SyncState,
 ])
@@ -222,7 +269,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9; // v9: contratos de renta (F2)
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
