@@ -356,7 +356,12 @@ class _LineTile extends ConsumerWidget {
                       Text(
                           'Devuelta '
                           '${DateFormat('dd/MM HH:mm').format(l.returnedAt!)}'
-                          ' · condición ${l.conditionIn ?? '-'}',
+                          ' · condición ${switch (l.conditionIn) {
+                            'good' => 'bien',
+                            'fair' => 'regular',
+                            'poor' => 'dañada',
+                            _ => l.conditionIn ?? '-',
+                          }}',
                           style: const TextStyle(
                               fontSize: 11, color: Colors.green)),
                   ]),
