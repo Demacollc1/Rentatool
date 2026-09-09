@@ -46,7 +46,7 @@ Deno.serve(async (req) => {
 
   const { data: models } = await service
     .from("tool_models")
-    .select("supplier_code, name, description, brand, rate_day")
+    .select("rat_code, supplier_code, name, description, brand, rate_day")
     .eq("organization_id", org)
     .eq("published", true)
     .is("deleted_at", null);
@@ -61,28 +61,29 @@ Deno.serve(async (req) => {
   // Disponibles por modelo.
   const { data: assets } = await service
     .from("assets")
-    .select("tool_model_id, status, tool_models!inner(supplier_code)")
+    .select("tool_model_id, status, tool_models!inner(rat_code)")
     .eq("organization_id", org)
     .eq("status", "available")
     .is("deleted_at", null);
   const availByCode = new Map<string, number>();
   for (const a of assets ?? []) {
-    const code = (a as Record<string, { supplier_code?: string }>)
-      .tool_models?.supplier_code;
+    const code = (a as Record<string, { rat_code?: string }>)
+      .tool_models?.rat_code;
     if (code) availByCode.set(code, (availByCode.get(code) ?? 0) + 1);
   }
 
   const items = models
-    .filter((m) => m.supplier_code && (m.rate_day ?? 0) > 0)
+    .map((m) => ({ ...m, code: m.rat_code ?? m.supplier_code }))
+    .filter((m) => m.code && (m.rate_day ?? 0) > 0)
     .map((m) => ({
-      external_id: m.supplier_code,
+      external_id: m.code,
       description:
-        `Alquiler ${m.name}${m.brand ? ` ${m.brand}` : ""} (${m.supplier_code})`,
+        `Alquiler ${m.name}${m.brand ? ` ${m.brand}` : ""} (${m.code})`,
       brand: m.brand,
       unit: "día",
       price: m.rate_day,
       is_rental: true,
-      stock: availByCode.get(m.supplier_code) ?? 0,
+      stock: availByCode.get(m.code) ?? 0,
     }));
 
   const res = await fetch(url, {
