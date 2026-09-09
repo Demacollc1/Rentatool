@@ -31,6 +31,11 @@ Future<String?> buildContractPdf(WidgetRef ref, String contractId) async {
       : await (db.select(db.customerSites)
             ..where((s) => s.id.equals(contract.siteId!)))
           .getSingleOrNull();
+  final contact = contract.contactId == null
+      ? null
+      : await (db.select(db.siteContacts)
+            ..where((c) => c.id.equals(contract.contactId!)))
+          .getSingleOrNull();
   final lines = await repo.watchLines(contractId).first;
   final money = NumberFormat.currency(symbol: r'$');
   final df = DateFormat('dd/MM/yyyy HH:mm');
@@ -92,11 +97,21 @@ Future<String?> buildContractPdf(WidgetRef ref, String contractId) async {
             ' · Devolución pactada: '
             '${DateFormat('dd/MM/yyyy').format(contract.dueAt!)}',
             style: const pw.TextStyle(fontSize: 10)),
+      if (site != null)
+        pw.Text(
+            'Obra: ${site.name}'
+            '${site.address == null ? '' : ' — ${site.address}'}',
+            style: const pw.TextStyle(fontSize: 10)),
+      if (contact != null)
+        pw.Text(
+            'Responsable de la herramienta: ${contact.name}'
+            '${contact.role == null ? '' : ' (${contact.role})'}'
+            '${contact.idNumber == null ? '' : ' · CI ${contact.idNumber}'}'
+            '${contact.phone == null ? '' : ' · ${contact.phone}'}',
+            style: const pw.TextStyle(fontSize: 10)),
       pw.Text(
           contract.deliveryMethod == 'delivery'
-              ? 'Entrega: envío por transporte'
-                  '${site == null ? '' : ' a ${site.name}'
-                      '${site.address == null ? '' : ' — ${site.address}'}'}'
+              ? 'Entrega: envío por transporte a la obra'
               : 'Entrega: retiro en el local',
           style: const pw.TextStyle(fontSize: 10)),
       pw.SizedBox(height: 12),

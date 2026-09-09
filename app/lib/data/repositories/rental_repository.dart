@@ -123,6 +123,50 @@ class RentalRepository {
     return rowId;
   }
 
+  // ---------------- responsables por obra ----------------
+
+  Stream<List<SiteContact>> watchContacts(String siteId) =>
+      (_db.select(_db.siteContacts)
+            ..where((c) =>
+                c.siteId.equals(siteId) & c.deletedAt.isNull())
+            ..orderBy([(c) => OrderingTerm.asc(c.name)]))
+          .watch();
+
+  Future<String> saveContact({
+    String? id,
+    required String siteId,
+    required String name,
+    String? idNumber,
+    String? phone,
+    String? role,
+  }) async {
+    final rowId = id ?? const Uuid().v4();
+    final now = DateTime.now();
+    await _db.into(_db.siteContacts).insertOnConflictUpdate(
+          SiteContactsCompanion(
+            id: Value(rowId),
+            siteId: Value(siteId),
+            name: Value(name),
+            idNumber: Value(idNumber),
+            phone: Value(phone),
+            role: Value(role),
+            updatedAt: Value(now),
+          ),
+        );
+    await _sync
+        .enqueue(table: 'site_contacts', rowId: rowId, op: 'upsert', row: {
+      'id': rowId,
+      'site_id': siteId,
+      'name': name,
+      'id_number': idNumber,
+      'phone': phone,
+      'role': role,
+      'updated_at': isoTs(now),
+      'deleted_at': null,
+    });
+    return rowId;
+  }
+
   // ---------------- contratos ----------------
 
   /// Siguiente correlativo CTR-0001 (por máximo local, igual que DEM-).
@@ -141,6 +185,8 @@ class RentalRepository {
 
   Future<String> createContract({
     required String customerId,
+    String? siteId,
+    String? contactId,
     DateTime? dueAt,
     double deposit = 0,
     String? notes,
@@ -153,6 +199,8 @@ class RentalRepository {
             id: rowId,
             contractNumber: number,
             customerId: customerId,
+            siteId: Value(siteId),
+            contactId: Value(contactId),
             dueAt: Value(dueAt),
             deposit: Value(deposit),
             notes: Value(notes),
@@ -179,6 +227,7 @@ class RentalRepository {
     String? customerId,
     String? deliveryMethod,
     String? siteId,
+    String? contactId,
     double? deliveryFee,
   }) async {
     await (_db.update(_db.rentalContracts)..where((c) => c.id.equals(id)))
@@ -194,6 +243,8 @@ class RentalRepository {
           ? const Value.absent()
           : Value(deliveryMethod),
       siteId: siteId == null ? const Value.absent() : Value(siteId),
+      contactId:
+          contactId == null ? const Value.absent() : Value(contactId),
       deliveryFee: deliveryFee == null
           ? const Value.absent()
           : Value(deliveryFee),
@@ -504,6 +555,7 @@ class RentalRepository {
       'deposit': c.deposit,
       'delivery_method': c.deliveryMethod,
       'site_id': c.siteId,
+      'contact_id': c.contactId,
       'delivery_fee': c.deliveryFee,
       // Solo si lo conocemos: si el server ya generó uno (contratos
       // viejos) no hay que pisarlo con null.
@@ -581,6 +633,17 @@ final siteProvider =
     StreamProvider.autoDispose.family<CustomerSite?, String>((ref, id) {
   final db = ref.watch(appDatabaseProvider);
   return (db.select(db.customerSites)..where((s) => s.id.equals(id)))
+      .watchSingleOrNull();
+});
+
+final siteContactsProvider = StreamProvider.autoDispose
+    .family<List<SiteContact>, String>((ref, siteId) =>
+        ref.watch(rentalRepositoryProvider).watchContacts(siteId));
+
+final siteContactProvider =
+    StreamProvider.autoDispose.family<SiteContact?, String>((ref, id) {
+  final db = ref.watch(appDatabaseProvider);
+  return (db.select(db.siteContacts)..where((c) => c.id.equals(id)))
       .watchSingleOrNull();
 });
 

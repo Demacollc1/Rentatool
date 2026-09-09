@@ -116,12 +116,17 @@ class _RentalsScreenState extends ConsumerState<RentalsScreen> {
     );
   }
 
+  /// Cadena obligatoria: cliente → proyecto/dirección de entrega →
+  /// responsable de la herramienta → contrato.
   Future<void> _newContract(BuildContext context) async {
     final customerId = await pickCustomer(context, ref);
     if (customerId == null || !context.mounted) return;
-    final id = await ref
-        .read(rentalRepositoryProvider)
-        .createContract(customerId: customerId);
+    final siteId = await pickSite(context, ref, customerId);
+    if (siteId == null || !context.mounted) return;
+    final contactId = await pickContact(context, ref, siteId);
+    if (contactId == null || !context.mounted) return;
+    final id = await ref.read(rentalRepositoryProvider).createContract(
+        customerId: customerId, siteId: siteId, contactId: contactId);
     if (context.mounted) context.go('/rentals/contract/$id');
   }
 }

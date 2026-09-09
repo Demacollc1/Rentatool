@@ -356,6 +356,30 @@ List<TableSyncAdapter> buildSyncAdapters() => [
         },
       ),
       TableSyncAdapter(
+        remoteTable: 'site_contacts',
+        mergeRemote: (db, r) async {
+          final local = await (db.select(db.siteContacts)
+                ..where((x) => x.id.equals(r['id'] as String)))
+              .getSingleOrNull();
+          final remoteUpdated = ts(r['updated_at']);
+          if (!newer(local?.updatedAt, remoteUpdated)) return false;
+          await db.into(db.siteContacts).insertOnConflictUpdate(
+                SiteContactsCompanion(
+                  id: Value(r['id'] as String),
+                  siteId: Value(r['site_id'] as String),
+                  name: Value(r['name'] as String),
+                  idNumber: Value(r['id_number'] as String?),
+                  phone: Value(r['phone'] as String?),
+                  role: Value(r['role'] as String?),
+                  notes: Value(r['notes'] as String?),
+                  updatedAt: Value(remoteUpdated),
+                  deletedAt: Value(tsN(r['deleted_at'])),
+                ),
+              );
+          return true;
+        },
+      ),
+      TableSyncAdapter(
         remoteTable: 'rental_contracts',
         mergeRemote: (db, r) async {
           final local = await (db.select(db.rentalContracts)
@@ -377,6 +401,7 @@ List<TableSyncAdapter> buildSyncAdapters() => [
                   deliveryMethod:
                       Value((r['delivery_method'] ?? 'pickup') as String),
                   siteId: Value(r['site_id'] as String?),
+                  contactId: Value(r['contact_id'] as String?),
                   deliveryFee: Value(_d(r['delivery_fee'])),
                   acceptanceToken:
                       Value(r['acceptance_token'] as String?),

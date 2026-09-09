@@ -146,11 +146,19 @@ async function cargar() {
     const f = (s) => s ? new Date(s).toLocaleDateString('es-EC') : '—';
     $('fechas').textContent =
         'Retiro ' + f(d.pickup_at) + ' → devolución ' + f(d.due_at);
-    $('entrega').textContent = d.delivery_method === 'delivery'
-        ? ('Envío a obra' + (d.site ? ': ' + d.site.name +
-            (d.site.address ? ' — ' + d.site.address : '') : '') +
+    let entrega = d.delivery_method === 'delivery'
+        ? ('Envío a obra' +
             (d.delivery_fee > 0 ? ' · transporte ' + money(d.delivery_fee) : ''))
         : 'Retiro en el local DEMACO';
+    if (d.site) {
+      entrega += ' · Obra: ' + d.site.name +
+          (d.site.address ? ' — ' + d.site.address : '');
+    }
+    if (d.contact) {
+      entrega += ' · Responsable: ' + d.contact.name +
+          (d.contact.role ? ' (' + d.contact.role + ')' : '');
+    }
+    $('entrega').textContent = entrega;
     for (const i of d.items) {
       const tr = document.createElement('tr');
       tr.innerHTML = '<td><b>' + (i.tag||'') + '</b> ' + (i.equipo||'') +

@@ -22,7 +22,8 @@ async function contractByToken(token: string) {
     .from("rental_contracts")
     .select(
       "id, organization_id, contract_number, status, pickup_at, start_at, " +
-        "due_at, deposit, delivery_method, delivery_fee, site_id, customer_id",
+        "due_at, deposit, delivery_method, delivery_fee, site_id, " +
+        "contact_id, customer_id",
     )
     .eq("acceptance_token", token)
     .is("deleted_at", null)
@@ -66,6 +67,10 @@ Deno.serve(async (req) => {
       ? await service.from("customer_sites").select("name, address")
         .eq("id", c.site_id).maybeSingle()
       : { data: null };
+    const { data: contact } = c.contact_id
+      ? await service.from("site_contacts").select("name, role, phone")
+        .eq("id", c.contact_id).maybeSingle()
+      : { data: null };
     const { data: lines } = await service
       .from("rental_lines")
       .select("rate_kind, rate, periods, amount, asset_id, tool_model_id")
@@ -104,6 +109,7 @@ Deno.serve(async (req) => {
       delivery_method: c.delivery_method,
       delivery_fee: c.delivery_fee,
       site,
+      contact,
       customer: {
         name: customer?.name,
         id_number: customer?.id_number,

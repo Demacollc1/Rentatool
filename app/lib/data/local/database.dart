@@ -203,6 +203,16 @@ class CustomerSites extends Table with SyncColumns {
   TextColumn get notes => text().nullable()();
 }
 
+/// Responsable de la herramienta por parte del cliente, en una obra.
+class SiteContacts extends Table with SyncColumns {
+  TextColumn get siteId => text()();
+  TextColumn get name => text()();
+  TextColumn get idNumber => text().nullable()();
+  TextColumn get phone => text().nullable()();
+  TextColumn get role => text().nullable()();
+  TextColumn get notes => text().nullable()();
+}
+
 /// Contrato de renta: draft → active (entregado) → closed (devuelto).
 class RentalContracts extends Table with SyncColumns {
   /// Correlativo humano: CTR-0001…
@@ -225,8 +235,11 @@ class RentalContracts extends Table with SyncColumns {
   TextColumn get deliveryMethod =>
       text().withDefault(const Constant('pickup'))();
 
-  /// Obra del cliente donde estará la herramienta (si es envío).
+  /// Obra del cliente donde estará la herramienta.
   TextColumn get siteId => text().nullable()();
+
+  /// Responsable de la herramienta por parte del cliente (en la obra).
+  TextColumn get contactId => text().nullable()();
   RealColumn get deliveryFee => real().withDefault(const Constant(0))();
 
   /// Secreto del link público del portal de aceptación (F2b).
@@ -302,6 +315,7 @@ class SyncState extends Table {
   InventoryMovements,
   Customers,
   CustomerSites,
+  SiteContacts,
   RentalContracts,
   RentalLines,
   ContractAcceptances,
@@ -313,7 +327,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 12; // v9-11 contratos · v12 portal aceptación
+  int get schemaVersion => 13; // v9-12 contratos/portal · v13 responsables
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -357,6 +371,9 @@ class AppDatabase extends _$AppDatabase {
           if (from >= 9 && from < 12) {
             await m.addColumn(
                 rentalContracts, rentalContracts.acceptanceToken);
+          }
+          if (from >= 9 && from < 13) {
+            await m.addColumn(rentalContracts, rentalContracts.contactId);
           }
         },
       );

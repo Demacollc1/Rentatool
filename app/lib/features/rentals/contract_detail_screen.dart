@@ -205,6 +205,12 @@ class _HeaderCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final customer =
         ref.watch(customerProvider(contract.customerId)).value;
+    final site = contract.siteId == null
+        ? null
+        : ref.watch(siteProvider(contract.siteId!)).value;
+    final contact = contract.contactId == null
+        ? null
+        : ref.watch(siteContactProvider(contract.contactId!)).value;
     final df = DateFormat('dd/MM/yyyy HH:mm');
     return Card(
       margin: const EdgeInsets.all(12),
@@ -232,6 +238,71 @@ class _HeaderCard extends ConsumerWidget {
                           .updateContract(contract.id, customerId: id);
                     }
                   })
+              : null,
+        ),
+        const Divider(height: 1),
+        ListTile(
+          dense: true,
+          leading: const Icon(Icons.place_outlined, size: 20),
+          title: Text(site == null
+              ? 'Elige el proyecto / dirección de entrega'
+              : site.name),
+          subtitle: site?.address == null
+              ? null
+              : Text(site!.address!,
+                  style: const TextStyle(fontSize: 11)),
+          trailing:
+              editable ? const Icon(Icons.chevron_right) : null,
+          onTap: editable
+              ? () async {
+                  final id = await pickSite(
+                      context, ref, contract.customerId);
+                  if (id != null) {
+                    // Obra nueva → el responsable anterior ya no aplica.
+                    await ref
+                        .read(rentalRepositoryProvider)
+                        .updateContract(contract.id, siteId: id);
+                    if (context.mounted) {
+                      final cid = await pickContact(context, ref, id);
+                      if (cid != null) {
+                        await ref
+                            .read(rentalRepositoryProvider)
+                            .updateContract(contract.id,
+                                contactId: cid);
+                      }
+                    }
+                  }
+                }
+              : null,
+        ),
+        ListTile(
+          dense: true,
+          leading: const Icon(Icons.engineering_outlined, size: 20),
+          title: Text(contact == null
+              ? 'Elige el responsable de la herramienta'
+              : contact.name),
+          subtitle: contact == null
+              ? null
+              : Text(
+                  [
+                    if (contact.role != null) contact.role!,
+                    if (contact.idNumber != null)
+                      'CI ${contact.idNumber}',
+                    if (contact.phone != null) contact.phone!,
+                  ].join(' · '),
+                  style: const TextStyle(fontSize: 11)),
+          trailing:
+              editable ? const Icon(Icons.chevron_right) : null,
+          onTap: editable && contract.siteId != null
+              ? () async {
+                  final id = await pickContact(
+                      context, ref, contract.siteId!);
+                  if (id != null) {
+                    await ref
+                        .read(rentalRepositoryProvider)
+                        .updateContract(contract.id, contactId: id);
+                  }
+                }
               : null,
         ),
         const Divider(height: 1),
@@ -469,9 +540,6 @@ class _DeliveryTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final repo = ref.read(rentalRepositoryProvider);
     final delivery = contract.deliveryMethod == 'delivery';
-    final site = contract.siteId == null
-        ? null
-        : ref.watch(siteProvider(contract.siteId!)).value;
     final money = NumberFormat.currency(symbol: r'$');
     return Column(children: [
       ListTile(
@@ -498,30 +566,6 @@ class _DeliveryTile extends ConsumerWidget {
           ),
         ]),
       ),
-      if (delivery)
-        ListTile(
-          dense: true,
-          leading: const Icon(Icons.place_outlined, size: 20),
-          title: Text(site == null
-              ? 'Elige la obra / dirección de entrega'
-              : site.name),
-          subtitle: site?.address == null
-              ? null
-              : Text(site!.address!,
-                  style: const TextStyle(fontSize: 11)),
-          trailing: editable
-              ? const Icon(Icons.chevron_right)
-              : null,
-          onTap: editable
-              ? () async {
-                  final id = await pickSite(
-                      context, ref, contract.customerId);
-                  if (id != null) {
-                    await repo.updateContract(contract.id, siteId: id);
-                  }
-                }
-              : null,
-        ),
       if (delivery)
         ListTile(
           dense: true,
@@ -567,115 +611,6 @@ class _DeliveryTile extends ConsumerWidget {
               double.tryParse(ctrl.text.replaceAll(',', '.')) ?? 0);
     }
   }
-}
-
-/// Selector de obra del cliente con alta rápida.
-Future<String?> pickSite(
-    BuildContext context, WidgetRef ref, String customerId) {
-  return showModalBottomSheet<String>(
-    context: context,
-    isScrollControlled: true,
-    builder: (_) => Consumer(builder: (ctx, ref, _) {
-      final sites = ref.watch(customerSitesProvider(customerId));
-      return DraggableScrollableSheet(
-        expand: false,
-        initialChildSize: 0.6,
-        builder: (ctx2, scroll) => ListView(
-          controller: scroll,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.add_location_alt_outlined),
-              title: const Text('Crear obra nueva'),
-              onTap: () async {
-                final id =
-                    await _createSite(ctx2, ref, customerId);
-                if (id != null && ctx2.mounted) {
-                  Navigator.pop(ctx2, id);
-                }
-              },
-            ),
-            const Divider(height: 1),
-            ...sites.when(
-              loading: () => [
-                const Padding(
-                    padding: EdgeInsets.all(24),
-                    child:
-                        Center(child: CircularProgressIndicator()))
-              ],
-              error: (e, _) => [Text('Error: $e')],
-              data: (list) => [
-                for (final s in list)
-                  ListTile(
-                    leading: const Icon(Icons.place_outlined),
-                    title: Text(s.name),
-                    subtitle: s.address == null
-                        ? null
-                        : Text(s.address!,
-                            style: const TextStyle(fontSize: 11)),
-                    onTap: () => Navigator.pop(ctx2, s.id),
-                  ),
-              ],
-            ),
-          ],
-        ),
-      );
-    }),
-  );
-}
-
-Future<String?> _createSite(
-    BuildContext context, WidgetRef ref, String customerId) async {
-  final name = TextEditingController();
-  final address = TextEditingController();
-  final contact = TextEditingController();
-  final phone = TextEditingController();
-  final ok = await showDialog<bool>(
-    context: context,
-    builder: (ctx) => AlertDialog(
-      title: const Text('Nueva obra del cliente'),
-      content: SingleChildScrollView(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          TextField(
-              controller: name,
-              autofocus: true,
-              decoration: const InputDecoration(
-                  labelText: 'Nombre de la obra *',
-                  hintText: 'Ej. Edificio Norte')),
-          TextField(
-              controller: address,
-              decoration:
-                  const InputDecoration(labelText: 'Dirección')),
-          TextField(
-              controller: contact,
-              decoration: const InputDecoration(
-                  labelText: 'Contacto en obra')),
-          TextField(
-              controller: phone,
-              keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(labelText: 'Teléfono')),
-        ]),
-      ),
-      actions: [
-        TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar')),
-        FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Crear')),
-      ],
-    ),
-  );
-  if (ok != true || name.text.trim().isEmpty) return null;
-  return ref.read(rentalRepositoryProvider).saveSite(
-        customerId: customerId,
-        name: name.text.trim(),
-        address:
-            address.text.trim().isEmpty ? null : address.text.trim(),
-        contactName:
-            contact.text.trim().isEmpty ? null : contact.text.trim(),
-        contactPhone:
-            phone.text.trim().isEmpty ? null : phone.text.trim(),
-      );
 }
 
 /// Línea: unidad + tarifa (kind/períodos editables) + devolver.

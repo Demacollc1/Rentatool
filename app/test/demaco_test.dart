@@ -382,6 +382,29 @@ BOSCH GWS14-125
       expect(lines.single.line.periods, 2); // ceil(10/7)
     });
 
+    test('jerarquía cliente → obra → responsable en el contrato',
+        () async {
+      final customerId =
+          await rentals.saveCustomer(name: 'Constructora Sur');
+      final siteId = await rentals.saveSite(
+          customerId: customerId,
+          name: 'Torre B',
+          address: 'Av. Loja 456');
+      final contactId = await rentals.saveContact(
+          siteId: siteId,
+          name: 'Pedro Mora',
+          idNumber: '0102030405',
+          role: 'Residente de obra');
+      final contractId = await rentals.createContract(
+          customerId: customerId, siteId: siteId, contactId: contactId);
+      final c = await rentals.getContract(contractId);
+      expect(c!.siteId, siteId);
+      expect(c.contactId, contactId);
+      final contacts = await rentals.watchContacts(siteId).first;
+      expect(contacts.single.name, 'Pedro Mora');
+      expect(contacts.single.role, 'Residente de obra');
+    });
+
     test('obras por cliente y entrega con transporte', () async {
       final (contractId, _) = await armaContrato();
       final contract = await rentals.getContract(contractId);
