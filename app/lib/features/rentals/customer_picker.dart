@@ -149,6 +149,11 @@ Future<String?> pickSite(
   );
 }
 
+/// Nombre completo del código postal: Descripción 1 + Descripción 2
+/// del ERP concatenadas (la 2 completa a la 1).
+String postalFullName(PostalCode c) =>
+    c.parish == null ? c.city : '${c.city} ${c.parish}';
+
 /// Selector de código postal interno DEMACO (código → ciudad y
 /// parroquia), con alta rápida a la lista.
 Future<PostalCode?> pickPostalCode(BuildContext context, WidgetRef ref) {
@@ -212,11 +217,9 @@ class _PostalListState extends ConsumerState<_PostalList> {
                 ListTile(
                   dense: true,
                   leading: const Icon(Icons.tag),
-                  title: Text('${c.code} · ${c.city}'),
-                  subtitle: c.parish == null
-                      ? null
-                      : Text(c.parish!,
-                          style: const TextStyle(fontSize: 11)),
+                  title: Text(c.code),
+                  subtitle: Text(postalFullName(c),
+                      style: const TextStyle(fontSize: 11)),
                   onTap: () => Navigator.pop(context, c),
                 ),
             ],
@@ -320,8 +323,7 @@ Future<String?> createSite(
               leading: const Icon(Icons.tag, size: 20),
               title: Text(postal == null
                   ? 'Código postal interno *'
-                  : '${postal!.code} · ${postal!.city}'
-                      '${postal!.parish == null ? '' : ' · ${postal!.parish}'}'),
+                  : '${postal!.code} · ${postalFullName(postal!)}'),
               trailing: const Icon(Icons.chevron_right),
               onTap: () async {
                 final pc = await pickPostalCode(ctx, ref);
