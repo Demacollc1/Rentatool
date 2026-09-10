@@ -131,7 +131,7 @@ class SyncService {
   }
 
   Future<String> orgName() async =>
-      await stateGet('org_name') ?? 'DEMACO Rent a Tool';
+      await stateGet('org_name') ?? 'Alivio Constructor';
 
   // ---------- Push ----------
 

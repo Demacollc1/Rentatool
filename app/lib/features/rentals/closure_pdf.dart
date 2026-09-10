@@ -46,7 +46,7 @@ Future<String?> buildClosurePdf(WidgetRef ref, String contractId) async {
             pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
-                  pw.Text('DEMACO RENT A TOOL',
+                  pw.Text('ALIVIO CONSTRUCTOR',
                       style: pw.TextStyle(
                           fontSize: 18,
                           fontWeight: pw.FontWeight.bold)),
@@ -144,7 +144,7 @@ Future<String?> buildClosurePdf(WidgetRef ref, String contractId) async {
       ),
       pw.SizedBox(height: 8),
       pw.Text(
-          'DEMACO confirma la recepción conforme de los equipos '
+          'ALIVIO CONSTRUCTOR confirma la recepción conforme de los equipos '
           'detallados y el cumplimiento de los términos del contrato. '
           'Con la devolución de la garantía, el contrato queda cerrado '
           'sin valores pendientes entre las partes, salvo lo indicado '
@@ -152,7 +152,7 @@ Future<String?> buildClosurePdf(WidgetRef ref, String contractId) async {
           style: const pw.TextStyle(fontSize: 9)),
       pw.SizedBox(height: 42),
       pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceAround, children: [
-        for (final firma in ['RECIBE · DEMACO', 'CONFORME · CLIENTE'])
+        for (final firma in ['RECIBE · ALIVIO', 'CONFORME · CLIENTE'])
           pw.Column(children: [
             pw.Container(
                 width: 180,

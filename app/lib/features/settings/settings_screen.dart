@@ -194,7 +194,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         const ListTile(
           leading: Icon(Icons.info_outline),
-          title: Text('DEMACO Rent a Tool'),
+          title: Text('Alivio Constructor — Alquiler de Equipos y Herramientas'),
           subtitle: Text('Fase 1 — Inventario y ubicaciones · v0.1'),
         ),
       ]),

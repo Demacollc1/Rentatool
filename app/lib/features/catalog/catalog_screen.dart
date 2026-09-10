@@ -6,7 +6,7 @@ import '../../data/local/database.dart';
 import '../../data/repositories/catalog_repository.dart';
 import '../../data/repositories/canonical_repository.dart';
 import '../../data/repositories/category_repository.dart';
-import '../../core/theme.dart' show HazardStripe;
+import '../../core/theme.dart';
 import 'product_sheet.dart';
 import 'visuals.dart';
 
@@ -124,9 +124,9 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                       initiallyExpanded: _query.isNotEmpty,
                       leading: CircleAvatar(
                         backgroundColor:
-                            Colors.amber.withValues(alpha: .25),
+                            AppTheme.blue.withValues(alpha: .12),
                         child: Icon(tradeIcon(oficio),
-                            color: Colors.black87, size: 22),
+                            color: AppTheme.blue, size: 22),
                       ),
                       title: Text(oficio,
                           style: const TextStyle(

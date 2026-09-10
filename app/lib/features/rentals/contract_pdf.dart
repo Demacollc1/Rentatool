@@ -54,11 +54,11 @@ Future<String?> buildContractPdf(WidgetRef ref, String contractId) async {
             pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
-                  pw.Text('DEMACO RENT A TOOL',
+                  pw.Text('ALIVIO CONSTRUCTOR',
                       style: pw.TextStyle(
                           fontSize: 18,
                           fontWeight: pw.FontWeight.bold)),
-                  pw.Text('Contrato de renta de herramientas',
+                  pw.Text('Alquiler de Equipos y Herramientas — Contrato de renta',
                       style: const pw.TextStyle(
                           fontSize: 10, color: PdfColors.grey700)),
                 ]),
@@ -208,7 +208,7 @@ Future<String?> buildContractPdf(WidgetRef ref, String contractId) async {
       ],
       pw.SizedBox(height: 42),
       pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceAround, children: [
-        for (final firma in ['ENTREGA · DEMACO', 'RECIBE · CLIENTE'])
+        for (final firma in ['ENTREGA · ALIVIO', 'RECIBE · CLIENTE'])
           pw.Column(children: [
             pw.Container(
                 width: 180,

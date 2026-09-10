@@ -569,7 +569,7 @@ class _AcceptanceCard extends ConsumerWidget {
                     child: OutlinedButton.icon(
                       onPressed: () => SharePlus.instance.share(
                           ShareParams(
-                              text: 'DEMACO Rent a Tool — contrato '
+                              text: 'Alivio Constructor — contrato '
                                   '${contract.contractNumber}. Revisa, '
                                   'acepta y firma aquí: $_url')),
                       icon: const Icon(Icons.send),

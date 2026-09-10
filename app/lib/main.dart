@@ -23,7 +23,7 @@ class DemacoApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp.router(
-      title: 'DEMACO Rent a Tool',
+      title: 'Alivio Constructor',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       routerConfig: ref.watch(routerProvider),

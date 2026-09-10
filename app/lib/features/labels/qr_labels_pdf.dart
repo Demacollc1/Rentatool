@@ -94,7 +94,7 @@ Future<String> buildQrLabelsPdf({
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
-                  pw.Text('DEMACO · $title'.toUpperCase(),
+                  pw.Text('ALIVIO · $title'.toUpperCase(),
                       style: pw.TextStyle(
                           fontSize: 7 * k,
                           color: PdfColors.grey700,

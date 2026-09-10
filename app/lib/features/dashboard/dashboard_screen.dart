@@ -243,7 +243,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             child: FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
-              child: Text('DEMACO RENT A TOOL',
+              child: Text('ALIVIO CONSTRUCTOR',
                   style: TextStyle(
                       fontWeight: FontWeight.w900, letterSpacing: 2)),
             ),

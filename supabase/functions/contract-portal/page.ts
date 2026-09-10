@@ -4,13 +4,13 @@ export const PAGE = `<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>DEMACO — Contrato de renta</title>
+<title>Alivio Constructor — Contrato de renta</title>
 <style>
-  :root { --amarillo:#F2B705; --negro:#151310; --gris:#6b6b6b; }
+  :root { --amarillo:#F08A12; --negro:#23509E; --gris:#6b6b6b; }
   * { box-sizing:border-box; }
   body { margin:0; font-family:system-ui,-apple-system,Roboto,sans-serif;
          background:#faf7f0; color:var(--negro); }
-  header { background:var(--negro); color:var(--amarillo); padding:14px 16px;
+  header { background:var(--negro); color:#fff; padding:14px 16px;
            font-weight:800; letter-spacing:.5px; }
   main { padding:16px; max-width:560px; margin:0 auto; }
   .card { background:#fff; border:1px solid #e8e2d5; border-radius:12px;
@@ -30,7 +30,7 @@ export const PAGE = `<!doctype html>
   canvas { width:100%; height:160px; background:#fff;
            border:1.5px dashed #b7ae97; border-radius:8px; touch-action:none; }
   .btn { display:block; width:100%; padding:14px; border:0; border-radius:10px;
-         background:var(--amarillo); color:var(--negro); font-size:16px;
+         background:var(--amarillo); color:#fff; font-size:16px;
          font-weight:800; margin-top:6px; }
   .btn.sec { background:#eee7d6; font-weight:600; font-size:13px;
              padding:8px; width:auto; }
@@ -43,7 +43,7 @@ export const PAGE = `<!doctype html>
 </style>
 </head>
 <body>
-<header>DEMACO RENT A TOOL</header>
+<header>ALIVIO CONSTRUCTOR · Alquiler de Equipos y Herramientas</header>
 <main>
   <div id="cargando" class="card">Cargando contrato…</div>
 
@@ -109,7 +109,7 @@ export const PAGE = `<!doctype html>
     <div class="check" id="d-terminos"></div>
     <div class="check" id="d-recepcion"></div>
     <div class="check" id="d-cedula"></div>
-    <p class="muted">DEMACO recibió tu aceptación. Conserva este
+    <p class="muted">Alivio Constructor recibió tu aceptación. Conserva este
       contrato; recibirás el respaldo documental por correo.</p>
   </div>
 </main>
@@ -150,7 +150,7 @@ async function cargar() {
     let entrega = d.delivery_method === 'delivery'
         ? ('Envío a obra' +
             (d.delivery_fee > 0 ? ' · transporte ' + money(d.delivery_fee) : ''))
-        : 'Retiro en el local DEMACO';
+        : 'Retiro en el local de Alivio Constructor';
     if (d.site) {
       entrega += ' · Obra: ' + d.site.name +
           (d.site.address ? ' — ' + d.site.address : '');

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/config.dart';
+import '../../core/theme.dart';
 import '../../data/local/database.dart';
 import '../admin/admin_screen.dart' show canonicalAvatar;
 
@@ -109,10 +110,10 @@ Widget productAvatar(ToolModel model, Canonical? canonical,
   return CircleAvatar(
     radius: radius,
     backgroundColor: model.line == 'ind'
-        ? Colors.amber.shade200
-        : Colors.blueGrey.shade100,
+        ? AppTheme.yellow.withValues(alpha: .22)
+        : AppTheme.blue.withValues(alpha: .12),
     child: Icon(productIcon(model.name),
-        size: radius + 2, color: Colors.black87),
+        size: radius + 2, color: AppTheme.steel),
   );
 }
 

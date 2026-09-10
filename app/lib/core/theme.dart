@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// Identidad DEMACO: industrial, amarillo/negro (mundo herramienta).
+/// Identidad ALIVIO CONSTRUCTOR: azul + naranja del logo (casco y
+/// rompepavimento sonriente), amable pero de obra.
 ///
 /// Decisiones (pase frontend-design):
 /// - El amarillo es SEÑAL y ACCIÓN, no decoración: FABs, selección,
@@ -12,21 +13,25 @@ import 'package:flutter/material.dart';
 /// - Lo memorable en una sola cosa: la franja diagonal amarillo/negro
 ///   bajo el AppBar (señalización de obra).
 class AppTheme {
-  static const yellow = Color(0xFFFFC400);
-  static const ink = Color(0xFF15130D);
-  static const steel = Color(0xFF3A3D42);
-  static const paper = Color(0xFFF2F2EE);
-  static const border = Color(0xFFE5E3DB);
-  static const graphite = Color(0xFF55534C);
+  /// Naranja de acción (se llamó yellow en la era DEMACO).
+  static const yellow = Color(0xFFF08A12);
+  static const blue = Color(0xFF23509E);
+
+  /// Azul noche para tarjetas héroe (KPIs, capital).
+  static const ink = Color(0xFF1B2E5B);
+  static const steel = Color(0xFF4A4A4A);
+  static const paper = Color(0xFFF4F5F7);
+  static const border = Color(0xFFE2E4EA);
+  static const graphite = Color(0xFF565B63);
   static const okGreen = Color(0xFF1E7A3C);
   static const alertRed = Color(0xFFC23A2B);
 
   static ThemeData get light {
     final scheme = ColorScheme.fromSeed(
-      seedColor: yellow,
+      seedColor: blue,
       brightness: Brightness.light,
-      primary: const Color(0xFF7A6100),
-      secondary: steel,
+      primary: blue,
+      secondary: yellow,
       surface: Colors.white,
     );
     const r8 = BorderRadius.all(Radius.circular(8));
@@ -36,8 +41,8 @@ class AppTheme {
       colorScheme: scheme,
       scaffoldBackgroundColor: paper,
       appBarTheme: const AppBarTheme(
-        backgroundColor: ink,
-        foregroundColor: yellow,
+        backgroundColor: blue,
+        foregroundColor: Colors.white,
         elevation: 0,
       ),
       cardTheme: const CardThemeData(
@@ -100,7 +105,7 @@ class AppTheme {
               BorderSide(color: border)),
           backgroundColor: WidgetStateProperty.resolveWith((states) =>
               states.contains(WidgetState.selected)
-                  ? yellow.withValues(alpha: .35)
+                  ? yellow.withValues(alpha: .30)
                   : Colors.white),
           textStyle: const WidgetStatePropertyAll(
               TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600)),
@@ -109,14 +114,14 @@ class AppTheme {
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: yellow,
-        foregroundColor: ink,
+        foregroundColor: Colors.white,
         elevation: 1,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(14))),
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: Colors.white,
-        indicatorColor: yellow.withValues(alpha: .35),
+        indicatorColor: yellow.withValues(alpha: .25),
         labelTextStyle: const WidgetStatePropertyAll(
             TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600)),
       ),
@@ -141,7 +146,7 @@ class AppTheme {
   }
 }
 
-/// Franja de señalización de obra (diagonales amarillo/negro): el
+/// Franja de obra ALIVIO (diagonales azul/naranja del logo): el
 /// acento de marca, una vez por pantalla bajo el AppBar.
 class HazardStripe extends StatelessWidget
     implements PreferredSizeWidget {
@@ -166,7 +171,7 @@ class _HazardPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final yellowPaint = Paint()..color = AppTheme.yellow;
-    final inkPaint = Paint()..color = AppTheme.ink;
+    final inkPaint = Paint()..color = AppTheme.blue;
     canvas.drawRect(Offset.zero & size, yellowPaint);
     const w = 12.0;
     for (var x = -size.height; x < size.width; x += w * 2) {

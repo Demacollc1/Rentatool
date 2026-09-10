@@ -43,18 +43,21 @@ class _LoginScreenState extends State<LoginScreen> {
             constraints: const BoxConstraints(maxWidth: 380),
             child: Column(
               children: [
-                const Icon(Icons.handyman, color: AppTheme.yellow, size: 56),
-                const Text('DEMACO',
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.asset('assets/brand/logo.png',
+                      width: 180, height: 180, fit: BoxFit.cover),
+                ),
+                const SizedBox(height: 12),
+                const Text('ALIVIO CONSTRUCTOR',
                     style: TextStyle(
-                        color: AppTheme.yellow,
-                        fontSize: 32,
+                        color: Colors.white,
+                        fontSize: 24,
                         fontWeight: FontWeight.w900,
-                        letterSpacing: 4)),
-                const Text('RENT A TOOL',
+                        letterSpacing: 1.5)),
+                const Text('Alquiler de Equipos y Herramientas',
                     style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 11,
-                        letterSpacing: 3)),
+                        color: Colors.white70, fontSize: 12)),
                 const SizedBox(height: 32),
                 Card(
                   child: Padding(
