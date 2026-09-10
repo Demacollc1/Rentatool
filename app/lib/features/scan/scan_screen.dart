@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
+import '../../core/theme.dart' show HazardStripe;
 import '../../data/repositories/catalog_repository.dart';
 
 /// Escáner tri-rama: unidad (demaco:asset:), ubicación (demaco:loc:)
@@ -75,6 +76,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        bottom: const HazardStripe(),
         title: const Text('Escanear'),
         actions: [
           IconButton(

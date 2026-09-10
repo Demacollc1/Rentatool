@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/theme.dart' show HazardStripe;
 import '../../data/repositories/rental_repository.dart';
 import 'customer_picker.dart';
 
@@ -31,6 +32,7 @@ class _RentalsScreenState extends ConsumerState<RentalsScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        bottom: const HazardStripe(),
         title: const Text('Rentas'),
         actions: [
           IconButton(

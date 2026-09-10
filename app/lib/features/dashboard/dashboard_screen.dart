@@ -102,10 +102,9 @@ class _ActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
+    return Pressable(
+      onTap: onTap,
+      child: Card(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Row(children: [
@@ -236,6 +235,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        bottom: const HazardStripe(),
         title: const Row(children: [
           Icon(Icons.handyman, color: AppTheme.yellow),
           SizedBox(width: 8),
@@ -322,11 +322,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                             crossAxisAlignment:
                                 CrossAxisAlignment.start,
                             children: [
-                              const Text('CAPITAL EN HERRAMIENTAS',
+                              const Text('Capital en herramientas',
                                   style: TextStyle(
                                       color: Colors.white70,
-                                      fontSize: 11,
-                                      letterSpacing: 2)),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600)),
                               Text(_money.format(capital),
                                   style: const TextStyle(
                                       color: AppTheme.yellow,

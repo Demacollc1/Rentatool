@@ -6,6 +6,7 @@ import '../../data/local/database.dart';
 import '../../data/repositories/catalog_repository.dart';
 import '../../data/repositories/canonical_repository.dart';
 import '../../data/repositories/category_repository.dart';
+import '../../core/theme.dart' show HazardStripe;
 import 'product_sheet.dart';
 import 'visuals.dart';
 
@@ -34,6 +35,7 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        bottom: const HazardStripe(),
         title: const Text('Catálogo de renta'),
         actions: [
           IconButton(
