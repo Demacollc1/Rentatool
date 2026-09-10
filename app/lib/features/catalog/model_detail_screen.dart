@@ -18,6 +18,7 @@ import '../labels/qr_labels_pdf.dart';
 import '../locations/location_picker.dart';
 import 'category_tree_picker.dart';
 import 'product_sheet.dart';
+import 'visuals.dart';
 
 class ModelDetailScreen extends ConsumerWidget {
   const ModelDetailScreen(
@@ -607,14 +608,7 @@ class _AssetTile extends ConsumerWidget {
     return ListTile(
       dense: true,
       tileColor: highlight ? Colors.amber.shade100 : null,
-      leading: Icon(
-        highlight ? Icons.center_focus_strong : Icons.qr_code_2,
-        color: asset.status == 'available'
-            ? Colors.green
-            : asset.status == 'rented'
-                ? Colors.orange
-                : Colors.grey,
-      ),
+      leading: AssetThumb(asset: asset, highlight: highlight),
       title: Text(
           [
             asset.assetTag,
@@ -731,6 +725,18 @@ class _AssetSheetState extends ConsumerState<AssetSheet> {
               label: const Text(
                   'Fotografiar etiqueta (reconoce serie y modelo)'),
             ),
+            const SizedBox(height: 4),
+            OutlinedButton.icon(
+              onPressed: _busy ? null : _takeUnitPhoto,
+              icon: Icon(
+                  _photoLocal == null
+                      ? Icons.photo_camera_outlined
+                      : Icons.check_circle,
+                  color: _photoLocal == null ? null : Colors.green),
+              label: Text(_photoLocal == null
+                  ? 'Foto de la unidad (miniatura del catálogo)'
+                  : 'Foto de la unidad lista ✔'),
+            ),
             const SizedBox(height: 8),
             Row(children: [
               Expanded(
@@ -841,6 +847,21 @@ class _AssetSheetState extends ConsumerState<AssetSheet> {
 
   /// Foto a la etiqueta/caja → OCR en el dispositivo → prellena
   /// marca, modelo y serie (solo los campos que estén vacíos).
+  String? _photoLocal;
+
+  Future<void> _takeUnitPhoto() async {
+    final picked = await ImagePicker().pickImage(
+        source: ImageSource.camera, maxWidth: 1200, imageQuality: 80);
+    if (picked == null) return;
+    setState(() => _photoLocal = picked.path);
+    // En edición se guarda al instante; en alta, tras crear la unidad.
+    if (widget.existing != null) {
+      await ref
+          .read(catalogRepositoryProvider)
+          .setAssetPhoto(widget.existing!.id, picked.path);
+    }
+  }
+
   Future<void> _scanLabel() async {
     final picked = await ImagePicker().pickImage(
         source: ImageSource.camera, maxWidth: 1920, imageQuality: 90);
@@ -930,6 +951,9 @@ class _AssetSheetState extends ConsumerState<AssetSheet> {
             ? null
             : _datasheet.text.trim(),
       );
+      if (_photoLocal != null) {
+        await repo.setAssetPhoto(id, _photoLocal!);
+      }
       final brandModel =
           '${_brand.text.trim()} ${_mfrModel.text.trim()}'.trim();
       final (wMm, hMm) =

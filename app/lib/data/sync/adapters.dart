@@ -272,6 +272,10 @@ List<TableSyncAdapter> buildSyncAdapters() => [
                   brand: Value(r['brand'] as String?),
                   mfrModel: Value(r['mfr_model'] as String?),
                   datasheetUrl: Value(r['datasheet_url'] as String?),
+                  photoPath: Value(r['photo_path'] as String?),
+                  // Los campos locales de la foto se conservan.
+                  photoLocalPath: Value(local?.photoLocalPath),
+                  photoUploadedAt: Value(local?.photoUploadedAt),
                   updatedAt: Value(remoteUpdated),
                   deletedAt: Value(tsN(r['deleted_at'])),
                 ),

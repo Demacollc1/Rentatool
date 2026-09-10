@@ -137,6 +137,7 @@ class SyncService {
 
   Future<(int, String?)> _push(String org) async {
     await _uploadPendingCanonicalIcons(org);
+    await _uploadPendingAssetPhotos(org);
     await _uploadPendingLinePhotos();
     final entries = await (_db.select(_db.syncQueue)
           ..orderBy([(q) => OrderingTerm.asc(q.seq)]))
@@ -195,6 +196,32 @@ class SyncService {
           .write(CanonicalsCompanion(
         iconPath: Value(remotePath),
         iconUploadedAt: Value(DateTime.now()),
+      ));
+    }
+  }
+
+  /// Sube fotos de unidades al bucket photos y registra photo_path.
+  Future<void> _uploadPendingAssetPhotos(String org) async {
+    final pending = await (_db.select(_db.assets)
+          ..where((a) =>
+              a.photoUploadedAt.isNull() & a.photoLocalPath.isNotNull()))
+        .get();
+    for (final a in pending) {
+      final file = File(a.photoLocalPath!);
+      if (!file.existsSync()) continue;
+      final remotePath = '$org/unidades/${a.id}.jpg';
+      await _remote.storage.from('photos').upload(
+            remotePath,
+            file,
+            fileOptions: const FileOptions(upsert: true),
+          );
+      await _remote
+          .from('assets')
+          .update({'photo_path': remotePath}).eq('id', a.id);
+      await (_db.update(_db.assets)..where((x) => x.id.equals(a.id)))
+          .write(AssetsCompanion(
+        photoPath: Value(remotePath),
+        photoUploadedAt: Value(DateTime.now()),
       ));
     }
   }

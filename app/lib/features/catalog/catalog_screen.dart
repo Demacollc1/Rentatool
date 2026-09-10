@@ -6,8 +6,8 @@ import '../../data/local/database.dart';
 import '../../data/repositories/catalog_repository.dart';
 import '../../data/repositories/canonical_repository.dart';
 import '../../data/repositories/category_repository.dart';
-import '../admin/admin_screen.dart' show canonicalAvatar;
 import 'product_sheet.dart';
+import 'visuals.dart';
 
 /// Catálogo agrupado oficio → grupo, con búsqueda.
 class CatalogScreen extends ConsumerStatefulWidget {
@@ -75,42 +75,40 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
               for (final a in assetList) {
                 unitsByModel.putIfAbsent(a.toolModelId, () => []).add(a);
               }
-              // Agrupa por oficio: vínculos n:m primero; si el
-              // producto no tiene, cae al oficio raíz del import.
-              final byOficio = <String, List<ToolModel>>{};
+              // Agrupa oficio → subcategoría → productos. Los
+              // vínculos n:m mandan; sin vínculo cae al oficio raíz
+              // del import como "(directo)".
+              const directo = '(directo en el oficio)';
+              final tree = <String, Map<String, List<ToolModel>>>{};
+              void add(String oficio, String sub, ToolModel m) {
+                final subs = tree.putIfAbsent(oficio, () => {});
+                final lista = subs.putIfAbsent(sub, () => []);
+                if (!lista.any((x) => x.id == m.id)) lista.add(m);
+              }
+
               for (final m in list) {
                 final links = modelCats[m.id] ?? const <String>{};
-                final roots = <String>{};
+                var colocado = false;
                 for (final catId in links) {
-                  String? cid = catId;
-                  while (cid != null &&
-                      byId[cid]?.parentId != null) {
-                    cid = byId[cid]!.parentId;
+                  final cat = byId[catId];
+                  if (cat == null) continue;
+                  if (cat.parentId != null) {
+                    final root = byId[cat.parentId!];
+                    add(root?.name ?? 'Sin oficio', cat.name, m);
+                  } else {
+                    add(cat.name, directo, m);
                   }
-                  if (cid != null) roots.add(cid);
+                  colocado = true;
                 }
-                if (roots.isEmpty) {
+                if (!colocado) {
                   String? cid = m.categoryId;
-                  while (cid != null &&
-                      byId[cid]?.parentId != null) {
+                  while (cid != null && byId[cid]?.parentId != null) {
                     cid = byId[cid]!.parentId;
                   }
-                  if (cid != null) roots.add(cid);
-                }
-                if (roots.isEmpty) {
-                  byOficio
-                      .putIfAbsent('Sin oficio', () => [])
-                      .add(m);
-                } else {
-                  for (final r in roots) {
-                    byOficio
-                        .putIfAbsent(
-                            byId[r]?.name ?? 'Sin oficio', () => [])
-                        .add(m);
-                  }
+                  add(byId[cid ?? '']?.name ?? 'Sin oficio', directo, m);
                 }
               }
-              final oficios = byOficio.keys.toList()..sort();
+              final oficios = tree.keys.toList()..sort();
               if (list.isEmpty) {
                 return const Center(
                     child: Text('Sin modelos. Importa el portafolio '
@@ -122,21 +120,67 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                   for (final oficio in oficios)
                     ExpansionTile(
                       initiallyExpanded: _query.isNotEmpty,
+                      leading: CircleAvatar(
+                        backgroundColor:
+                            Colors.amber.withValues(alpha: .25),
+                        child: Icon(tradeIcon(oficio),
+                            color: Colors.black87, size: 22),
+                      ),
                       title: Text(oficio,
                           style: const TextStyle(
                               fontWeight: FontWeight.bold)),
                       subtitle: Text(
-                          '${byOficio[oficio]!.length} modelos',
+                          '${tree[oficio]!.values.expand((l) => l).map((m) => m.id).toSet().length} modelos',
                           style: const TextStyle(fontSize: 11)),
                       children: [
-                        for (final m in byOficio[oficio]!)
-                          _ModelTile(
-                            model: m,
-                            units: unitsByModel[m.id] ?? const [],
-                            canonical: m.canonicalCode == null
-                                ? null
-                                : canonicalByCode[m.canonicalCode],
-                          ),
+                        for (final sub
+                            in tree[oficio]!.keys.toList()..sort())
+                          if (tree[oficio]!.length == 1 &&
+                              sub == '(directo en el oficio)')
+                            // Sin subcategorías: lista directa.
+                            ...[
+                            for (final m in tree[oficio]![sub]!)
+                              _ModelTile(
+                                model: m,
+                                units:
+                                    unitsByModel[m.id] ?? const [],
+                                canonical: m.canonicalCode == null
+                                    ? null
+                                    : canonicalByCode[
+                                        m.canonicalCode],
+                              ),
+                          ] else
+                            ExpansionTile(
+                              initiallyExpanded: _query.isNotEmpty,
+                              tilePadding: const EdgeInsets.only(
+                                  left: 28, right: 16),
+                              childrenPadding:
+                                  const EdgeInsets.only(left: 12),
+                              leading: const Icon(
+                                  Icons.subdirectory_arrow_right,
+                                  size: 18),
+                              title: Text(sub,
+                                  style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600)),
+                              subtitle: Text(
+                                  '${tree[oficio]![sub]!.length} '
+                                  'modelos',
+                                  style:
+                                      const TextStyle(fontSize: 10)),
+                              children: [
+                                for (final m in tree[oficio]![sub]!)
+                                  _ModelTile(
+                                    model: m,
+                                    units: unitsByModel[m.id] ??
+                                        const [],
+                                    canonical: m.canonicalCode == null
+                                        ? null
+                                        : canonicalByCode[
+                                            m.canonicalCode],
+                                  ),
+                              ],
+                            ),
                       ],
                     ),
                 ],
@@ -163,19 +207,7 @@ class _ModelTile extends StatelessWidget {
         units.where((a) => a.status == 'available').length;
     return ListTile(
       dense: true,
-      leading: canonical != null && canonical!.iconLocalPath != null
-          ? canonicalAvatar(canonical!, radius: 16)
-          : CircleAvatar(
-              radius: 16,
-              backgroundColor: model.line == 'ind'
-                  ? Colors.amber.shade700
-                  : Colors.blueGrey,
-              child: Text(model.line == 'ind' ? 'IND' : 'DIY',
-                  style: const TextStyle(
-                      fontSize: 8,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold)),
-            ),
+      leading: productAvatar(model, canonical),
       title: Text('${model.name} — ${model.brand ?? ''}'),
       subtitle: Text(
         [

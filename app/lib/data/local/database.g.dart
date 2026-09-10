@@ -4579,6 +4579,40 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _photoPathMeta = const VerificationMeta(
+    'photoPath',
+  );
+  @override
+  late final GeneratedColumn<String> photoPath = GeneratedColumn<String>(
+    'photo_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _photoLocalPathMeta = const VerificationMeta(
+    'photoLocalPath',
+  );
+  @override
+  late final GeneratedColumn<String> photoLocalPath = GeneratedColumn<String>(
+    'photo_local_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _photoUploadedAtMeta = const VerificationMeta(
+    'photoUploadedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> photoUploadedAt =
+      GeneratedColumn<DateTime>(
+        'photo_uploaded_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -4598,6 +4632,9 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
     brand,
     mfrModel,
     datasheetUrl,
+    photoPath,
+    photoLocalPath,
+    photoUploadedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -4731,6 +4768,30 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
         ),
       );
     }
+    if (data.containsKey('photo_path')) {
+      context.handle(
+        _photoPathMeta,
+        photoPath.isAcceptableOrUnknown(data['photo_path']!, _photoPathMeta),
+      );
+    }
+    if (data.containsKey('photo_local_path')) {
+      context.handle(
+        _photoLocalPathMeta,
+        photoLocalPath.isAcceptableOrUnknown(
+          data['photo_local_path']!,
+          _photoLocalPathMeta,
+        ),
+      );
+    }
+    if (data.containsKey('photo_uploaded_at')) {
+      context.handle(
+        _photoUploadedAtMeta,
+        photoUploadedAt.isAcceptableOrUnknown(
+          data['photo_uploaded_at']!,
+          _photoUploadedAtMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -4808,6 +4869,18 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
         DriftSqlType.string,
         data['${effectivePrefix}datasheet_url'],
       ),
+      photoPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}photo_path'],
+      ),
+      photoLocalPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}photo_local_path'],
+      ),
+      photoUploadedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}photo_uploaded_at'],
+      ),
     );
   }
 
@@ -4844,6 +4917,12 @@ class Asset extends DataClass implements Insertable<Asset> {
 
   /// Link a la ficha técnica del modelo de esta unidad.
   final String? datasheetUrl;
+
+  /// Foto de la unidad: remota (photos/<org>/unidades) y locales
+  /// (patrón de los íconos de canónicos: sube en el sync).
+  final String? photoPath;
+  final String? photoLocalPath;
+  final DateTime? photoUploadedAt;
   const Asset({
     required this.id,
     required this.updatedAt,
@@ -4862,6 +4941,9 @@ class Asset extends DataClass implements Insertable<Asset> {
     this.brand,
     this.mfrModel,
     this.datasheetUrl,
+    this.photoPath,
+    this.photoLocalPath,
+    this.photoUploadedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -4902,6 +4984,15 @@ class Asset extends DataClass implements Insertable<Asset> {
     }
     if (!nullToAbsent || datasheetUrl != null) {
       map['datasheet_url'] = Variable<String>(datasheetUrl);
+    }
+    if (!nullToAbsent || photoPath != null) {
+      map['photo_path'] = Variable<String>(photoPath);
+    }
+    if (!nullToAbsent || photoLocalPath != null) {
+      map['photo_local_path'] = Variable<String>(photoLocalPath);
+    }
+    if (!nullToAbsent || photoUploadedAt != null) {
+      map['photo_uploaded_at'] = Variable<DateTime>(photoUploadedAt);
     }
     return map;
   }
@@ -4945,6 +5036,15 @@ class Asset extends DataClass implements Insertable<Asset> {
       datasheetUrl: datasheetUrl == null && nullToAbsent
           ? const Value.absent()
           : Value(datasheetUrl),
+      photoPath: photoPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(photoPath),
+      photoLocalPath: photoLocalPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(photoLocalPath),
+      photoUploadedAt: photoUploadedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(photoUploadedAt),
     );
   }
 
@@ -4971,6 +5071,9 @@ class Asset extends DataClass implements Insertable<Asset> {
       brand: serializer.fromJson<String?>(json['brand']),
       mfrModel: serializer.fromJson<String?>(json['mfrModel']),
       datasheetUrl: serializer.fromJson<String?>(json['datasheetUrl']),
+      photoPath: serializer.fromJson<String?>(json['photoPath']),
+      photoLocalPath: serializer.fromJson<String?>(json['photoLocalPath']),
+      photoUploadedAt: serializer.fromJson<DateTime?>(json['photoUploadedAt']),
     );
   }
   @override
@@ -4994,6 +5097,9 @@ class Asset extends DataClass implements Insertable<Asset> {
       'brand': serializer.toJson<String?>(brand),
       'mfrModel': serializer.toJson<String?>(mfrModel),
       'datasheetUrl': serializer.toJson<String?>(datasheetUrl),
+      'photoPath': serializer.toJson<String?>(photoPath),
+      'photoLocalPath': serializer.toJson<String?>(photoLocalPath),
+      'photoUploadedAt': serializer.toJson<DateTime?>(photoUploadedAt),
     };
   }
 
@@ -5015,6 +5121,9 @@ class Asset extends DataClass implements Insertable<Asset> {
     Value<String?> brand = const Value.absent(),
     Value<String?> mfrModel = const Value.absent(),
     Value<String?> datasheetUrl = const Value.absent(),
+    Value<String?> photoPath = const Value.absent(),
+    Value<String?> photoLocalPath = const Value.absent(),
+    Value<DateTime?> photoUploadedAt = const Value.absent(),
   }) => Asset(
     id: id ?? this.id,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -5035,6 +5144,13 @@ class Asset extends DataClass implements Insertable<Asset> {
     brand: brand.present ? brand.value : this.brand,
     mfrModel: mfrModel.present ? mfrModel.value : this.mfrModel,
     datasheetUrl: datasheetUrl.present ? datasheetUrl.value : this.datasheetUrl,
+    photoPath: photoPath.present ? photoPath.value : this.photoPath,
+    photoLocalPath: photoLocalPath.present
+        ? photoLocalPath.value
+        : this.photoLocalPath,
+    photoUploadedAt: photoUploadedAt.present
+        ? photoUploadedAt.value
+        : this.photoUploadedAt,
   );
   Asset copyWithCompanion(AssetsCompanion data) {
     return Asset(
@@ -5069,6 +5185,13 @@ class Asset extends DataClass implements Insertable<Asset> {
       datasheetUrl: data.datasheetUrl.present
           ? data.datasheetUrl.value
           : this.datasheetUrl,
+      photoPath: data.photoPath.present ? data.photoPath.value : this.photoPath,
+      photoLocalPath: data.photoLocalPath.present
+          ? data.photoLocalPath.value
+          : this.photoLocalPath,
+      photoUploadedAt: data.photoUploadedAt.present
+          ? data.photoUploadedAt.value
+          : this.photoUploadedAt,
     );
   }
 
@@ -5091,7 +5214,10 @@ class Asset extends DataClass implements Insertable<Asset> {
           ..write('invoiceNumber: $invoiceNumber, ')
           ..write('brand: $brand, ')
           ..write('mfrModel: $mfrModel, ')
-          ..write('datasheetUrl: $datasheetUrl')
+          ..write('datasheetUrl: $datasheetUrl, ')
+          ..write('photoPath: $photoPath, ')
+          ..write('photoLocalPath: $photoLocalPath, ')
+          ..write('photoUploadedAt: $photoUploadedAt')
           ..write(')'))
         .toString();
   }
@@ -5115,6 +5241,9 @@ class Asset extends DataClass implements Insertable<Asset> {
     brand,
     mfrModel,
     datasheetUrl,
+    photoPath,
+    photoLocalPath,
+    photoUploadedAt,
   );
   @override
   bool operator ==(Object other) =>
@@ -5136,7 +5265,10 @@ class Asset extends DataClass implements Insertable<Asset> {
           other.invoiceNumber == this.invoiceNumber &&
           other.brand == this.brand &&
           other.mfrModel == this.mfrModel &&
-          other.datasheetUrl == this.datasheetUrl);
+          other.datasheetUrl == this.datasheetUrl &&
+          other.photoPath == this.photoPath &&
+          other.photoLocalPath == this.photoLocalPath &&
+          other.photoUploadedAt == this.photoUploadedAt);
 }
 
 class AssetsCompanion extends UpdateCompanion<Asset> {
@@ -5157,6 +5289,9 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
   final Value<String?> brand;
   final Value<String?> mfrModel;
   final Value<String?> datasheetUrl;
+  final Value<String?> photoPath;
+  final Value<String?> photoLocalPath;
+  final Value<DateTime?> photoUploadedAt;
   final Value<int> rowid;
   const AssetsCompanion({
     this.id = const Value.absent(),
@@ -5176,6 +5311,9 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     this.brand = const Value.absent(),
     this.mfrModel = const Value.absent(),
     this.datasheetUrl = const Value.absent(),
+    this.photoPath = const Value.absent(),
+    this.photoLocalPath = const Value.absent(),
+    this.photoUploadedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   AssetsCompanion.insert({
@@ -5196,6 +5334,9 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     this.brand = const Value.absent(),
     this.mfrModel = const Value.absent(),
     this.datasheetUrl = const Value.absent(),
+    this.photoPath = const Value.absent(),
+    this.photoLocalPath = const Value.absent(),
+    this.photoUploadedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        toolModelId = Value(toolModelId),
@@ -5218,6 +5359,9 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     Expression<String>? brand,
     Expression<String>? mfrModel,
     Expression<String>? datasheetUrl,
+    Expression<String>? photoPath,
+    Expression<String>? photoLocalPath,
+    Expression<DateTime>? photoUploadedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -5238,6 +5382,9 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
       if (brand != null) 'brand': brand,
       if (mfrModel != null) 'mfr_model': mfrModel,
       if (datasheetUrl != null) 'datasheet_url': datasheetUrl,
+      if (photoPath != null) 'photo_path': photoPath,
+      if (photoLocalPath != null) 'photo_local_path': photoLocalPath,
+      if (photoUploadedAt != null) 'photo_uploaded_at': photoUploadedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -5260,6 +5407,9 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     Value<String?>? brand,
     Value<String?>? mfrModel,
     Value<String?>? datasheetUrl,
+    Value<String?>? photoPath,
+    Value<String?>? photoLocalPath,
+    Value<DateTime?>? photoUploadedAt,
     Value<int>? rowid,
   }) {
     return AssetsCompanion(
@@ -5280,6 +5430,9 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
       brand: brand ?? this.brand,
       mfrModel: mfrModel ?? this.mfrModel,
       datasheetUrl: datasheetUrl ?? this.datasheetUrl,
+      photoPath: photoPath ?? this.photoPath,
+      photoLocalPath: photoLocalPath ?? this.photoLocalPath,
+      photoUploadedAt: photoUploadedAt ?? this.photoUploadedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -5338,6 +5491,15 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     if (datasheetUrl.present) {
       map['datasheet_url'] = Variable<String>(datasheetUrl.value);
     }
+    if (photoPath.present) {
+      map['photo_path'] = Variable<String>(photoPath.value);
+    }
+    if (photoLocalPath.present) {
+      map['photo_local_path'] = Variable<String>(photoLocalPath.value);
+    }
+    if (photoUploadedAt.present) {
+      map['photo_uploaded_at'] = Variable<DateTime>(photoUploadedAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -5364,6 +5526,9 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
           ..write('brand: $brand, ')
           ..write('mfrModel: $mfrModel, ')
           ..write('datasheetUrl: $datasheetUrl, ')
+          ..write('photoPath: $photoPath, ')
+          ..write('photoLocalPath: $photoLocalPath, ')
+          ..write('photoUploadedAt: $photoUploadedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -16051,6 +16216,9 @@ typedef $$AssetsTableCreateCompanionBuilder =
       Value<String?> brand,
       Value<String?> mfrModel,
       Value<String?> datasheetUrl,
+      Value<String?> photoPath,
+      Value<String?> photoLocalPath,
+      Value<DateTime?> photoUploadedAt,
       Value<int> rowid,
     });
 typedef $$AssetsTableUpdateCompanionBuilder =
@@ -16072,6 +16240,9 @@ typedef $$AssetsTableUpdateCompanionBuilder =
       Value<String?> brand,
       Value<String?> mfrModel,
       Value<String?> datasheetUrl,
+      Value<String?> photoPath,
+      Value<String?> photoLocalPath,
+      Value<DateTime?> photoUploadedAt,
       Value<int> rowid,
     });
 
@@ -16166,6 +16337,21 @@ class $$AssetsTableFilterComposer
 
   ColumnFilters<String> get datasheetUrl => $composableBuilder(
     column: $table.datasheetUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get photoPath => $composableBuilder(
+    column: $table.photoPath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get photoLocalPath => $composableBuilder(
+    column: $table.photoLocalPath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get photoUploadedAt => $composableBuilder(
+    column: $table.photoUploadedAt,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -16263,6 +16449,21 @@ class $$AssetsTableOrderingComposer
     column: $table.datasheetUrl,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get photoPath => $composableBuilder(
+    column: $table.photoPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get photoLocalPath => $composableBuilder(
+    column: $table.photoLocalPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get photoUploadedAt => $composableBuilder(
+    column: $table.photoUploadedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$AssetsTableAnnotationComposer
@@ -16338,6 +16539,19 @@ class $$AssetsTableAnnotationComposer
     column: $table.datasheetUrl,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get photoPath =>
+      $composableBuilder(column: $table.photoPath, builder: (column) => column);
+
+  GeneratedColumn<String> get photoLocalPath => $composableBuilder(
+    column: $table.photoLocalPath,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get photoUploadedAt => $composableBuilder(
+    column: $table.photoUploadedAt,
+    builder: (column) => column,
+  );
 }
 
 class $$AssetsTableTableManager
@@ -16385,6 +16599,9 @@ class $$AssetsTableTableManager
                 Value<String?> brand = const Value.absent(),
                 Value<String?> mfrModel = const Value.absent(),
                 Value<String?> datasheetUrl = const Value.absent(),
+                Value<String?> photoPath = const Value.absent(),
+                Value<String?> photoLocalPath = const Value.absent(),
+                Value<DateTime?> photoUploadedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => AssetsCompanion(
                 id: id,
@@ -16404,6 +16621,9 @@ class $$AssetsTableTableManager
                 brand: brand,
                 mfrModel: mfrModel,
                 datasheetUrl: datasheetUrl,
+                photoPath: photoPath,
+                photoLocalPath: photoLocalPath,
+                photoUploadedAt: photoUploadedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -16425,6 +16645,9 @@ class $$AssetsTableTableManager
                 Value<String?> brand = const Value.absent(),
                 Value<String?> mfrModel = const Value.absent(),
                 Value<String?> datasheetUrl = const Value.absent(),
+                Value<String?> photoPath = const Value.absent(),
+                Value<String?> photoLocalPath = const Value.absent(),
+                Value<DateTime?> photoUploadedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => AssetsCompanion.insert(
                 id: id,
@@ -16444,6 +16667,9 @@ class $$AssetsTableTableManager
                 brand: brand,
                 mfrModel: mfrModel,
                 datasheetUrl: datasheetUrl,
+                photoPath: photoPath,
+                photoLocalPath: photoLocalPath,
+                photoUploadedAt: photoUploadedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

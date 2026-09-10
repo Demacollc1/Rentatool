@@ -108,6 +108,12 @@ class Assets extends Table with SyncColumns {
 
   /// Link a la ficha técnica del modelo de esta unidad.
   TextColumn get datasheetUrl => text().nullable()();
+
+  /// Foto de la unidad: remota (photos, carpeta de la org) y locales
+  /// (patrón de los íconos de canónicos: sube en el sync).
+  TextColumn get photoPath => text().nullable()();
+  TextColumn get photoLocalPath => text().nullable()();
+  DateTimeColumn get photoUploadedAt => dateTime().nullable()();
 }
 
 /// Consumibles y accesorios (stock por cantidad).
@@ -372,7 +378,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 15; // v14 fichas · v15 evidencias y garantía
+  int get schemaVersion => 16; // v15 evidencias · v16 foto de unidad
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -419,6 +425,11 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from >= 9 && from < 13) {
             await m.addColumn(rentalContracts, rentalContracts.contactId);
+          }
+          if (from < 16) {
+            await m.addColumn(assets, assets.photoPath);
+            await m.addColumn(assets, assets.photoLocalPath);
+            await m.addColumn(assets, assets.photoUploadedAt);
           }
           if (from >= 9 && from < 15) {
             await m.addColumn(

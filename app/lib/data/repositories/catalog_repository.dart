@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path/path.dart' as pth;
+import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
 import '../local/database.dart';
@@ -457,6 +461,21 @@ class CatalogRepository {
   }
 
   /// Mueve una unidad de ubicación (kardex `transfer`).
+  /// Guarda la foto de la unidad: copia local + subida en el sync.
+  Future<void> setAssetPhoto(String id, String pickedPath) async {
+    final dir = await getApplicationDocumentsDirectory();
+    final outDir = Directory(pth.join(dir.path, 'unidades'));
+    await outDir.create(recursive: true);
+    final dest = pth.join(outDir.path, '$id.jpg');
+    await File(pickedPath).copy(dest);
+    await (_db.update(_db.assets)..where((a) => a.id.equals(id)))
+        .write(AssetsCompanion(
+      photoLocalPath: Value(dest),
+      photoUploadedAt: const Value(null),
+      updatedAt: Value(DateTime.now()),
+    ));
+  }
+
   Future<void> moveAsset(String id, String? toLocationId) async {
     final asset = await getAsset(id);
     if (asset == null) return;
