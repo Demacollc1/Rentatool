@@ -559,7 +559,7 @@ class _AcceptanceCard extends ConsumerWidget {
                 Row(children: [
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () => _showQr(context),
+                      onPressed: () => _showQr(context, ref),
                       icon: const Icon(Icons.qr_code_2),
                       label: const Text('QR mostrador'),
                     ),
@@ -567,11 +567,17 @@ class _AcceptanceCard extends ConsumerWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () => SharePlus.instance.share(
-                          ShareParams(
-                              text: 'Alivio Constructor — contrato '
-                                  '${contract.contractNumber}. Revisa, '
-                                  'acepta y firma aquí: $_url')),
+                      onPressed: () async {
+                        // El link solo vive cuando el contrato está
+                        // en el servidor: sincroniza antes de enviar.
+                        await ref
+                            .read(syncServiceProvider)
+                            .syncAll();
+                        await SharePlus.instance.share(ShareParams(
+                            text: 'Alivio Constructor — contrato '
+                                '${contract.contractNumber}. Revisa, '
+                                'acepta y firma aquí: $_url'));
+                      },
                       icon: const Icon(Icons.send),
                       label: const Text('Enviar link'),
                     ),
@@ -594,20 +600,58 @@ class _AcceptanceCard extends ConsumerWidget {
         ]),
       );
 
-  void _showQr(BuildContext context) {
+  void _showQr(BuildContext context, WidgetRef ref) {
+    // Sincroniza en paralelo: cuando el cliente termine de escanear y
+    // abrir, el contrato ya debe estar en el servidor.
+    final syncing = ref.read(syncServiceProvider).syncAll();
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text('Escanea con tu teléfono\n'
             '(${contract.contractNumber})'),
-        content: SizedBox(
-          width: 260,
-          height: 260,
-          child: QrImageView(
-            data: _url!,
-            backgroundColor: Colors.white,
+        content: Column(mainAxisSize: MainAxisSize.min, children: [
+          SizedBox(
+            width: 260,
+            height: 260,
+            child: QrImageView(
+              data: _url!,
+              backgroundColor: Colors.white,
+            ),
           ),
-        ),
+          FutureBuilder(
+            future: syncing,
+            builder: (_, snap) => snap.connectionState !=
+                    ConnectionState.done
+                ? const Padding(
+                    padding: EdgeInsets.only(top: 8),
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2)),
+                          SizedBox(width: 8),
+                          Text('Activando el link…',
+                              style: TextStyle(fontSize: 12)),
+                        ]),
+                  )
+                : Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                        snap.data?.ok ?? false
+                            ? 'Link activo ✔'
+                            : 'Sin conexión: el cliente debe escanear '
+                                'cuando vuelva la señal',
+                        style: TextStyle(
+                            fontSize: 12,
+                            color: (snap.data?.ok ?? false)
+                                ? Colors.green
+                                : Colors.orange)),
+                  ),
+          ),
+        ]),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(ctx),

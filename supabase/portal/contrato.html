@@ -182,7 +182,12 @@ async function cargar() {
     $('cargando').style.display = 'none';
     $('form').style.display = 'block';
   } catch (e) {
-    $('cargando').textContent = 'No se pudo cargar el contrato: ' + e.message;
+    $('cargando').innerHTML = (e.message || '').includes('no encontrado')
+        ? '<b>Este contrato aún no está disponible.</b><br>' +
+          'Pide al personal de Alivio Constructor que presione ' +
+          'sincronizar en su app y vuelve a escanear el código.'
+        : 'No se pudo cargar el contrato: ' + e.message +
+          '<br>Revisa tu conexión e intenta de nuevo.';
   }
 }
 
