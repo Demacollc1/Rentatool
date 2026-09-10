@@ -136,9 +136,20 @@ class SyncService {
   // ---------- Push ----------
 
   Future<(int, String?)> _push(String org) async {
-    await _uploadPendingCanonicalIcons(org);
-    await _uploadPendingAssetPhotos(org);
-    await _uploadPendingLinePhotos();
+    // Un archivo que no sube (RLS, red, tamaño) no debe bloquear la
+    // cola de filas: se reintenta en el próximo sync.
+    String? uploadError;
+    for (final subir in [
+      () => _uploadPendingCanonicalIcons(org),
+      () => _uploadPendingAssetPhotos(org),
+      _uploadPendingLinePhotos,
+    ]) {
+      try {
+        await subir();
+      } on Object catch (e) {
+        uploadError ??= 'foto pendiente: $e';
+      }
+    }
     final entries = await (_db.select(_db.syncQueue)
           ..orderBy([(q) => OrderingTerm.asc(q.seq)]))
         .get();
@@ -167,10 +178,10 @@ class SyncService {
         firstError ??= '${e.tableRef}: $err';
       }
     }
-    final error = failed == 0
-        ? null
-        : '$failed fila(s) no subieron (se reintentarán). '
-            'Primer error → $firstError';
+    final error = failed > 0
+        ? '$failed fila(s) no subieron (se reintentarán). '
+            'Primer error → $firstError'
+        : uploadError;
     return (pushed, error);
   }
 
