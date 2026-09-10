@@ -170,6 +170,18 @@ async function cargar() {
           '<td style="text-align:right">' + money(i.amount) + '</td>';
       $('tabla').appendChild(tr);
     }
+    for (const cx of (d.consumables || [])) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td style="padding-left:14px">↳ ' +
+          (cx.nombre || 'Consumible') +
+          ' <span class="muted">(' +
+          (cx.kind === 'incluido' ? 'incluido' : 'opcional') +
+          ')</span></td>' +
+          '<td>× ' + Number(cx.qty) + '</td>' +
+          '<td style="text-align:right">' +
+          (Number(cx.amount) > 0 ? money(cx.amount) : '—') + '</td>';
+      $('tabla').appendChild(tr);
+    }
     $('total').textContent = 'Total ' + money(d.total);
     if (d.deposit > 0) {
       $('garantia').textContent = 'Garantía: ' + money(d.deposit);
@@ -182,6 +194,12 @@ async function cargar() {
         : 'Foto de tu cédula (obligatoria: cliente nuevo)';
     $('cargando').style.display = 'none';
     $('form').style.display = 'block';
+    if (!d.can_sign) {
+      $('guardar').disabled = true;
+      $('error').textContent = 'Este contrato aún no tiene los ' +
+          'equipos y las fechas de la renta definidos. Pide al ' +
+          'personal de Alivio Constructor completarlo antes de firmar.';
+    }
   } catch (e) {
     $('cargando').innerHTML = (e.message || '').includes('no encontrado')
         ? '<b>Este contrato aún no está disponible.</b><br>' +

@@ -611,14 +611,26 @@ class CatalogRepository {
     return rowId;
   }
 
+  /// Vincula (o reconfigura) un consumible del producto: incluido u
+  /// opcional, con costo adicional si aplica.
   Future<void> linkConsumable(String toolModelId, String consumableId,
-      {String? id}) async {
-    final rowId = id ?? const Uuid().v4();
+      {String? id, String kind = 'incluido', double extraPrice = 0}) async {
+    final existing = id ??
+        (await (_db.select(_db.toolModelConsumables)
+                  ..where((l) =>
+                      l.toolModelId.equals(toolModelId) &
+                      l.consumableId.equals(consumableId) &
+                      l.deletedAt.isNull()))
+                .getSingleOrNull())
+            ?.id;
+    final rowId = existing ?? const Uuid().v4();
     await _db.into(_db.toolModelConsumables).insertOnConflictUpdate(
           ToolModelConsumablesCompanion.insert(
             id: rowId,
             toolModelId: toolModelId,
             consumableId: consumableId,
+            kind: Value(kind),
+            extraPrice: Value(extraPrice),
             updatedAt: Value(DateTime.now()),
           ),
         );
@@ -630,9 +642,58 @@ class CatalogRepository {
           'id': rowId,
           'tool_model_id': toolModelId,
           'consumable_id': consumableId,
+          'kind': kind,
+          'extra_price': extraPrice,
           'updated_at': isoTs(DateTime.now()),
           'deleted_at': null,
         });
+  }
+
+  Future<void> unlinkConsumable(String linkId) async {
+    final now = DateTime.now();
+    await (_db.update(_db.toolModelConsumables)
+          ..where((l) => l.id.equals(linkId)))
+        .write(ToolModelConsumablesCompanion(
+      deletedAt: Value(now),
+      updatedAt: Value(now),
+    ));
+    final l = await (_db.select(_db.toolModelConsumables)
+          ..where((x) => x.id.equals(linkId)))
+        .getSingle();
+    await _sync.enqueue(
+        table: 'tool_model_consumables',
+        rowId: linkId,
+        op: 'upsert',
+        row: {
+          'id': l.id,
+          'tool_model_id': l.toolModelId,
+          'consumable_id': l.consumableId,
+          'kind': l.kind,
+          'extra_price': l.extraPrice,
+          'updated_at': isoTs(now),
+          'deleted_at': isoTs(now),
+        });
+  }
+
+  /// Vínculos consumible↔producto con su configuración.
+  Stream<List<(ToolModelConsumable, Consumable)>> watchModelConsumableLinks(
+      String modelId) {
+    final join = _db.select(_db.toolModelConsumables).join([
+      innerJoin(
+          _db.consumables,
+          _db.consumables.id
+              .equalsExp(_db.toolModelConsumables.consumableId)),
+    ])
+      ..where(_db.toolModelConsumables.toolModelId.equals(modelId) &
+          _db.consumables.deletedAt.isNull() &
+          _db.toolModelConsumables.deletedAt.isNull());
+    return join.watch().map((rows) => [
+          for (final r in rows)
+            (
+              r.readTable(_db.toolModelConsumables),
+              r.readTable(_db.consumables)
+            )
+        ]);
   }
 
   Stream<List<Consumable>> watchModelConsumables(String modelId) {
@@ -734,6 +795,12 @@ final consumablesProvider = StreamProvider.autoDispose
     .family<List<Consumable>, String>((ref, query) => ref
         .watch(catalogRepositoryProvider)
         .watchConsumables(query: query));
+
+final modelConsumableLinksProvider = StreamProvider.autoDispose
+    .family<List<(ToolModelConsumable, Consumable)>, String>(
+        (ref, modelId) => ref
+            .watch(catalogRepositoryProvider)
+            .watchModelConsumableLinks(modelId));
 
 final modelConsumablesProvider = StreamProvider.autoDispose
     .family<List<Consumable>, String>((ref, modelId) => ref

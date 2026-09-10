@@ -240,6 +240,8 @@ List<TableSyncAdapter> buildSyncAdapters() => [
                   id: Value(r['id'] as String),
                   toolModelId: Value(r['tool_model_id'] as String),
                   consumableId: Value(r['consumable_id'] as String),
+                  kind: Value((r['kind'] ?? 'incluido') as String),
+                  extraPrice: Value(_d(r['extra_price'])),
                   updatedAt: Value(remoteUpdated),
                   deletedAt: Value(tsN(r['deleted_at'])),
                 ),
@@ -325,6 +327,8 @@ List<TableSyncAdapter> buildSyncAdapters() => [
                   name: Value(r['name'] as String),
                   tradeName: Value(r['trade_name'] as String?),
                   kind: Value(r['kind'] as String?),
+                  qualification:
+                      Value((r['qualification'] ?? 'nuevo') as String),
                   idNumber: Value(r['id_number'] as String?),
                   phone: Value(r['phone'] as String?),
                   email: Value(r['email'] as String?),
@@ -439,12 +443,66 @@ List<TableSyncAdapter> buildSyncAdapters() => [
                   deliveryFee: Value(_d(r['delivery_fee'])),
                   acceptanceToken:
                       Value(r['acceptance_token'] as String?),
+                  depositRequired:
+                      Value((r['deposit_required'] ?? true) as bool),
+                  depositManual:
+                      Value((r['deposit_manual'] ?? false) as bool),
                   depositReleasedAt:
                       Value(tsN(r['deposit_released_at'])),
                   depositRetained: Value(_d(r['deposit_retained'])),
                   depositNotes: Value(r['deposit_notes'] as String?),
                   notes: Value(r['notes'] as String?),
                   createdBy: Value(r['created_by'] as String?),
+                  updatedAt: Value(remoteUpdated),
+                  deletedAt: Value(tsN(r['deleted_at'])),
+                ),
+              );
+          return true;
+        },
+      ),
+      TableSyncAdapter(
+        remoteTable: 'contract_consumables',
+        mergeRemote: (db, r) async {
+          final local = await (db.select(db.contractConsumables)
+                ..where((x) => x.id.equals(r['id'] as String)))
+              .getSingleOrNull();
+          final remoteUpdated = ts(r['updated_at']);
+          if (!newer(local?.updatedAt, remoteUpdated)) return false;
+          await db.into(db.contractConsumables).insertOnConflictUpdate(
+                ContractConsumablesCompanion(
+                  id: Value(r['id'] as String),
+                  contractId: Value(r['contract_id'] as String),
+                  lineId: Value(r['line_id'] as String?),
+                  consumableId: Value(r['consumable_id'] as String),
+                  kind: Value((r['kind'] ?? 'incluido') as String),
+                  qty: Value(_d(r['qty'])),
+                  price: Value(_d(r['price'])),
+                  amount: Value(_d(r['amount'])),
+                  updatedAt: Value(remoteUpdated),
+                  deletedAt: Value(tsN(r['deleted_at'])),
+                ),
+              );
+          return true;
+        },
+      ),
+      TableSyncAdapter(
+        remoteTable: 'contract_addendums',
+        mergeRemote: (db, r) async {
+          final local = await (db.select(db.contractAddendums)
+                ..where((x) => x.id.equals(r['id'] as String)))
+              .getSingleOrNull();
+          final remoteUpdated = ts(r['updated_at']);
+          if (!newer(local?.updatedAt, remoteUpdated)) return false;
+          await db.into(db.contractAddendums).insertOnConflictUpdate(
+                ContractAddendumsCompanion(
+                  id: Value(r['id'] as String),
+                  contractId: Value(r['contract_id'] as String),
+                  kind: Value((r['kind'] ?? 'extension') as String),
+                  oldPickupAt: Value(tsN(r['old_pickup_at'])),
+                  newPickupAt: Value(tsN(r['new_pickup_at'])),
+                  oldDueAt: Value(tsN(r['old_due_at'])),
+                  newDueAt: Value(tsN(r['new_due_at'])),
+                  notes: Value(r['notes'] as String?),
                   updatedAt: Value(remoteUpdated),
                   deletedAt: Value(tsN(r['deleted_at'])),
                 ),
@@ -463,7 +521,8 @@ List<TableSyncAdapter> buildSyncAdapters() => [
           await db.into(db.rentalLinePhotos).insertOnConflictUpdate(
                 RentalLinePhotosCompanion(
                   id: Value(r['id'] as String),
-                  lineId: Value(r['line_id'] as String),
+                  lineId: Value(r['line_id'] as String?),
+                  contractId: Value(r['contract_id'] as String?),
                   kind: Value(r['kind'] as String),
                   photoPath: Value(r['photo_path'] as String?),
                   // localPath/uploadedAt se conservan si existen.

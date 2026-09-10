@@ -74,6 +74,7 @@ class ContractDetailScreen extends ConsumerWidget {
             padding: const EdgeInsets.only(bottom: 96),
             children: [
               _HeaderCard(contract: c, editable: draft),
+              _AddendumHistory(contractId: contractId),
               if (c.status == 'draft' || c.status == 'active')
                 _AcceptanceCard(contract: c),
               lines.when(
@@ -82,11 +83,67 @@ class ContractDetailScreen extends ConsumerWidget {
                     child: Center(child: CircularProgressIndicator())),
                 error: (e, _) => Text('Error: $e'),
                 data: (list) {
+                  final consumibles = ref
+                          .watch(contractConsumablesProvider(contractId))
+                          .value ??
+                      const [];
+                  final totalCons = consumibles.fold<double>(
+                      0, (s, x) => s + x.$1.amount);
                   final total = list.fold<double>(
-                      0, (s, l) => s + l.line.amount);
+                          0, (s, l) => s + l.line.amount) +
+                      totalCons;
                   return Column(children: [
                     for (final v in list)
                       _LineTile(view: v, contract: c),
+                    if (consumibles.isNotEmpty)
+                      Card(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 4),
+                        child: Column(children: [
+                          const ListTile(
+                              dense: true,
+                              title: Text(
+                                  'Consumibles y accesorios',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w700))),
+                          for (final (cc, cons) in consumibles)
+                            ListTile(
+                              dense: true,
+                              leading: Icon(
+                                  cc.kind == 'incluido'
+                                      ? Icons.link
+                                      : Icons.add_circle_outline,
+                                  size: 18),
+                              title: Text(cons.name,
+                                  style: const TextStyle(
+                                      fontSize: 13)),
+                              subtitle: Text(
+                                  cc.kind == 'incluido'
+                                      ? 'Incluido con el equipo'
+                                      : 'Opcional',
+                                  style: const TextStyle(
+                                      fontSize: 11)),
+                              trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(cc.amount == 0
+                                        ? 'Sin costo'
+                                        : money.format(cc.amount)),
+                                    if (draft &&
+                                        cc.kind == 'opcional')
+                                      IconButton(
+                                          icon: const Icon(
+                                              Icons.close,
+                                              size: 16),
+                                          onPressed: () => ref
+                                              .read(
+                                                  rentalRepositoryProvider)
+                                              .removeContractConsumable(
+                                                  cc.id)),
+                                  ]),
+                            ),
+                        ]),
+                      ),
                     if (draft || active)
                       Padding(
                         padding: const EdgeInsets.all(12),
@@ -107,6 +164,32 @@ class ContractDetailScreen extends ConsumerWidget {
                                     _addFromList(context, ref),
                                 icon: const Icon(Icons.list),
                                 label: const Text('Elegir de lista'),
+                              ),
+                            ),
+                          ],
+                          if (active &&
+                              list.any((v) =>
+                                  v.line.returnedAt == null)) ...[
+                            Expanded(
+                              child: FilledButton.tonalIcon(
+                                onPressed: () => _returnGate(
+                                    context, ref,
+                                    line: null),
+                                icon: const Icon(
+                                    Icons.assignment_return),
+                                label:
+                                    const Text('Devolver todo'),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: () =>
+                                    _extendDates(context, ref, c),
+                                icon: const Icon(
+                                    Icons.edit_calendar),
+                                label: const Text(
+                                    'Extender / modificar'),
                               ),
                             ),
                           ],
@@ -167,12 +250,244 @@ class ContractDetailScreen extends ConsumerWidget {
   }
 
   Future<void> _deliver(BuildContext context, WidgetRef ref) async {
-    final err =
-        await ref.read(rentalRepositoryProvider).deliver(contractId);
+    final repo = ref.read(rentalRepositoryProvider);
+    // Foto obligatoria de la entrega (si aún no hay).
+    final fotos =
+        await ref.read(contractPhotosProvider(contractId).future);
+    if (!fotos.any((p) => p.kind == 'delivery')) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Toma la foto de la entrega para continuar')));
+      final picked = await ImagePicker().pickImage(
+          source: ImageSource.camera,
+          maxWidth: 1600,
+          imageQuality: 80);
+      if (picked == null) return; // sin foto no hay entrega
+      await repo.addLinePhoto(
+          contractId: contractId,
+          kind: 'delivery',
+          pickedPath: picked.path);
+    }
+    final err = await repo.deliver(contractId);
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(err ??
             'Entregado ✔ — unidades en renta, kardex registrado')));
+  }
+
+  /// Compuerta de devolución: escanear el QR del equipo o aprobar con
+  /// botón (→ los equipos van a CUARENTENA para revisión).
+  /// line == null → devolver todo.
+  Future<void> _returnGate(BuildContext context, WidgetRef ref,
+      {LineView? line}) async {
+    final opcion = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(line == null
+            ? 'Devolver todos los equipos'
+            : 'Devolver ${line.asset?.assetTag ?? ''}'),
+        content: const Text(
+            'Escanea el QR del equipo para confirmar su recepción, o '
+            'aprueba sin escanear: en ese caso los equipos pasan a '
+            'CUARENTENA para revisión y mantenimiento.'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancelar')),
+          OutlinedButton.icon(
+              onPressed: () => Navigator.pop(ctx, 'scan'),
+              icon: const Icon(Icons.qr_code_scanner, size: 18),
+              label: const Text('Escanear QR')),
+          FilledButton.icon(
+              onPressed: () => Navigator.pop(ctx, 'aprobar'),
+              icon: const Icon(Icons.gpp_maybe, size: 18),
+              label: const Text('Aprobar → cuarentena')),
+        ],
+      ),
+    );
+    if (opcion == null || !context.mounted) return;
+    final repo = ref.read(rentalRepositoryProvider);
+
+    if (opcion == 'scan') {
+      final scannedId = await Navigator.of(context).push<String>(
+          MaterialPageRoute(builder: (_) => const _AssetScanPage()));
+      if (scannedId == null || !context.mounted) return;
+      if (line != null) {
+        if (scannedId != line.line.assetId) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content:
+                  Text('Ese QR no corresponde a esta unidad')));
+          return;
+        }
+        await _conditionAndReturn(context, ref, line.line.id,
+            tag: line.asset?.assetTag);
+      } else {
+        // Devolver todo escaneando: confirma la unidad escaneada y
+        // repite hasta terminar (una por escaneo).
+        final lines = await ref
+            .read(contractLinesProvider(contractId).future);
+        final match = lines
+            .where((v) =>
+                v.line.assetId == scannedId &&
+                v.line.returnedAt == null)
+            .toList();
+        if (match.isEmpty) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Text(
+                    'Ese QR no es de una unidad pendiente de este '
+                    'contrato')));
+          }
+          return;
+        }
+        if (context.mounted) {
+          await _conditionAndReturn(context, ref, match.first.line.id,
+              tag: match.first.asset?.assetTag);
+        }
+      }
+      return;
+    }
+
+    // Aprobación sin escaneo → cuarentena para todos (o la línea).
+    final notes = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Aprobar devolución → cuarentena'),
+        content: TextField(
+            controller: notes,
+            decoration: const InputDecoration(
+                labelText: 'Notas de recepción')),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancelar')),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Aprobar')),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    if (line != null) {
+      await repo.returnLine(line.line.id,
+          toQuarantine: true,
+          notes:
+              notes.text.trim().isEmpty ? null : notes.text.trim());
+    } else {
+      await repo.returnAll(contractId,
+          toQuarantine: true,
+          notes:
+              notes.text.trim().isEmpty ? null : notes.text.trim());
+    }
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text(
+              'Equipos en cuarentena para revisión ✔ (kardex '
+              'registrado)')));
+    }
+  }
+
+  /// Diálogo de condición y devolución normal (tras escanear el QR).
+  Future<void> _conditionAndReturn(
+      BuildContext context, WidgetRef ref, String lineId,
+      {String? tag}) async {
+    var condition = 'good';
+    final notes = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog(
+          title: Text('Recibir ${tag ?? ''}'),
+          content: Column(mainAxisSize: MainAxisSize.min, children: [
+            SegmentedButton<String>(
+              segments: const [
+                ButtonSegment(value: 'good', label: Text('Bien')),
+                ButtonSegment(value: 'fair', label: Text('Regular')),
+                ButtonSegment(value: 'poor', label: Text('Dañada')),
+              ],
+              selected: {condition},
+              onSelectionChanged: (s) =>
+                  setState(() => condition = s.first),
+              showSelectedIcon: false,
+            ),
+            TextField(
+                controller: notes,
+                decoration: const InputDecoration(
+                    labelText: 'Notas de recepción')),
+          ]),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancelar')),
+            FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Recibir')),
+          ],
+        ),
+      ),
+    );
+    if (ok != true) return;
+    await ref.read(rentalRepositoryProvider).returnLine(lineId,
+        conditionIn: condition,
+        notes: notes.text.trim().isEmpty ? null : notes.text.trim());
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Unidad recibida ✔ (kardex registrado)')));
+    }
+  }
+
+  /// Extensión/modificación de fechas: queda como addendum.
+  Future<void> _extendDates(BuildContext context, WidgetRef ref,
+      RentalContract c) async {
+    final range = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2026),
+      lastDate: DateTime(2035),
+      initialDateRange: c.dueAt == null
+          ? null
+          : DateTimeRange(
+              start: c.startAt ?? c.pickupAt ?? DateTime.now(),
+              end: c.dueAt!),
+      helpText: 'Nuevas fechas (queda como addendum)',
+      saveText: 'Continuar',
+    );
+    if (range == null || !context.mounted) return;
+    final notes = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Addendum al contrato'),
+        content: Column(mainAxisSize: MainAxisSize.min, children: [
+          Text('Devolución: '
+              '${c.dueAt == null ? '—' : DateFormat('dd/MM/yyyy').format(c.dueAt!)}'
+              ' → ${DateFormat('dd/MM/yyyy').format(range.end)}\n'
+              'La tarifa se recalcula y el cambio queda en el '
+              'historial del contrato.'),
+          TextField(
+              controller: notes,
+              decoration:
+                  const InputDecoration(labelText: 'Motivo / notas')),
+        ]),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancelar')),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Registrar addendum')),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    await ref.read(rentalRepositoryProvider).extendContract(c.id,
+        newPickupAt: range.start,
+        newDueAt: range.end,
+        notes: notes.text.trim().isEmpty ? null : notes.text.trim());
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Addendum registrado ✔')));
+    }
   }
 
   Future<void> _cancel(BuildContext context, WidgetRef ref) async {
@@ -191,24 +506,46 @@ class ContractDetailScreen extends ConsumerWidget {
     final assetId = await Navigator.of(context).push<String>(
         MaterialPageRoute(builder: (_) => const _AssetScanPage()));
     if (assetId == null || !context.mounted) return;
-    final err = await ref
-        .read(rentalRepositoryProvider)
-        .addLine(contractId, assetId);
-    if (context.mounted && err != null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(err)));
-    }
+    await _addAsset(context, ref, assetId);
   }
 
   Future<void> _addFromList(BuildContext context, WidgetRef ref) async {
     final assetId = await _pickAvailableAsset(context, ref);
     if (assetId == null || !context.mounted) return;
-    final err = await ref
-        .read(rentalRepositoryProvider)
-        .addLine(contractId, assetId);
-    if (context.mounted && err != null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(err)));
+    await _addAsset(context, ref, assetId);
+  }
+
+  /// Agrega la unidad; los incluidos entran solos y los opcionales
+  /// del producto se ofrecen para elegir.
+  Future<void> _addAsset(
+      BuildContext context, WidgetRef ref, String assetId) async {
+    final repo = ref.read(rentalRepositoryProvider);
+    final err = await repo.addLine(contractId, assetId);
+    if (err != null) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(err)));
+      }
+      return;
+    }
+    final opcionales = await repo.optionalConsumablesFor(assetId);
+    if (opcionales.isEmpty || !context.mounted) return;
+    final elegidos = await showModalBottomSheet<Set<String>>(
+      context: context,
+      builder: (_) => _OptionalConsumablesSheet(options: opcionales),
+    );
+    if (elegidos == null || elegidos.isEmpty) return;
+    final lineId = await repo.findLineId(contractId, assetId);
+    for (final (link, cons) in opcionales) {
+      if (elegidos.contains(cons.id)) {
+        await repo.addContractConsumable(
+          contractId: contractId,
+          lineId: lineId,
+          consumableId: cons.id,
+          kind: 'opcional',
+          price: link.extraPrice > 0 ? link.extraPrice : cons.salePrice,
+        );
+      }
     }
   }
 
@@ -452,11 +789,26 @@ class _HeaderCard extends ConsumerWidget {
           dense: true,
           leading: const Icon(Icons.savings_outlined, size: 20),
           title: Text('Garantía: '
-              '${NumberFormat.currency(symbol: r'$').format(contract.deposit)}'),
+              '${NumberFormat.currency(symbol: r'$').format(contract.deposit)}'
+              '${!contract.depositRequired ? ' (exonerada)' : contract.depositManual ? ' (manual)' : ' (automática)'}'),
+          subtitle: contract.depositRequired && !contract.depositManual
+              ? const Text(
+                  '100% nuevo · 50% frecuente · 30% con contrato',
+                  style: TextStyle(fontSize: 10))
+              : null,
           trailing: editable
-              ? IconButton(
-                  icon: const Icon(Icons.edit, size: 18),
-                  onPressed: () => _editDeposit(context, ref))
+              ? Row(mainAxisSize: MainAxisSize.min, children: [
+                  Switch(
+                    value: contract.depositRequired,
+                    onChanged: (v) => ref
+                        .read(rentalRepositoryProvider)
+                        .updateContract(contract.id,
+                            depositRequired: v),
+                  ),
+                  IconButton(
+                      icon: const Icon(Icons.edit, size: 18),
+                      onPressed: () => _editDeposit(context, ref)),
+                ])
               : null,
         ),
         _DeliveryTile(contract: contract, editable: editable),
@@ -816,7 +1168,9 @@ class _LineTile extends ConsumerWidget {
                   onPressed: () => repo.removeLine(l.id)),
             if (contract.status == 'active' && !returned)
               FilledButton.tonalIcon(
-                onPressed: () => _returnDialog(context, ref),
+                onPressed: () => ContractDetailScreen(
+                        contractId: contract.id)
+                    ._returnGate(context, ref, line: view),
                 icon: const Icon(Icons.assignment_return, size: 18),
                 label: const Text('Devolver'),
               ),
@@ -904,57 +1258,6 @@ class _LineTile extends ConsumerWidget {
     }
   }
 
-  Future<void> _returnDialog(BuildContext context, WidgetRef ref) async {
-    var condition = 'good';
-    final notes = TextEditingController();
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setState) => AlertDialog(
-          title: Text('Devolver ${view.asset?.assetTag ?? ''}'),
-          content: Column(mainAxisSize: MainAxisSize.min, children: [
-            SegmentedButton<String>(
-              segments: const [
-                ButtonSegment(value: 'good', label: Text('Bien')),
-                ButtonSegment(value: 'fair', label: Text('Regular')),
-                ButtonSegment(
-                    value: 'poor', label: Text('Dañada')),
-              ],
-              selected: {condition},
-              onSelectionChanged: (s) =>
-                  setState(() => condition = s.first),
-              showSelectedIcon: false,
-            ),
-            const SizedBox(height: 8),
-            if (condition == 'poor')
-              const Text('Irá a mantenimiento, no a disponible.',
-                  style: TextStyle(fontSize: 12, color: Colors.red)),
-            TextField(
-                controller: notes,
-                decoration: const InputDecoration(
-                    labelText: 'Notas de recepción')),
-          ]),
-          actions: [
-            TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancelar')),
-            FilledButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Recibir')),
-          ],
-        ),
-      ),
-    );
-    if (ok == true) {
-      await ref.read(rentalRepositoryProvider).returnLine(view.line.id,
-          conditionIn: condition,
-          notes: notes.text.trim().isEmpty ? null : notes.text.trim());
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Unidad recibida ✔ (kardex registrado)')));
-      }
-    }
-  }
 }
 
 /// Botón de evidencias: toma foto del estado al entregar/recibir y
@@ -1050,7 +1353,7 @@ class _AssetScanPageState extends State<_AssetScanPage> {
   }
 }
 
-/// Lista de unidades disponibles para agregar al contrato.
+/// Lista de unidades disponibles con buscador (código o nombre).
 Future<String?> _pickAvailableAsset(
     BuildContext context, WidgetRef ref) async {
   final db = ref.read(appDatabaseProvider);
@@ -1067,29 +1370,191 @@ Future<String?> _pickAvailableAsset(
   return showModalBottomSheet<String>(
     context: context,
     isScrollControlled: true,
-    builder: (_) => DraggableScrollableSheet(
-      expand: false,
-      initialChildSize: 0.8,
-      builder: (ctx, scroll) => ListView(
-        controller: scroll,
-        children: [
-          const Padding(
-            padding: EdgeInsets.all(12),
-            child: Text('Unidades disponibles',
-                style: TextStyle(fontWeight: FontWeight.bold)),
-          ),
-          for (final a in assets)
-            ListTile(
-              dense: true,
-              leading: const Icon(Icons.qr_code_2),
-              title: Text('${a.assetTag} · '
-                  '${[a.brand, a.mfrModel].whereType<String>().join(' ')}'),
-              subtitle: Text(models[a.toolModelId]?.name ?? '',
-                  maxLines: 1, overflow: TextOverflow.ellipsis),
-              onTap: () => Navigator.pop(ctx, a.id),
-            ),
-        ],
-      ),
-    ),
+    builder: (_) =>
+        _AvailableAssetSheet(assets: assets, models: models),
   );
+}
+
+class _AvailableAssetSheet extends StatefulWidget {
+  const _AvailableAssetSheet(
+      {required this.assets, required this.models});
+
+  final List<Asset> assets;
+  final Map<String, ToolModel?> models;
+
+  @override
+  State<_AvailableAssetSheet> createState() =>
+      _AvailableAssetSheetState();
+}
+
+class _AvailableAssetSheetState extends State<_AvailableAssetSheet> {
+  String _query = '';
+
+  @override
+  Widget build(BuildContext context) {
+    final q = _query.trim().toUpperCase();
+    final list = q.isEmpty
+        ? widget.assets
+        : widget.assets.where((a) {
+            final m = widget.models[a.toolModelId];
+            final texto = [
+              a.assetTag,
+              a.brand ?? '',
+              a.mfrModel ?? '',
+              a.serial ?? '',
+              m?.ratCode ?? '',
+              m?.name ?? '',
+            ].join(' ').toUpperCase();
+            return texto.contains(q);
+          }).toList();
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.85,
+      builder: (ctx, scroll) => Column(children: [
+        Padding(
+          padding: const EdgeInsets.all(12),
+          child: TextField(
+            autofocus: true,
+            decoration: const InputDecoration(
+              hintText: 'Buscar por código, nombre, marca o serie',
+              prefixIcon: Icon(Icons.search),
+            ),
+            onChanged: (v) => setState(() => _query = v),
+          ),
+        ),
+        Expanded(
+          child: ListView(
+            controller: scroll,
+            children: [
+              for (final a in list)
+                ListTile(
+                  dense: true,
+                  leading: const Icon(Icons.qr_code_2),
+                  title: Text(
+                      '${widget.models[a.toolModelId]?.ratCode ?? ''} · '
+                      '${a.assetTag} · '
+                      '${[a.brand, a.mfrModel].whereType<String>().join(' ')}'),
+                  subtitle: Text(
+                      widget.models[a.toolModelId]?.name ?? '',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis),
+                  onTap: () => Navigator.pop(context, a.id),
+                ),
+            ],
+          ),
+        ),
+      ]),
+    );
+  }
+}
+
+
+/// Historial de addendums (extensiones/modificaciones de fechas).
+class _AddendumHistory extends ConsumerWidget {
+  const _AddendumHistory({required this.contractId});
+
+  final String contractId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final addendums =
+        ref.watch(addendumsProvider(contractId)).value ?? const [];
+    if (addendums.isEmpty) return const SizedBox.shrink();
+    final df = DateFormat('dd/MM/yyyy');
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: Column(children: [
+        const ListTile(
+            dense: true,
+            leading: Icon(Icons.history, size: 20),
+            title: Text('Historial del contrato',
+                style: TextStyle(fontWeight: FontWeight.w700))),
+        for (final a in addendums)
+          ListTile(
+            dense: true,
+            leading: Icon(
+                a.kind == 'extension'
+                    ? Icons.update
+                    : Icons.edit_calendar,
+                size: 18),
+            title: Text(
+                '${a.kind == 'extension' ? 'Extensión' : 'Modificación'}: '
+                'devolución '
+                '${a.oldDueAt == null ? '—' : df.format(a.oldDueAt!)} → '
+                '${a.newDueAt == null ? '—' : df.format(a.newDueAt!)}',
+                style: const TextStyle(fontSize: 13)),
+            subtitle: Text(
+                '${DateFormat('dd/MM/yyyy HH:mm').format(a.updatedAt)}'
+                '${a.notes == null ? '' : ' · ${a.notes}'}',
+                style: const TextStyle(fontSize: 11)),
+          ),
+      ]),
+    );
+  }
+}
+
+/// Selección de consumibles opcionales al agregar una unidad.
+class _OptionalConsumablesSheet extends StatefulWidget {
+  const _OptionalConsumablesSheet({required this.options});
+
+  final List<(ToolModelConsumable, Consumable)> options;
+
+  @override
+  State<_OptionalConsumablesSheet> createState() =>
+      _OptionalConsumablesSheetState();
+}
+
+class _OptionalConsumablesSheetState
+    extends State<_OptionalConsumablesSheet> {
+  final _selected = <String>{};
+
+  @override
+  Widget build(BuildContext context) {
+    final money = NumberFormat.currency(symbol: r'\$');
+    return SafeArea(
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        const Padding(
+          padding: EdgeInsets.fromLTRB(16, 14, 16, 4),
+          child: Text('Accesorios y consumibles opcionales',
+              style: TextStyle(fontWeight: FontWeight.w800)),
+        ),
+        for (final (link, cons) in widget.options)
+          CheckboxListTile(
+            dense: true,
+            value: _selected.contains(cons.id),
+            title: Text(cons.name,
+                style: const TextStyle(fontSize: 13)),
+            subtitle: Text(
+                (link.extraPrice > 0
+                        ? money.format(link.extraPrice)
+                        : cons.salePrice > 0
+                            ? money.format(cons.salePrice)
+                            : 'Sin costo adicional'),
+                style: const TextStyle(fontSize: 11)),
+            onChanged: (v) => setState(() => v == true
+                ? _selected.add(cons.id)
+                : _selected.remove(cons.id)),
+          ),
+        Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () =>
+                    Navigator.pop(context, <String>{}),
+                child: const Text('Ninguno'),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: FilledButton(
+                onPressed: () => Navigator.pop(context, _selected),
+                child: Text('Agregar (${_selected.length})'),
+              ),
+            ),
+          ]),
+        ),
+      ]),
+    );
+  }
 }

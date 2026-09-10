@@ -94,6 +94,22 @@ Deno.serve(async (req) => {
         amount: l.amount,
       });
     }
+    const { data: consRows } = await service
+      .from("contract_consumables")
+      .select("consumable_id, kind, qty, price, amount")
+      .eq("contract_id", c.id)
+      .is("deleted_at", null);
+    const consumables = [];
+    for (const cc of consRows ?? []) {
+      const { data: cons } = await service.from("consumables")
+        .select("name").eq("id", cc.consumable_id).maybeSingle();
+      consumables.push({
+        nombre: cons?.name,
+        kind: cc.kind,
+        qty: cc.qty,
+        amount: cc.amount,
+      });
+    }
     const { data: acc } = await service.from("contract_acceptances")
       .select(
         "accepted_at, signer_name, signer_id_number, terms_accepted, " +
@@ -116,8 +132,11 @@ Deno.serve(async (req) => {
         registered: !!customer?.id_number,
       },
       items,
+      consumables,
       total: items.reduce((s, i) => s + Number(i.amount ?? 0), 0) +
+        consumables.reduce((s, x) => s + Number(x.amount ?? 0), 0) +
         Number(c.delivery_fee ?? 0),
+      can_sign: items.length > 0 && !!c.due_at,
       acceptance: acc,
     });
   }
@@ -147,6 +166,19 @@ Deno.serve(async (req) => {
     }
     if (!body.signature_b64) {
       return Response.json({ error: "Falta la firma" }, { status: 400 });
+    }
+    // Sin equipos y fechas definidos no hay nada que firmar.
+    const { count } = await service.from("rental_lines")
+      .select("id", { count: "exact", head: true })
+      .eq("contract_id", c.id).is("deleted_at", null);
+    if (!count || !c.due_at) {
+      return Response.json(
+        {
+          error: "El contrato aún no tiene los equipos y las fechas " +
+            "de la renta definidos; pide al personal completarlo",
+        },
+        { status: 400 },
+      );
     }
 
     const now = new Date().toISOString();

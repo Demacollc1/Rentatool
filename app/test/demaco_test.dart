@@ -252,6 +252,17 @@ BOSCH GWS14-125
 
     tearDown(() => db.close());
 
+    Future<void> fotoEntrega(String contractId) async {
+      await db.into(db.rentalLinePhotos).insert(
+            RentalLinePhotosCompanion.insert(
+              id: 'foto-$contractId',
+              contractId: Value(contractId),
+              kind: 'delivery',
+              updatedAt: Value(DateTime.now()),
+            ),
+          );
+    }
+
     Future<(String contractId, String assetId)> armaContrato() async {
       final modelId = await catalog.saveModel(
           name: 'Rotomartillo',
@@ -271,11 +282,120 @@ BOSCH GWS14-125
       return (contractId, assetId);
     }
 
-    test('correlativo CTR avanza', () async {
-      final customerId = await rentals.saveCustomer(name: 'Ana');
-      expect(await rentals.nextContractNumber(), 'CTR-0001');
-      await rentals.createContract(customerId: customerId);
-      expect(await rentals.nextContractNumber(), 'CTR-0002');
+    test('código: año+fecha+tipo de cliente+secuencial', () async {
+      final customerId = await rentals.saveCustomer(
+          name: 'Constructora Ríos', kind: 'constructora');
+      final id1 =
+          await rentals.createContract(customerId: customerId);
+      final c1 = await rentals.getContract(id1);
+      expect(c1!.contractNumber,
+          matches(RegExp(r'^\d{4}-\d{4}-C001$')));
+      final id2 =
+          await rentals.createContract(customerId: customerId);
+      final c2 = await rentals.getContract(id2);
+      expect(c2!.contractNumber.endsWith('C002'), isTrue);
+      // Cliente sin tipo → letra A con su propia secuencia.
+      final sinTipo = await rentals.saveCustomer(name: 'Ana');
+      final id3 = await rentals.createContract(customerId: sinTipo);
+      final c3 = await rentals.getContract(id3);
+      expect(c3!.contractNumber.endsWith('A001'), isTrue);
+    });
+
+    test('garantía automática por calificación del cliente', () async {
+      final nuevo = await rentals.saveCustomer(name: 'Nuevo');
+      final frecuente = await rentals.saveCustomer(
+          name: 'Frecuente', qualification: 'frecuente');
+      final modelId = await catalog.saveModel(
+          name: 'Equipo', listCost: 200, rateDay: 40);
+      final a1 = await catalog.createAsset(
+          toolModelId: modelId,
+          assetTag: await catalog.nextAssetTag(),
+          purchaseCost: 200);
+      final c1 = await rentals.createContract(customerId: nuevo);
+      await rentals.addLine(c1, a1);
+      expect((await rentals.getContract(c1))!.deposit, 200); // 100%
+      // Mismo equipo para un frecuente: 50%.
+      final lines = await rentals.watchLines(c1).first;
+      await rentals.removeLine(lines.single.line.id);
+      final c2 = await rentals.createContract(customerId: frecuente);
+      await rentals.addLine(c2, a1);
+      expect((await rentals.getContract(c2))!.deposit, 100); // 50%
+      // Exonerar garantía → 0.
+      await rentals.updateContract(c2, depositRequired: false);
+      expect((await rentals.getContract(c2))!.deposit, 0);
+    });
+
+    test('consumible incluido entra solo; opcional se ofrece',
+        () async {
+      final modelId = await catalog.saveModel(
+          name: 'Sierra', listCost: 100, rateDay: 20);
+      final discoId = await catalog.saveConsumable(
+          name: 'Disco 7"', cost: 5, salePrice: 8);
+      final guanteId = await catalog.saveConsumable(
+          name: 'Guantes', cost: 2, salePrice: 4);
+      await catalog.linkConsumable(modelId, discoId,
+          kind: 'incluido', extraPrice: 0);
+      await catalog.linkConsumable(modelId, guanteId,
+          kind: 'opcional', extraPrice: 3);
+      final assetId = await catalog.createAsset(
+          toolModelId: modelId,
+          assetTag: await catalog.nextAssetTag(),
+          purchaseCost: 100);
+      final customerId =
+          await rentals.saveCustomer(name: 'Cliente X');
+      final contractId =
+          await rentals.createContract(customerId: customerId);
+      await rentals.addLine(contractId, assetId);
+      final cons =
+          await rentals.watchContractConsumables(contractId).first;
+      expect(cons.length, 1); // solo el incluido
+      expect(cons.single.$2.name, 'Disco 7"');
+      final opcionales =
+          await rentals.optionalConsumablesFor(assetId);
+      expect(opcionales.single.$2.name, 'Guantes');
+      expect(opcionales.single.$1.extraPrice, 3);
+    });
+
+    test('extensión de fechas queda como addendum', () async {
+      final (contractId, assetId) = await armaContrato();
+      await rentals.updateContract(contractId,
+          dueAt: DateTime.now().add(const Duration(days: 3)));
+      await rentals.addLine(contractId, assetId);
+      await fotoEntrega(contractId);
+      expect(await rentals.deliver(contractId), isNull);
+      final nueva = DateTime.now().add(const Duration(days: 10));
+      await rentals.extendContract(contractId,
+          newDueAt: nueva, notes: 'cliente pidió una semana más');
+      final adds = await rentals.watchAddendums(contractId).first;
+      expect(adds.single.kind, 'extension');
+      expect(adds.single.notes, contains('semana'));
+      final c = await rentals.getContract(contractId);
+      expect(c!.dueAt!.day, nueva.day);
+      // La línea se recalculó a semana×2 (10 días).
+      final lines = await rentals.watchLines(contractId).first;
+      expect(lines.single.line.rateKind, 'week');
+    });
+
+    test('devolver aprobado sin escanear manda a cuarentena',
+        () async {
+      final (contractId, assetId) = await armaContrato();
+      await rentals.addLine(contractId, assetId);
+      await fotoEntrega(contractId);
+      expect(await rentals.deliver(contractId), isNull);
+      await rentals.returnAll(contractId, toQuarantine: true);
+      final asset = await catalog.getAsset(assetId);
+      expect(asset!.status, 'quarantine');
+      final c = await rentals.getContract(contractId);
+      expect(c!.status, 'closed');
+    });
+
+    test('entregar exige la foto de la entrega', () async {
+      final (contractId, assetId) = await armaContrato();
+      await rentals.addLine(contractId, assetId);
+      expect(await rentals.deliver(contractId),
+          contains('foto obligatoria'));
+      await fotoEntrega(contractId);
+      expect(await rentals.deliver(contractId), isNull);
     });
 
     test('flujo completo: agregar, entregar, devolver, cerrar', () async {
@@ -296,6 +416,7 @@ BOSCH GWS14-125
       expect(lines.single.line.amount, 140);
 
       // Entregar: contrato activo, unidad rentada, kardex rent_out.
+      await fotoEntrega(contractId);
       expect(await rentals.deliver(contractId), isNull);
       var contract = await rentals.getContract(contractId);
       expect(contract!.status, 'active');
@@ -325,6 +446,7 @@ BOSCH GWS14-125
     test('devolución dañada manda la unidad a mantenimiento', () async {
       final (contractId, assetId) = await armaContrato();
       await rentals.addLine(contractId, assetId);
+      await fotoEntrega(contractId);
       await rentals.deliver(contractId);
       final lines = await rentals.watchLines(contractId).first;
       await rentals.returnLine(lines.single.line.id,
@@ -449,6 +571,7 @@ BOSCH GWS14-125
       // Antes de cerrar no se puede liberar.
       expect(await rentals.releaseDeposit(contractId),
           contains('al cerrar'));
+      await fotoEntrega(contractId);
       await rentals.deliver(contractId);
       final lines = await rentals.watchLines(contractId).first;
       await rentals.returnLine(lines.single.line.id);
@@ -472,6 +595,7 @@ BOSCH GWS14-125
       expect(await rentals.deliver(contractId),
           contains('al menos una unidad'));
       await rentals.addLine(contractId, assetId);
+      await fotoEntrega(contractId);
       expect(await rentals.deliver(contractId), isNull);
       expect(await rentals.deliver(contractId),
           contains('ya fue entregado'));

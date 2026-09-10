@@ -54,6 +54,7 @@ class RentalRepository {
     required String name,
     String? tradeName,
     String? kind,
+    String qualification = 'nuevo',
     String? idNumber,
     String? phone,
     String? email,
@@ -67,6 +68,7 @@ class RentalRepository {
             name: Value(name),
             tradeName: Value(tradeName),
             kind: Value(kind),
+            qualification: Value(qualification),
             idNumber: Value(idNumber),
             phone: Value(phone),
             email: Value(email),
@@ -79,6 +81,7 @@ class RentalRepository {
       'name': name,
       'trade_name': tradeName,
       'kind': kind,
+      'qualification': qualification,
       'id_number': idNumber,
       'phone': phone,
       'email': email,
@@ -240,18 +243,79 @@ class RentalRepository {
 
   // ---------------- contratos ----------------
 
-  /// Siguiente correlativo CTR-0001 (por máximo local, igual que DEM-).
-  Future<String> nextContractNumber() async {
-    final rows = await _db.select(_db.rentalContracts).get();
+  /// Letra del tipo de cliente para el código del contrato.
+  static String kindLetter(String? kind) => switch (kind) {
+        'maestro' => 'M',
+        'constructora' => 'C',
+        'diyer' => 'D',
+        'mantenimiento' => 'T',
+        'obra_eventual' => 'O',
+        _ => 'A',
+      };
+
+  /// Código del contrato: año+fecha de la renta+tipo de cliente+
+  /// secuencial del día. Ej: 2026-0909-A001.
+  Future<String> nextContractNumber({String? customerId}) async {
+    final now = DateTime.now();
+    final datePart = '${now.year}-'
+        '${now.month.toString().padLeft(2, '0')}'
+        '${now.day.toString().padLeft(2, '0')}';
+    var letter = 'A';
+    if (customerId != null) {
+      final customer = await (_db.select(_db.customers)
+            ..where((c) => c.id.equals(customerId)))
+          .getSingleOrNull();
+      letter = kindLetter(customer?.kind);
+    }
+    final prefix = '$datePart-$letter';
+    final rows = await (_db.select(_db.rentalContracts)
+          ..where((c) => c.contractNumber.like('$prefix%')))
+        .get();
     var max = 0;
     for (final r in rows) {
-      final m = RegExp(r'^CTR-(\d+)$').firstMatch(r.contractNumber);
-      if (m != null) {
-        final n = int.parse(m.group(1)!);
-        if (n > max) max = n;
+      final n = int.tryParse(r.contractNumber.substring(prefix.length));
+      if (n != null && n > max) max = n;
+    }
+    return '$prefix${(max + 1).toString().padLeft(3, '0')}';
+  }
+
+  /// Porcentaje de garantía según la calificación del cliente.
+  static double depositPct(String qualification) => switch (qualification) {
+        'frecuente' => 0.5,
+        'con_contrato' => 0.3,
+        _ => 1.0, // nuevo
+      };
+
+  /// Recalcula la garantía automática: % (por calificación) del costo
+  /// de las unidades del contrato. No toca montos manuales ni
+  /// contratos sin garantía requerida.
+  Future<void> recomputeDeposit(String contractId) async {
+    final c = await getContract(contractId);
+    if (c == null || c.status != 'draft') return;
+    if (c.depositManual) return;
+    double dep = 0;
+    if (c.depositRequired) {
+      final customer = await (_db.select(_db.customers)
+            ..where((x) => x.id.equals(c.customerId)))
+          .getSingleOrNull();
+      final pct = depositPct(customer?.qualification ?? 'nuevo');
+      for (final l in await _livingLines(contractId)) {
+        final asset = await _catalog.getAsset(l.assetId);
+        var cost = asset?.purchaseCost ?? 0;
+        if (cost <= 0) {
+          final model = await _catalog.getModel(l.toolModelId);
+          cost = model?.listCost ?? 0;
+        }
+        dep += cost * pct;
       }
     }
-    return 'CTR-${(max + 1).toString().padLeft(4, '0')}';
+    await (_db.update(_db.rentalContracts)
+          ..where((x) => x.id.equals(contractId)))
+        .write(RentalContractsCompanion(
+      deposit: Value(double.parse(dep.toStringAsFixed(2))),
+      updatedAt: Value(DateTime.now()),
+    ));
+    await _enqueueContract(contractId);
   }
 
   Future<String> createContract({
@@ -263,7 +327,7 @@ class RentalRepository {
     String? notes,
   }) async {
     final rowId = const Uuid().v4();
-    final number = await nextContractNumber();
+    final number = await nextContractNumber(customerId: customerId);
     final now = DateTime.now();
     await _db.into(_db.rentalContracts).insert(
           RentalContractsCompanion.insert(
@@ -300,6 +364,7 @@ class RentalRepository {
     String? siteId,
     String? contactId,
     double? deliveryFee,
+    bool? depositRequired,
   }) async {
     await (_db.update(_db.rentalContracts)..where((c) => c.id.equals(id)))
         .write(RentalContractsCompanion(
@@ -307,6 +372,11 @@ class RentalRepository {
           pickupAt == null ? const Value.absent() : Value(pickupAt),
       dueAt: dueAt == null ? const Value.absent() : Value(dueAt),
       deposit: deposit == null ? const Value.absent() : Value(deposit),
+      depositManual:
+          deposit == null ? const Value.absent() : const Value(true),
+      depositRequired: depositRequired == null
+          ? const Value.absent()
+          : Value(depositRequired),
       notes: notes == null ? const Value.absent() : Value(notes),
       customerId:
           customerId == null ? const Value.absent() : Value(customerId),
@@ -324,6 +394,9 @@ class RentalRepository {
     if (dueAt != null || pickupAt != null) {
       await recalcLinesFromDates(id);
     }
+    if (depositRequired != null || customerId != null) {
+      await recomputeDeposit(id);
+    }
     await _enqueueContract(id);
   }
 
@@ -339,8 +412,13 @@ class RentalRepository {
               ..where((x) => x.id.equals(c.customerId)))
             .getSingleOrNull();
         final lines = await _livingLines(c.id);
-        final total =
-            lines.fold<double>(0, (s, l) => s + l.amount);
+        final cons = await (_db.select(_db.contractConsumables)
+              ..where((x) =>
+                  x.contractId.equals(c.id) & x.deletedAt.isNull()))
+            .get();
+        final total = lines.fold<double>(0, (s, l) => s + l.amount) +
+            cons.fold<double>(0, (s, x) => s + x.amount) +
+            c.deliveryFee;
         out.add(ContractView(c, customer, total, lines.length));
       }
       return out;
@@ -464,7 +542,138 @@ class RentalRepository {
           updatedAt: Value(now),
         ));
     await _enqueueLine(rowId);
+    // Consumibles amarrados al producto: entran solos.
+    final links = await _catalog
+        .watchModelConsumableLinks(asset.toolModelId)
+        .first;
+    for (final (link, cons) in links) {
+      if (link.kind == 'incluido') {
+        await addContractConsumable(
+          contractId: contractId,
+          lineId: rowId,
+          consumableId: cons.id,
+          kind: 'incluido',
+          price: link.extraPrice,
+        );
+      }
+    }
+    await recomputeDeposit(contractId);
     return null;
+  }
+
+  /// Opcionales configurados en el producto de esta unidad (para
+  /// ofrecerlos al agregarla al contrato).
+  Future<List<(ToolModelConsumable, Consumable)>> optionalConsumablesFor(
+      String assetId) async {
+    final asset = await _catalog.getAsset(assetId);
+    if (asset == null) return const [];
+    final links = await _catalog
+        .watchModelConsumableLinks(asset.toolModelId)
+        .first;
+    return [for (final l in links) if (l.$1.kind == 'opcional') l];
+  }
+
+  /// Línea viva del contrato para una unidad (para amarrar opcionales).
+  Future<String?> findLineId(String contractId, String assetId) async {
+    final l = await (_db.select(_db.rentalLines)
+          ..where((x) =>
+              x.contractId.equals(contractId) &
+              x.assetId.equals(assetId) &
+              x.deletedAt.isNull()))
+        .getSingleOrNull();
+    return l?.id;
+  }
+
+  // ---------------- consumibles del contrato ----------------
+
+  Stream<List<(ContractConsumable, Consumable)>> watchContractConsumables(
+      String contractId) {
+    final join = _db.select(_db.contractConsumables).join([
+      innerJoin(
+          _db.consumables,
+          _db.consumables.id
+              .equalsExp(_db.contractConsumables.consumableId)),
+    ])
+      ..where(_db.contractConsumables.contractId.equals(contractId) &
+          _db.contractConsumables.deletedAt.isNull());
+    return join.watch().map((rows) => [
+          for (final r in rows)
+            (
+              r.readTable(_db.contractConsumables),
+              r.readTable(_db.consumables)
+            )
+        ]);
+  }
+
+  Future<String> addContractConsumable({
+    required String contractId,
+    String? lineId,
+    required String consumableId,
+    String kind = 'incluido',
+    double price = 0,
+    double qty = 1,
+  }) async {
+    final rowId = const Uuid().v4();
+    final now = DateTime.now();
+    await _db.into(_db.contractConsumables).insert(
+          ContractConsumablesCompanion.insert(
+            id: rowId,
+            contractId: contractId,
+            lineId: Value(lineId),
+            consumableId: consumableId,
+            kind: Value(kind),
+            qty: Value(qty),
+            price: Value(price),
+            amount: Value(price * qty),
+            updatedAt: Value(now),
+          ),
+        );
+    await _sync.enqueue(
+        table: 'contract_consumables',
+        rowId: rowId,
+        op: 'upsert',
+        row: {
+          'id': rowId,
+          'contract_id': contractId,
+          'line_id': lineId,
+          'consumable_id': consumableId,
+          'kind': kind,
+          'qty': qty,
+          'price': price,
+          'amount': price * qty,
+          'updated_at': isoTs(now),
+          'deleted_at': null,
+        });
+    return rowId;
+  }
+
+  Future<void> removeContractConsumable(String id) async {
+    final now = DateTime.now();
+    await (_db.update(_db.contractConsumables)
+          ..where((x) => x.id.equals(id)))
+        .write(ContractConsumablesCompanion(
+      deletedAt: Value(now),
+      updatedAt: Value(now),
+    ));
+    final r = await (_db.select(_db.contractConsumables)
+          ..where((x) => x.id.equals(id)))
+        .getSingle();
+    await _sync.enqueue(
+        table: 'contract_consumables',
+        rowId: id,
+        op: 'upsert',
+        row: {
+          'id': r.id,
+          'contract_id': r.contractId,
+          'line_id': r.lineId,
+          'consumable_id': r.consumableId,
+          'kind': r.kind,
+          'qty': r.qty,
+          'price': r.price,
+          'amount': r.amount,
+          'updated_at': isoTs(now),
+          'deleted_at': isoTs(now),
+        });
   }
 
   Future<void> updateLine(String lineId,
@@ -491,6 +700,9 @@ class RentalRepository {
   }
 
   Future<void> removeLine(String lineId) async {
+    final line = await (_db.select(_db.rentalLines)
+          ..where((l) => l.id.equals(lineId)))
+        .getSingle();
     final now = DateTime.now();
     await (_db.update(_db.rentalLines)..where((l) => l.id.equals(lineId)))
         .write(RentalLinesCompanion(
@@ -498,6 +710,15 @@ class RentalRepository {
       updatedAt: Value(now),
     ));
     await _enqueueLine(lineId);
+    // Sus consumibles amarrados salen con ella.
+    final cons = await (_db.select(_db.contractConsumables)
+          ..where((c) =>
+              c.lineId.equals(lineId) & c.deletedAt.isNull()))
+        .get();
+    for (final c in cons) {
+      await removeContractConsumable(c.id);
+    }
+    await recomputeDeposit(line.contractId);
   }
 
   // ---------------- flujo entregar / devolver ----------------
@@ -512,6 +733,15 @@ class RentalRepository {
     }
     final lines = await _livingLines(contractId);
     if (lines.isEmpty) return 'Agrega al menos una unidad';
+    final fotos = await (_db.select(_db.rentalLinePhotos)
+          ..where((p) =>
+              p.contractId.equals(contractId) &
+              p.kind.equals('delivery') &
+              p.deletedAt.isNull()))
+        .get();
+    if (fotos.isEmpty) {
+      return 'Falta la foto obligatoria de la entrega';
+    }
     for (final l in lines) {
       final asset = await _catalog.getAsset(l.assetId);
       if (asset == null || asset.status != 'available') {
@@ -543,9 +773,32 @@ class RentalRepository {
     return null;
   }
 
-  /// Devuelve una unidad. Si es la última pendiente, cierra el contrato.
+  /// Devuelve TODAS las unidades pendientes de una vez.
+  Future<void> returnAll(String contractId,
+      {String conditionIn = 'good',
+      String? notes,
+      bool toQuarantine = false}) async {
+    final pendientes = await (_db.select(_db.rentalLines)
+          ..where((l) =>
+              l.contractId.equals(contractId) &
+              l.deletedAt.isNull() &
+              l.returnedAt.isNull()))
+        .get();
+    for (final l in pendientes) {
+      await returnLine(l.id,
+          conditionIn: conditionIn,
+          notes: notes,
+          toQuarantine: toQuarantine);
+    }
+  }
+
+  /// Devuelve una unidad. Si es la última pendiente, cierra el
+  /// contrato. toQuarantine = aprobado sin escanear: va a cuarentena
+  /// para revisión y mantenimiento.
   Future<void> returnLine(String lineId,
-      {String conditionIn = 'good', String? notes}) async {
+      {String conditionIn = 'good',
+      String? notes,
+      bool toQuarantine = false}) async {
     final line = await (_db.select(_db.rentalLines)
           ..where((l) => l.id.equals(lineId)))
         .getSingle();
@@ -559,9 +812,12 @@ class RentalRepository {
       condition: Value(conditionIn),
       updatedAt: Value(now),
     ));
-    // Dañada → mantenimiento; bien → disponible.
-    await _catalog.setAssetStatus(
-        line.assetId, conditionIn == 'poor' ? 'maintenance' : 'available',
+    // Aprobada sin escaneo → cuarentena; dañada → mantenimiento;
+    // bien → disponible.
+    final destino = toQuarantine
+        ? 'quarantine'
+        : (conditionIn == 'poor' ? 'maintenance' : 'available');
+    await _catalog.setAssetStatus(line.assetId, destino,
         contractRef: contract?.contractNumber, notes: notes);
     await (_db.update(_db.rentalLines)..where((l) => l.id.equals(lineId)))
         .write(RentalLinesCompanion(
@@ -589,6 +845,59 @@ class RentalRepository {
       await _enqueueContract(line.contractId);
     }
   }
+
+  /// Extiende/modifica las fechas de un contrato ACTIVO dejando
+  /// addendum en el historial (nunca se sobreescribe en silencio).
+  Future<void> extendContract(String contractId,
+      {DateTime? newPickupAt,
+      required DateTime newDueAt,
+      String? notes}) async {
+    final c = await getContract(contractId);
+    if (c == null) return;
+    final rowId = const Uuid().v4();
+    final now = DateTime.now();
+    final kind = (newDueAt.isAfter(c.dueAt ?? newDueAt))
+        ? 'extension'
+        : 'modificacion';
+    await _db.into(_db.contractAddendums).insert(
+          ContractAddendumsCompanion.insert(
+            id: rowId,
+            contractId: contractId,
+            kind: Value(kind),
+            oldPickupAt: Value(c.startAt ?? c.pickupAt),
+            newPickupAt: Value(newPickupAt ?? c.startAt ?? c.pickupAt),
+            oldDueAt: Value(c.dueAt),
+            newDueAt: Value(newDueAt),
+            notes: Value(notes),
+            updatedAt: Value(now),
+          ),
+        );
+    await _sync.enqueue(
+        table: 'contract_addendums',
+        rowId: rowId,
+        op: 'upsert',
+        row: {
+          'id': rowId,
+          'contract_id': contractId,
+          'kind': kind,
+          'old_pickup_at': isoTsN(c.startAt ?? c.pickupAt),
+          'new_pickup_at': isoTsN(newPickupAt ?? c.startAt ?? c.pickupAt),
+          'old_due_at': isoTsN(c.dueAt),
+          'new_due_at': isoTs(newDueAt),
+          'notes': notes,
+          'updated_at': isoTs(now),
+          'deleted_at': null,
+        });
+    await updateContract(contractId,
+        pickupAt: newPickupAt, dueAt: newDueAt);
+  }
+
+  Stream<List<ContractAddendum>> watchAddendums(String contractId) =>
+      (_db.select(_db.contractAddendums)
+            ..where((a) =>
+                a.contractId.equals(contractId) & a.deletedAt.isNull())
+            ..orderBy([(a) => OrderingTerm.desc(a.updatedAt)]))
+          .watch();
 
   /// Cancela un borrador (las unidades nunca salieron).
   Future<String?> cancel(String contractId) async {
@@ -621,7 +930,7 @@ class RentalRepository {
   /// archivo a documentos y deja la subida para el próximo sync.
   Future<void> addLinePhoto({
     required String contractId,
-    required String lineId,
+    String? lineId,
     required String kind, // delivery | return
     required String pickedPath,
   }) async {
@@ -637,7 +946,8 @@ class RentalRepository {
     await _db.into(_db.rentalLinePhotos).insert(
           RentalLinePhotosCompanion.insert(
             id: rowId,
-            lineId: lineId,
+            lineId: Value(lineId),
+            contractId: Value(contractId),
             kind: kind,
             photoPath: Value(remotePath),
             localPath: Value(localPath),
@@ -651,6 +961,7 @@ class RentalRepository {
         row: {
           'id': rowId,
           'line_id': lineId,
+          'contract_id': contractId,
           'kind': kind,
           'photo_path': remotePath,
           'updated_at': isoTs(now),
@@ -703,6 +1014,8 @@ class RentalRepository {
       'due_at': isoTsN(c.dueAt),
       'returned_at': isoTsN(c.returnedAt),
       'deposit': c.deposit,
+      'deposit_required': c.depositRequired,
+      'deposit_manual': c.depositManual,
       'delivery_method': c.deliveryMethod,
       'site_id': c.siteId,
       'contact_id': c.contactId,
@@ -802,6 +1115,26 @@ final siteContactProvider =
   final db = ref.watch(appDatabaseProvider);
   return (db.select(db.siteContacts)..where((c) => c.id.equals(id)))
       .watchSingleOrNull();
+});
+
+final contractConsumablesProvider = StreamProvider.autoDispose
+    .family<List<(ContractConsumable, Consumable)>, String>(
+        (ref, contractId) => ref
+            .watch(rentalRepositoryProvider)
+            .watchContractConsumables(contractId));
+
+final addendumsProvider = StreamProvider.autoDispose
+    .family<List<ContractAddendum>, String>((ref, contractId) => ref
+        .watch(rentalRepositoryProvider)
+        .watchAddendums(contractId));
+
+final contractPhotosProvider = StreamProvider.autoDispose
+    .family<List<RentalLinePhoto>, String>((ref, contractId) {
+  final db = ref.watch(appDatabaseProvider);
+  return (db.select(db.rentalLinePhotos)
+        ..where((p) =>
+            p.contractId.equals(contractId) & p.deletedAt.isNull()))
+      .watch();
 });
 
 final linePhotosProvider = StreamProvider.autoDispose

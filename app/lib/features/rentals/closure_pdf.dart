@@ -28,9 +28,12 @@ Future<String?> buildClosurePdf(WidgetRef ref, String contractId) async {
             ..where((s) => s.id.equals(contract.siteId!)))
           .getSingleOrNull();
   final lines = await repo.watchLines(contractId).first;
+  final consumables =
+      await repo.watchContractConsumables(contractId).first;
   final money = NumberFormat.currency(symbol: r'$');
   final df = DateFormat('dd/MM/yyyy HH:mm');
   final total = lines.fold<double>(0, (s, l) => s + l.line.amount) +
+      consumables.fold<double>(0, (s, x) => s + x.$1.amount) +
       contract.deliveryFee;
   final devuelta = contract.deposit - contract.depositRetained;
 

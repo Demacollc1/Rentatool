@@ -37,9 +37,13 @@ Future<String?> buildContractPdf(WidgetRef ref, String contractId) async {
             ..where((c) => c.id.equals(contract.contactId!)))
           .getSingleOrNull();
   final lines = await repo.watchLines(contractId).first;
+  final consumables =
+      await repo.watchContractConsumables(contractId).first;
+  final addendums = await repo.watchAddendums(contractId).first;
   final money = NumberFormat.currency(symbol: r'$');
   final df = DateFormat('dd/MM/yyyy HH:mm');
   final total = lines.fold<double>(0, (s, l) => s + l.line.amount) +
+      consumables.fold<double>(0, (s, x) => s + x.$1.amount) +
       contract.deliveryFee;
 
   final doc = pw.Document();
@@ -162,6 +166,16 @@ Future<String?> buildContractPdf(WidgetRef ref, String contractId) async {
               v.line.periods.toStringAsFixed(0),
               money.format(v.line.amount),
             ],
+          for (final (cc, cons) in consumables)
+            [
+              '',
+              '↳ ${cons.name} '
+                  '(${cc.kind == 'incluido' ? 'incluido' : 'opcional'})',
+              '',
+              '',
+              cc.qty.toStringAsFixed(0),
+              cc.amount > 0 ? money.format(cc.amount) : '—',
+            ],
         ],
       ),
       pw.SizedBox(height: 8),
@@ -201,6 +215,24 @@ Future<String?> buildContractPdf(WidgetRef ref, String contractId) async {
           text: 'La garantía se devuelve al cierre del contrato, '
               'descontando daños o faltantes si los hubiera.',
           style: const pw.TextStyle(fontSize: 9)),
+      if (addendums.isNotEmpty) ...[
+        pw.SizedBox(height: 8),
+        pw.Text('HISTORIAL DE ADDENDUMS',
+            style: pw.TextStyle(
+                fontSize: 9,
+                color: PdfColors.grey700,
+                letterSpacing: 1)),
+        for (final a in addendums)
+          pw.Text(
+              '• ${DateFormat('dd/MM/yyyy').format(a.updatedAt)} — '
+              '${a.kind == 'extension' ? 'Extensión' : 'Modificación'}: '
+              'devolución '
+              '${a.oldDueAt == null ? '—' : DateFormat('dd/MM/yyyy').format(a.oldDueAt!)}'
+              ' → '
+              '${a.newDueAt == null ? '—' : DateFormat('dd/MM/yyyy').format(a.newDueAt!)}'
+              '${a.notes == null ? '' : ' (${a.notes})'}',
+              style: const pw.TextStyle(fontSize: 9)),
+      ],
       if ((contract.notes ?? '').isNotEmpty) ...[
         pw.SizedBox(height: 6),
         pw.Text('Notas: ${contract.notes}',

@@ -87,6 +87,47 @@ class _KpiPill extends ConsumerWidget {
       );
 }
 
+/// \$ rentado del día: contratos entregados hoy (líneas +
+/// consumibles + transporte).
+class _VendidoHoy extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final todos =
+        ref.watch(contractsProvider(null)).value ?? const [];
+    final hoy = DateTime.now();
+    double vendido = 0;
+    var n = 0;
+    for (final v in todos) {
+      final s = v.contract.startAt;
+      if (s != null &&
+          v.contract.status != 'cancelled' &&
+          s.year == hoy.year &&
+          s.month == hoy.month &&
+          s.day == hoy.day) {
+        vendido += v.total;
+        n++;
+      }
+    }
+    return Row(children: [
+      const Icon(Icons.trending_up,
+          color: Colors.greenAccent, size: 18),
+      const SizedBox(width: 6),
+      Text('Vendido hoy: ',
+          style: const TextStyle(
+              color: Colors.white70, fontSize: 13)),
+      Text(_money.format(vendido),
+          style: const TextStyle(
+              color: Colors.greenAccent,
+              fontSize: 16,
+              fontWeight: FontWeight.w800)),
+      const Spacer(),
+      Text('$n entrega${n == 1 ? '' : 's'}',
+          style: const TextStyle(
+              color: Colors.white54, fontSize: 11)),
+    ]);
+  }
+}
+
 /// Tarjeta de acción del grid del Inicio.
 class _ActionCard extends StatelessWidget {
   const _ActionCard(
@@ -313,10 +354,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // ── Capital ──
+                      // ── Capital + vendido del día ──
                       Card(
                         color: AppTheme.ink,
-                        child: Padding(
+                        child: Container(
+                          width: double.infinity,
                           padding: const EdgeInsets.all(20),
                           child: Column(
                             crossAxisAlignment:
@@ -338,6 +380,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                   style: const TextStyle(
                                       color: Colors.white70,
                                       fontSize: 12)),
+                              const Divider(
+                                  color: Colors.white12, height: 20),
+                              _VendidoHoy(),
                             ],
                           ),
                         ),

@@ -165,10 +165,37 @@ class ToolModelCategories extends Table with SyncColumns {
   TextColumn get categoryId => text()();
 }
 
-/// n:m modelo ↔ consumible (el mismo disco sirve a varias sierras).
+/// n:m modelo ↔ consumible. kind: incluido (va amarrado al rentar)
+/// u opcional (se ofrece); extra_price = costo adicional si aplica.
 class ToolModelConsumables extends Table with SyncColumns {
   TextColumn get toolModelId => text()();
   TextColumn get consumableId => text()();
+  TextColumn get kind => text().withDefault(const Constant('incluido'))();
+  RealColumn get extraPrice => real().withDefault(const Constant(0))();
+}
+
+/// Consumibles/accesorios dentro de un contrato de renta.
+class ContractConsumables extends Table with SyncColumns {
+  TextColumn get contractId => text()();
+  TextColumn get lineId => text().nullable()();
+  TextColumn get consumableId => text()();
+  TextColumn get kind => text().withDefault(const Constant('incluido'))();
+  RealColumn get qty => real().withDefault(const Constant(1))();
+  RealColumn get price => real().withDefault(const Constant(0))();
+  RealColumn get amount => real().withDefault(const Constant(0))();
+}
+
+/// Addendum del contrato: extensión/modificación de fechas con
+/// historial (nunca se sobreescribe en silencio).
+class ContractAddendums extends Table with SyncColumns {
+  TextColumn get contractId => text()();
+  TextColumn get kind =>
+      text().withDefault(const Constant('extension'))();
+  DateTimeColumn get oldPickupAt => dateTime().nullable()();
+  DateTimeColumn get newPickupAt => dateTime().nullable()();
+  DateTimeColumn get oldDueAt => dateTime().nullable()();
+  DateTimeColumn get newDueAt => dateTime().nullable()();
+  TextColumn get notes => text().nullable()();
 }
 
 /// Kardex: la historia de todo movimiento de activos y consumibles.
@@ -194,6 +221,10 @@ class Customers extends Table with SyncColumns {
   TextColumn get name => text()();
   TextColumn get tradeName => text().nullable()();
   TextColumn get kind => text().nullable()();
+
+  /// nuevo (100% garantía) · frecuente (50%) · con_contrato (30%).
+  TextColumn get qualification =>
+      text().withDefault(const Constant('nuevo'))();
   TextColumn get idNumber => text().nullable()();
   TextColumn get phone => text().nullable()();
   TextColumn get email => text().nullable()();
@@ -274,6 +305,13 @@ class RentalContracts extends Table with SyncColumns {
   /// Secreto del link público del portal de aceptación (F2b).
   TextColumn get acceptanceToken => text().nullable()();
 
+  /// La garantía es obligatoria por defecto; se desactiva solo para
+  /// clientes calificados. deposit_manual = monto editado a mano.
+  BoolColumn get depositRequired =>
+      boolean().withDefault(const Constant(true))();
+  BoolColumn get depositManual =>
+      boolean().withDefault(const Constant(false))();
+
   /// Ciclo de la garantía: se libera (o retiene) al cierre.
   DateTimeColumn get depositReleasedAt => dateTime().nullable()();
   RealColumn get depositRetained =>
@@ -287,7 +325,9 @@ class RentalContracts extends Table with SyncColumns {
 /// localPath/uploadedAt son solo locales (patrón de íconos): el
 /// archivo sube al bucket docs en el próximo sync.
 class RentalLinePhotos extends Table with SyncColumns {
-  TextColumn get lineId => text()();
+  /// Foto de una línea (lineId) o del contrato (contractId).
+  TextColumn get lineId => text().nullable()();
+  TextColumn get contractId => text().nullable()();
 
   /// delivery = al entregar · return = al recibir.
   TextColumn get kind => text()();
@@ -369,6 +409,8 @@ class SyncState extends Table {
   RentalContracts,
   RentalLines,
   RentalLinePhotos,
+  ContractConsumables,
+  ContractAddendums,
   ContractAcceptances,
   SyncQueue,
   SyncState,
@@ -378,7 +420,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 16; // v15 evidencias · v16 foto de unidad
+  int get schemaVersion => 17; // v16 foto unidad · v17 reglas de renta
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -430,6 +472,23 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(assets, assets.photoPath);
             await m.addColumn(assets, assets.photoLocalPath);
             await m.addColumn(assets, assets.photoUploadedAt);
+          }
+          if (from < 17) {
+            await m.addColumn(
+                toolModelConsumables, toolModelConsumables.kind);
+            await m.addColumn(toolModelConsumables,
+                toolModelConsumables.extraPrice);
+          }
+          if (from >= 9 && from < 17) {
+            await m.addColumn(customers, customers.qualification);
+            await m.addColumn(
+                rentalContracts, rentalContracts.depositRequired);
+            await m.addColumn(
+                rentalContracts, rentalContracts.depositManual);
+          }
+          if (from >= 15 && from < 17) {
+            await m.addColumn(
+                rentalLinePhotos, rentalLinePhotos.contractId);
           }
           if (from >= 9 && from < 15) {
             await m.addColumn(

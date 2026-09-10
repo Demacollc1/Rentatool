@@ -1,4 +1,6 @@
+import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_picker/image_picker.dart';
@@ -33,7 +35,6 @@ class ModelDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final model = ref.watch(toolModelProvider(modelId));
     final units = ref.watch(modelAssetsProvider(modelId));
-    final consumables = ref.watch(modelConsumablesProvider(modelId));
 
     return model.when(
       loading: () => const Scaffold(
@@ -135,36 +136,7 @@ class ModelDetailScreen extends ConsumerWidget {
               const SizedBox(height: 8),
               _RatesCard(model: m),
               const SizedBox(height: 8),
-              consumables.when(
-                loading: () => const SizedBox.shrink(),
-                error: (e, _) => const SizedBox.shrink(),
-                data: (list) => list.isEmpty
-                    ? const SizedBox.shrink()
-                    : Card(
-                        child: Column(children: [
-                          const ListTile(
-                              dense: true,
-                              title: Text('Consumibles del equipo',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold))),
-                          for (final c in list)
-                            ListTile(
-                              dense: true,
-                              leading: const Icon(
-                                  Icons.circle_outlined,
-                                  size: 16),
-                              title: Text(c.name,
-                                  style:
-                                      const TextStyle(fontSize: 13)),
-                              subtitle: Text(c.code ?? '',
-                                  style:
-                                      const TextStyle(fontSize: 11)),
-                              trailing: Text(
-                                  '\$${c.cost.toStringAsFixed(2)}'),
-                            ),
-                        ]),
-                      ),
-              ),
+              _ConsumablesConfigCard(modelId: modelId),
               const SizedBox(height: 8),
               units.when(
                 loading: () => const LinearProgressIndicator(),
@@ -989,5 +961,168 @@ class _AssetSheetState extends ConsumerState<AssetSheet> {
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+}
+
+
+/// Consumibles y accesorios del PRODUCTO: cuáles van amarrados
+/// (incluidos) al rentar, cuáles son opcionales y su costo adicional.
+class _ConsumablesConfigCard extends ConsumerWidget {
+  const _ConsumablesConfigCard({required this.modelId});
+
+  final String modelId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final links =
+        ref.watch(modelConsumableLinksProvider(modelId)).value ??
+            const [];
+    final money = NumberFormat.currency(symbol: r'\$');
+    return Card(
+      child: Column(children: [
+        ListTile(
+          dense: true,
+          title: const Text('Consumibles y accesorios',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          subtitle: const Text(
+              'Incluidos entran solos al rentar; opcionales se '
+              'ofrecen al cliente',
+              style: TextStyle(fontSize: 10)),
+          trailing: IconButton(
+            icon: const Icon(Icons.add_link),
+            tooltip: 'Vincular consumible',
+            onPressed: () => _linkNew(context, ref),
+          ),
+        ),
+        for (final (link, cons) in links)
+          ListTile(
+            dense: true,
+            leading: Icon(
+                link.kind == 'incluido'
+                    ? Icons.link
+                    : Icons.add_circle_outline,
+                size: 18,
+                color: link.kind == 'incluido'
+                    ? Colors.green
+                    : Colors.blueGrey),
+            title:
+                Text(cons.name, style: const TextStyle(fontSize: 13)),
+            subtitle: Text(
+                '${link.kind == 'incluido' ? 'Incluido' : 'Opcional'}'
+                '${link.extraPrice > 0 ? ' · ${money.format(link.extraPrice)} adicional' : ' · sin costo adicional'}',
+                style: const TextStyle(fontSize: 11)),
+            trailing: PopupMenuButton<String>(
+              onSelected: (v) async {
+                final repo = ref.read(catalogRepositoryProvider);
+                if (v == 'config') {
+                  await _configure(context, ref, link, cons);
+                } else if (v == 'quitar') {
+                  await repo.unlinkConsumable(link.id);
+                }
+              },
+              itemBuilder: (_) => const [
+                PopupMenuItem(
+                    value: 'config',
+                    child: Text('Configurar (tipo y costo)')),
+                PopupMenuItem(value: 'quitar', child: Text('Quitar')),
+              ],
+            ),
+          ),
+      ]),
+    );
+  }
+
+  Future<void> _configure(BuildContext context, WidgetRef ref,
+      ToolModelConsumable link, Consumable cons) async {
+    var kind = link.kind;
+    final price = TextEditingController(
+        text: link.extraPrice == 0
+            ? ''
+            : link.extraPrice.toStringAsFixed(2));
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog(
+          title: Text(cons.name),
+          content: Column(mainAxisSize: MainAxisSize.min, children: [
+            SegmentedButton<String>(
+              segments: const [
+                ButtonSegment(
+                    value: 'incluido', label: Text('Incluido')),
+                ButtonSegment(
+                    value: 'opcional', label: Text('Opcional')),
+              ],
+              selected: {kind},
+              onSelectionChanged: (s) =>
+                  setState(() => kind = s.first),
+              showSelectedIcon: false,
+            ),
+            TextField(
+                controller: price,
+                keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true),
+                decoration: const InputDecoration(
+                    labelText: 'Costo adicional (0 = sin costo)')),
+          ]),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancelar')),
+            FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Guardar')),
+          ],
+        ),
+      ),
+    );
+    if (ok == true) {
+      await ref.read(catalogRepositoryProvider).linkConsumable(
+          modelId, cons.id,
+          id: link.id,
+          kind: kind,
+          extraPrice: double.tryParse(
+                  price.text.replaceAll(',', '.').trim()) ??
+              0);
+    }
+  }
+
+  Future<void> _linkNew(BuildContext context, WidgetRef ref) async {
+    final db = ref.read(appDatabaseProvider);
+    final all = await (db.select(db.consumables)
+          ..where((c) => c.deletedAt.isNull())
+          ..orderBy([(c) => OrderingTerm.asc(c.name)]))
+        .get();
+    if (!context.mounted) return;
+    final elegido = await showModalBottomSheet<Consumable>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.7,
+        builder: (ctx, scroll) => ListView(
+          controller: scroll,
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(12),
+              child: Text('Vincular consumible al producto',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+            for (final c in all)
+              ListTile(
+                dense: true,
+                title:
+                    Text(c.name, style: const TextStyle(fontSize: 13)),
+                subtitle: Text(c.code ?? '',
+                    style: const TextStyle(fontSize: 11)),
+                onTap: () => Navigator.pop(ctx, c),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (elegido == null) return;
+    await ref
+        .read(catalogRepositoryProvider)
+        .linkConsumable(modelId, elegido.id);
   }
 }
