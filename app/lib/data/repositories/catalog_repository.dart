@@ -490,10 +490,13 @@ class CatalogRepository {
     final kind = switch (status) {
       'rented' => 'rent_out',
       'maintenance' => 'maintenance_out',
+      'quarantine' => 'quarantine_in',
       'retired' => 'retire',
       'available' when asset.status == 'rented' => 'rent_return',
       'available' when asset.status == 'maintenance' =>
         'maintenance_return',
+      'available' when asset.status == 'quarantine' =>
+        'quarantine_out',
       _ => 'adjust',
     };
     await _recordMovement(
