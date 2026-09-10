@@ -278,6 +278,9 @@ List<TableSyncAdapter> buildSyncAdapters() => [
                   // Los campos locales de la foto se conservan.
                   photoLocalPath: Value(local?.photoLocalPath),
                   photoUploadedAt: Value(local?.photoUploadedAt),
+                  hoursMeter: Value(_d(r['hours_meter'])),
+                  lastMaintenanceAt:
+                      Value(tsN(r['last_maintenance_at'])),
                   updatedAt: Value(remoteUpdated),
                   deletedAt: Value(tsN(r['deleted_at'])),
                 ),
@@ -305,6 +308,62 @@ List<TableSyncAdapter> buildSyncAdapters() => [
                   contractRef: Value(r['contract_ref'] as String?),
                   movedAt: Value(ts(r['moved_at'])),
                   createdBy: Value(r['created_by'] as String?),
+                  notes: Value(r['notes'] as String?),
+                  updatedAt: Value(remoteUpdated),
+                  deletedAt: Value(tsN(r['deleted_at'])),
+                ),
+              );
+          return true;
+        },
+      ),
+      TableSyncAdapter(
+        remoteTable: 'maintenance_orders',
+        mergeRemote: (db, r) async {
+          final local = await (db.select(db.maintenanceOrders)
+                ..where((x) => x.id.equals(r['id'] as String)))
+              .getSingleOrNull();
+          final remoteUpdated = ts(r['updated_at']);
+          if (!newer(local?.updatedAt, remoteUpdated)) return false;
+          await db.into(db.maintenanceOrders).insertOnConflictUpdate(
+                MaintenanceOrdersCompanion(
+                  id: Value(r['id'] as String),
+                  assetId: Value(r['asset_id'] as String),
+                  kind: Value((r['kind'] ?? 'revision') as String),
+                  status: Value((r['status'] ?? 'open') as String),
+                  contractRef: Value(r['contract_ref'] as String?),
+                  openedAt: Value(ts(r['opened_at'])),
+                  closedAt: Value(tsN(r['closed_at'])),
+                  hoursMeter: Value(_dN(r['hours_meter'])),
+                  laborCost: Value(_d(r['labor_cost'])),
+                  partsCost: Value(_d(r['parts_cost'])),
+                  otherCost: Value(_d(r['other_cost'])),
+                  depreciationCost:
+                      Value(_d(r['depreciation_cost'])),
+                  totalCost: Value(_d(r['total_cost'])),
+                  notes: Value(r['notes'] as String?),
+                  updatedAt: Value(remoteUpdated),
+                  deletedAt: Value(tsN(r['deleted_at'])),
+                ),
+              );
+          return true;
+        },
+      ),
+      TableSyncAdapter(
+        remoteTable: 'maintenance_plans',
+        mergeRemote: (db, r) async {
+          final local = await (db.select(db.maintenancePlans)
+                ..where((x) => x.id.equals(r['id'] as String)))
+              .getSingleOrNull();
+          final remoteUpdated = ts(r['updated_at']);
+          if (!newer(local?.updatedAt, remoteUpdated)) return false;
+          await db.into(db.maintenancePlans).insertOnConflictUpdate(
+                MaintenancePlansCompanion(
+                  id: Value(r['id'] as String),
+                  toolModelId: Value(r['tool_model_id'] as String),
+                  name: Value(r['name'] as String),
+                  everyDays:
+                      Value((r['every_days'] as num?)?.toInt()),
+                  everyHours: Value(_dN(r['every_hours'])),
                   notes: Value(r['notes'] as String?),
                   updatedAt: Value(remoteUpdated),
                   deletedAt: Value(tsN(r['deleted_at'])),

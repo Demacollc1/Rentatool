@@ -1510,7 +1510,7 @@ class _OptionalConsumablesSheetState
 
   @override
   Widget build(BuildContext context) {
-    final money = NumberFormat.currency(symbol: r'\$');
+    final money = NumberFormat.currency(symbol: r'$');
     return SafeArea(
       child: Column(mainAxisSize: MainAxisSize.min, children: [
         const Padding(

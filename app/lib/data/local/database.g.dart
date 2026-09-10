@@ -4613,6 +4613,30 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
         type: DriftSqlType.dateTime,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _hoursMeterMeta = const VerificationMeta(
+    'hoursMeter',
+  );
+  @override
+  late final GeneratedColumn<double> hoursMeter = GeneratedColumn<double>(
+    'hours_meter',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _lastMaintenanceAtMeta = const VerificationMeta(
+    'lastMaintenanceAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastMaintenanceAt =
+      GeneratedColumn<DateTime>(
+        'last_maintenance_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -4635,6 +4659,8 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
     photoPath,
     photoLocalPath,
     photoUploadedAt,
+    hoursMeter,
+    lastMaintenanceAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -4792,6 +4818,21 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
         ),
       );
     }
+    if (data.containsKey('hours_meter')) {
+      context.handle(
+        _hoursMeterMeta,
+        hoursMeter.isAcceptableOrUnknown(data['hours_meter']!, _hoursMeterMeta),
+      );
+    }
+    if (data.containsKey('last_maintenance_at')) {
+      context.handle(
+        _lastMaintenanceAtMeta,
+        lastMaintenanceAt.isAcceptableOrUnknown(
+          data['last_maintenance_at']!,
+          _lastMaintenanceAtMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -4881,6 +4922,14 @@ class $AssetsTable extends Assets with TableInfo<$AssetsTable, Asset> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}photo_uploaded_at'],
       ),
+      hoursMeter: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}hours_meter'],
+      )!,
+      lastMaintenanceAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_maintenance_at'],
+      ),
     );
   }
 
@@ -4923,6 +4972,10 @@ class Asset extends DataClass implements Insertable<Asset> {
   final String? photoPath;
   final String? photoLocalPath;
   final DateTime? photoUploadedAt;
+
+  /// Horómetro acumulado (horas de trabajo) y última revisión.
+  final double hoursMeter;
+  final DateTime? lastMaintenanceAt;
   const Asset({
     required this.id,
     required this.updatedAt,
@@ -4944,6 +4997,8 @@ class Asset extends DataClass implements Insertable<Asset> {
     this.photoPath,
     this.photoLocalPath,
     this.photoUploadedAt,
+    required this.hoursMeter,
+    this.lastMaintenanceAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -4993,6 +5048,10 @@ class Asset extends DataClass implements Insertable<Asset> {
     }
     if (!nullToAbsent || photoUploadedAt != null) {
       map['photo_uploaded_at'] = Variable<DateTime>(photoUploadedAt);
+    }
+    map['hours_meter'] = Variable<double>(hoursMeter);
+    if (!nullToAbsent || lastMaintenanceAt != null) {
+      map['last_maintenance_at'] = Variable<DateTime>(lastMaintenanceAt);
     }
     return map;
   }
@@ -5045,6 +5104,10 @@ class Asset extends DataClass implements Insertable<Asset> {
       photoUploadedAt: photoUploadedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(photoUploadedAt),
+      hoursMeter: Value(hoursMeter),
+      lastMaintenanceAt: lastMaintenanceAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastMaintenanceAt),
     );
   }
 
@@ -5074,6 +5137,10 @@ class Asset extends DataClass implements Insertable<Asset> {
       photoPath: serializer.fromJson<String?>(json['photoPath']),
       photoLocalPath: serializer.fromJson<String?>(json['photoLocalPath']),
       photoUploadedAt: serializer.fromJson<DateTime?>(json['photoUploadedAt']),
+      hoursMeter: serializer.fromJson<double>(json['hoursMeter']),
+      lastMaintenanceAt: serializer.fromJson<DateTime?>(
+        json['lastMaintenanceAt'],
+      ),
     );
   }
   @override
@@ -5100,6 +5167,8 @@ class Asset extends DataClass implements Insertable<Asset> {
       'photoPath': serializer.toJson<String?>(photoPath),
       'photoLocalPath': serializer.toJson<String?>(photoLocalPath),
       'photoUploadedAt': serializer.toJson<DateTime?>(photoUploadedAt),
+      'hoursMeter': serializer.toJson<double>(hoursMeter),
+      'lastMaintenanceAt': serializer.toJson<DateTime?>(lastMaintenanceAt),
     };
   }
 
@@ -5124,6 +5193,8 @@ class Asset extends DataClass implements Insertable<Asset> {
     Value<String?> photoPath = const Value.absent(),
     Value<String?> photoLocalPath = const Value.absent(),
     Value<DateTime?> photoUploadedAt = const Value.absent(),
+    double? hoursMeter,
+    Value<DateTime?> lastMaintenanceAt = const Value.absent(),
   }) => Asset(
     id: id ?? this.id,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -5151,6 +5222,10 @@ class Asset extends DataClass implements Insertable<Asset> {
     photoUploadedAt: photoUploadedAt.present
         ? photoUploadedAt.value
         : this.photoUploadedAt,
+    hoursMeter: hoursMeter ?? this.hoursMeter,
+    lastMaintenanceAt: lastMaintenanceAt.present
+        ? lastMaintenanceAt.value
+        : this.lastMaintenanceAt,
   );
   Asset copyWithCompanion(AssetsCompanion data) {
     return Asset(
@@ -5192,6 +5267,12 @@ class Asset extends DataClass implements Insertable<Asset> {
       photoUploadedAt: data.photoUploadedAt.present
           ? data.photoUploadedAt.value
           : this.photoUploadedAt,
+      hoursMeter: data.hoursMeter.present
+          ? data.hoursMeter.value
+          : this.hoursMeter,
+      lastMaintenanceAt: data.lastMaintenanceAt.present
+          ? data.lastMaintenanceAt.value
+          : this.lastMaintenanceAt,
     );
   }
 
@@ -5217,13 +5298,15 @@ class Asset extends DataClass implements Insertable<Asset> {
           ..write('datasheetUrl: $datasheetUrl, ')
           ..write('photoPath: $photoPath, ')
           ..write('photoLocalPath: $photoLocalPath, ')
-          ..write('photoUploadedAt: $photoUploadedAt')
+          ..write('photoUploadedAt: $photoUploadedAt, ')
+          ..write('hoursMeter: $hoursMeter, ')
+          ..write('lastMaintenanceAt: $lastMaintenanceAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     updatedAt,
     deletedAt,
@@ -5244,7 +5327,9 @@ class Asset extends DataClass implements Insertable<Asset> {
     photoPath,
     photoLocalPath,
     photoUploadedAt,
-  );
+    hoursMeter,
+    lastMaintenanceAt,
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -5268,7 +5353,9 @@ class Asset extends DataClass implements Insertable<Asset> {
           other.datasheetUrl == this.datasheetUrl &&
           other.photoPath == this.photoPath &&
           other.photoLocalPath == this.photoLocalPath &&
-          other.photoUploadedAt == this.photoUploadedAt);
+          other.photoUploadedAt == this.photoUploadedAt &&
+          other.hoursMeter == this.hoursMeter &&
+          other.lastMaintenanceAt == this.lastMaintenanceAt);
 }
 
 class AssetsCompanion extends UpdateCompanion<Asset> {
@@ -5292,6 +5379,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
   final Value<String?> photoPath;
   final Value<String?> photoLocalPath;
   final Value<DateTime?> photoUploadedAt;
+  final Value<double> hoursMeter;
+  final Value<DateTime?> lastMaintenanceAt;
   final Value<int> rowid;
   const AssetsCompanion({
     this.id = const Value.absent(),
@@ -5314,6 +5403,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     this.photoPath = const Value.absent(),
     this.photoLocalPath = const Value.absent(),
     this.photoUploadedAt = const Value.absent(),
+    this.hoursMeter = const Value.absent(),
+    this.lastMaintenanceAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   AssetsCompanion.insert({
@@ -5337,6 +5428,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     this.photoPath = const Value.absent(),
     this.photoLocalPath = const Value.absent(),
     this.photoUploadedAt = const Value.absent(),
+    this.hoursMeter = const Value.absent(),
+    this.lastMaintenanceAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        toolModelId = Value(toolModelId),
@@ -5362,6 +5455,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     Expression<String>? photoPath,
     Expression<String>? photoLocalPath,
     Expression<DateTime>? photoUploadedAt,
+    Expression<double>? hoursMeter,
+    Expression<DateTime>? lastMaintenanceAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -5385,6 +5480,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
       if (photoPath != null) 'photo_path': photoPath,
       if (photoLocalPath != null) 'photo_local_path': photoLocalPath,
       if (photoUploadedAt != null) 'photo_uploaded_at': photoUploadedAt,
+      if (hoursMeter != null) 'hours_meter': hoursMeter,
+      if (lastMaintenanceAt != null) 'last_maintenance_at': lastMaintenanceAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -5410,6 +5507,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     Value<String?>? photoPath,
     Value<String?>? photoLocalPath,
     Value<DateTime?>? photoUploadedAt,
+    Value<double>? hoursMeter,
+    Value<DateTime?>? lastMaintenanceAt,
     Value<int>? rowid,
   }) {
     return AssetsCompanion(
@@ -5433,6 +5532,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
       photoPath: photoPath ?? this.photoPath,
       photoLocalPath: photoLocalPath ?? this.photoLocalPath,
       photoUploadedAt: photoUploadedAt ?? this.photoUploadedAt,
+      hoursMeter: hoursMeter ?? this.hoursMeter,
+      lastMaintenanceAt: lastMaintenanceAt ?? this.lastMaintenanceAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -5500,6 +5601,12 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     if (photoUploadedAt.present) {
       map['photo_uploaded_at'] = Variable<DateTime>(photoUploadedAt.value);
     }
+    if (hoursMeter.present) {
+      map['hours_meter'] = Variable<double>(hoursMeter.value);
+    }
+    if (lastMaintenanceAt.present) {
+      map['last_maintenance_at'] = Variable<DateTime>(lastMaintenanceAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -5529,6 +5636,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
           ..write('photoPath: $photoPath, ')
           ..write('photoLocalPath: $photoLocalPath, ')
           ..write('photoUploadedAt: $photoUploadedAt, ')
+          ..write('hoursMeter: $hoursMeter, ')
+          ..write('lastMaintenanceAt: $lastMaintenanceAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -7521,6 +7630,1415 @@ class InventoryMovementsCompanion extends UpdateCompanion<InventoryMovement> {
           ..write('contractRef: $contractRef, ')
           ..write('movedAt: $movedAt, ')
           ..write('createdBy: $createdBy, ')
+          ..write('notes: $notes, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $MaintenanceOrdersTable extends MaintenanceOrders
+    with TableInfo<$MaintenanceOrdersTable, MaintenanceOrder> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MaintenanceOrdersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _assetIdMeta = const VerificationMeta(
+    'assetId',
+  );
+  @override
+  late final GeneratedColumn<String> assetId = GeneratedColumn<String>(
+    'asset_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('revision'),
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('open'),
+  );
+  static const VerificationMeta _contractRefMeta = const VerificationMeta(
+    'contractRef',
+  );
+  @override
+  late final GeneratedColumn<String> contractRef = GeneratedColumn<String>(
+    'contract_ref',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _openedAtMeta = const VerificationMeta(
+    'openedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> openedAt = GeneratedColumn<DateTime>(
+    'opened_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _closedAtMeta = const VerificationMeta(
+    'closedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> closedAt = GeneratedColumn<DateTime>(
+    'closed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _hoursMeterMeta = const VerificationMeta(
+    'hoursMeter',
+  );
+  @override
+  late final GeneratedColumn<double> hoursMeter = GeneratedColumn<double>(
+    'hours_meter',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _laborCostMeta = const VerificationMeta(
+    'laborCost',
+  );
+  @override
+  late final GeneratedColumn<double> laborCost = GeneratedColumn<double>(
+    'labor_cost',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _partsCostMeta = const VerificationMeta(
+    'partsCost',
+  );
+  @override
+  late final GeneratedColumn<double> partsCost = GeneratedColumn<double>(
+    'parts_cost',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _otherCostMeta = const VerificationMeta(
+    'otherCost',
+  );
+  @override
+  late final GeneratedColumn<double> otherCost = GeneratedColumn<double>(
+    'other_cost',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _depreciationCostMeta = const VerificationMeta(
+    'depreciationCost',
+  );
+  @override
+  late final GeneratedColumn<double> depreciationCost = GeneratedColumn<double>(
+    'depreciation_cost',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _totalCostMeta = const VerificationMeta(
+    'totalCost',
+  );
+  @override
+  late final GeneratedColumn<double> totalCost = GeneratedColumn<double>(
+    'total_cost',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    updatedAt,
+    deletedAt,
+    assetId,
+    kind,
+    status,
+    contractRef,
+    openedAt,
+    closedAt,
+    hoursMeter,
+    laborCost,
+    partsCost,
+    otherCost,
+    depreciationCost,
+    totalCost,
+    notes,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'maintenance_orders';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<MaintenanceOrder> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('asset_id')) {
+      context.handle(
+        _assetIdMeta,
+        assetId.isAcceptableOrUnknown(data['asset_id']!, _assetIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_assetIdMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('contract_ref')) {
+      context.handle(
+        _contractRefMeta,
+        contractRef.isAcceptableOrUnknown(
+          data['contract_ref']!,
+          _contractRefMeta,
+        ),
+      );
+    }
+    if (data.containsKey('opened_at')) {
+      context.handle(
+        _openedAtMeta,
+        openedAt.isAcceptableOrUnknown(data['opened_at']!, _openedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_openedAtMeta);
+    }
+    if (data.containsKey('closed_at')) {
+      context.handle(
+        _closedAtMeta,
+        closedAt.isAcceptableOrUnknown(data['closed_at']!, _closedAtMeta),
+      );
+    }
+    if (data.containsKey('hours_meter')) {
+      context.handle(
+        _hoursMeterMeta,
+        hoursMeter.isAcceptableOrUnknown(data['hours_meter']!, _hoursMeterMeta),
+      );
+    }
+    if (data.containsKey('labor_cost')) {
+      context.handle(
+        _laborCostMeta,
+        laborCost.isAcceptableOrUnknown(data['labor_cost']!, _laborCostMeta),
+      );
+    }
+    if (data.containsKey('parts_cost')) {
+      context.handle(
+        _partsCostMeta,
+        partsCost.isAcceptableOrUnknown(data['parts_cost']!, _partsCostMeta),
+      );
+    }
+    if (data.containsKey('other_cost')) {
+      context.handle(
+        _otherCostMeta,
+        otherCost.isAcceptableOrUnknown(data['other_cost']!, _otherCostMeta),
+      );
+    }
+    if (data.containsKey('depreciation_cost')) {
+      context.handle(
+        _depreciationCostMeta,
+        depreciationCost.isAcceptableOrUnknown(
+          data['depreciation_cost']!,
+          _depreciationCostMeta,
+        ),
+      );
+    }
+    if (data.containsKey('total_cost')) {
+      context.handle(
+        _totalCostMeta,
+        totalCost.isAcceptableOrUnknown(data['total_cost']!, _totalCostMeta),
+      );
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  MaintenanceOrder map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MaintenanceOrder(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      assetId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}asset_id'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      contractRef: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contract_ref'],
+      ),
+      openedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}opened_at'],
+      )!,
+      closedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}closed_at'],
+      ),
+      hoursMeter: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}hours_meter'],
+      ),
+      laborCost: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}labor_cost'],
+      )!,
+      partsCost: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}parts_cost'],
+      )!,
+      otherCost: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}other_cost'],
+      )!,
+      depreciationCost: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}depreciation_cost'],
+      )!,
+      totalCost: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}total_cost'],
+      )!,
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
+    );
+  }
+
+  @override
+  $MaintenanceOrdersTable createAlias(String alias) {
+    return $MaintenanceOrdersTable(attachedDatabase, alias);
+  }
+}
+
+class MaintenanceOrder extends DataClass
+    implements Insertable<MaintenanceOrder> {
+  final String id;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final String assetId;
+  final String kind;
+  final String status;
+  final String? contractRef;
+  final DateTime openedAt;
+  final DateTime? closedAt;
+  final double? hoursMeter;
+  final double laborCost;
+  final double partsCost;
+  final double otherCost;
+  final double depreciationCost;
+  final double totalCost;
+  final String? notes;
+  const MaintenanceOrder({
+    required this.id,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.assetId,
+    required this.kind,
+    required this.status,
+    this.contractRef,
+    required this.openedAt,
+    this.closedAt,
+    this.hoursMeter,
+    required this.laborCost,
+    required this.partsCost,
+    required this.otherCost,
+    required this.depreciationCost,
+    required this.totalCost,
+    this.notes,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['asset_id'] = Variable<String>(assetId);
+    map['kind'] = Variable<String>(kind);
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || contractRef != null) {
+      map['contract_ref'] = Variable<String>(contractRef);
+    }
+    map['opened_at'] = Variable<DateTime>(openedAt);
+    if (!nullToAbsent || closedAt != null) {
+      map['closed_at'] = Variable<DateTime>(closedAt);
+    }
+    if (!nullToAbsent || hoursMeter != null) {
+      map['hours_meter'] = Variable<double>(hoursMeter);
+    }
+    map['labor_cost'] = Variable<double>(laborCost);
+    map['parts_cost'] = Variable<double>(partsCost);
+    map['other_cost'] = Variable<double>(otherCost);
+    map['depreciation_cost'] = Variable<double>(depreciationCost);
+    map['total_cost'] = Variable<double>(totalCost);
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    return map;
+  }
+
+  MaintenanceOrdersCompanion toCompanion(bool nullToAbsent) {
+    return MaintenanceOrdersCompanion(
+      id: Value(id),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      assetId: Value(assetId),
+      kind: Value(kind),
+      status: Value(status),
+      contractRef: contractRef == null && nullToAbsent
+          ? const Value.absent()
+          : Value(contractRef),
+      openedAt: Value(openedAt),
+      closedAt: closedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(closedAt),
+      hoursMeter: hoursMeter == null && nullToAbsent
+          ? const Value.absent()
+          : Value(hoursMeter),
+      laborCost: Value(laborCost),
+      partsCost: Value(partsCost),
+      otherCost: Value(otherCost),
+      depreciationCost: Value(depreciationCost),
+      totalCost: Value(totalCost),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
+    );
+  }
+
+  factory MaintenanceOrder.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MaintenanceOrder(
+      id: serializer.fromJson<String>(json['id']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      assetId: serializer.fromJson<String>(json['assetId']),
+      kind: serializer.fromJson<String>(json['kind']),
+      status: serializer.fromJson<String>(json['status']),
+      contractRef: serializer.fromJson<String?>(json['contractRef']),
+      openedAt: serializer.fromJson<DateTime>(json['openedAt']),
+      closedAt: serializer.fromJson<DateTime?>(json['closedAt']),
+      hoursMeter: serializer.fromJson<double?>(json['hoursMeter']),
+      laborCost: serializer.fromJson<double>(json['laborCost']),
+      partsCost: serializer.fromJson<double>(json['partsCost']),
+      otherCost: serializer.fromJson<double>(json['otherCost']),
+      depreciationCost: serializer.fromJson<double>(json['depreciationCost']),
+      totalCost: serializer.fromJson<double>(json['totalCost']),
+      notes: serializer.fromJson<String?>(json['notes']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'assetId': serializer.toJson<String>(assetId),
+      'kind': serializer.toJson<String>(kind),
+      'status': serializer.toJson<String>(status),
+      'contractRef': serializer.toJson<String?>(contractRef),
+      'openedAt': serializer.toJson<DateTime>(openedAt),
+      'closedAt': serializer.toJson<DateTime?>(closedAt),
+      'hoursMeter': serializer.toJson<double?>(hoursMeter),
+      'laborCost': serializer.toJson<double>(laborCost),
+      'partsCost': serializer.toJson<double>(partsCost),
+      'otherCost': serializer.toJson<double>(otherCost),
+      'depreciationCost': serializer.toJson<double>(depreciationCost),
+      'totalCost': serializer.toJson<double>(totalCost),
+      'notes': serializer.toJson<String?>(notes),
+    };
+  }
+
+  MaintenanceOrder copyWith({
+    String? id,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    String? assetId,
+    String? kind,
+    String? status,
+    Value<String?> contractRef = const Value.absent(),
+    DateTime? openedAt,
+    Value<DateTime?> closedAt = const Value.absent(),
+    Value<double?> hoursMeter = const Value.absent(),
+    double? laborCost,
+    double? partsCost,
+    double? otherCost,
+    double? depreciationCost,
+    double? totalCost,
+    Value<String?> notes = const Value.absent(),
+  }) => MaintenanceOrder(
+    id: id ?? this.id,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    assetId: assetId ?? this.assetId,
+    kind: kind ?? this.kind,
+    status: status ?? this.status,
+    contractRef: contractRef.present ? contractRef.value : this.contractRef,
+    openedAt: openedAt ?? this.openedAt,
+    closedAt: closedAt.present ? closedAt.value : this.closedAt,
+    hoursMeter: hoursMeter.present ? hoursMeter.value : this.hoursMeter,
+    laborCost: laborCost ?? this.laborCost,
+    partsCost: partsCost ?? this.partsCost,
+    otherCost: otherCost ?? this.otherCost,
+    depreciationCost: depreciationCost ?? this.depreciationCost,
+    totalCost: totalCost ?? this.totalCost,
+    notes: notes.present ? notes.value : this.notes,
+  );
+  MaintenanceOrder copyWithCompanion(MaintenanceOrdersCompanion data) {
+    return MaintenanceOrder(
+      id: data.id.present ? data.id.value : this.id,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      assetId: data.assetId.present ? data.assetId.value : this.assetId,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      status: data.status.present ? data.status.value : this.status,
+      contractRef: data.contractRef.present
+          ? data.contractRef.value
+          : this.contractRef,
+      openedAt: data.openedAt.present ? data.openedAt.value : this.openedAt,
+      closedAt: data.closedAt.present ? data.closedAt.value : this.closedAt,
+      hoursMeter: data.hoursMeter.present
+          ? data.hoursMeter.value
+          : this.hoursMeter,
+      laborCost: data.laborCost.present ? data.laborCost.value : this.laborCost,
+      partsCost: data.partsCost.present ? data.partsCost.value : this.partsCost,
+      otherCost: data.otherCost.present ? data.otherCost.value : this.otherCost,
+      depreciationCost: data.depreciationCost.present
+          ? data.depreciationCost.value
+          : this.depreciationCost,
+      totalCost: data.totalCost.present ? data.totalCost.value : this.totalCost,
+      notes: data.notes.present ? data.notes.value : this.notes,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MaintenanceOrder(')
+          ..write('id: $id, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('assetId: $assetId, ')
+          ..write('kind: $kind, ')
+          ..write('status: $status, ')
+          ..write('contractRef: $contractRef, ')
+          ..write('openedAt: $openedAt, ')
+          ..write('closedAt: $closedAt, ')
+          ..write('hoursMeter: $hoursMeter, ')
+          ..write('laborCost: $laborCost, ')
+          ..write('partsCost: $partsCost, ')
+          ..write('otherCost: $otherCost, ')
+          ..write('depreciationCost: $depreciationCost, ')
+          ..write('totalCost: $totalCost, ')
+          ..write('notes: $notes')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    updatedAt,
+    deletedAt,
+    assetId,
+    kind,
+    status,
+    contractRef,
+    openedAt,
+    closedAt,
+    hoursMeter,
+    laborCost,
+    partsCost,
+    otherCost,
+    depreciationCost,
+    totalCost,
+    notes,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MaintenanceOrder &&
+          other.id == this.id &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.assetId == this.assetId &&
+          other.kind == this.kind &&
+          other.status == this.status &&
+          other.contractRef == this.contractRef &&
+          other.openedAt == this.openedAt &&
+          other.closedAt == this.closedAt &&
+          other.hoursMeter == this.hoursMeter &&
+          other.laborCost == this.laborCost &&
+          other.partsCost == this.partsCost &&
+          other.otherCost == this.otherCost &&
+          other.depreciationCost == this.depreciationCost &&
+          other.totalCost == this.totalCost &&
+          other.notes == this.notes);
+}
+
+class MaintenanceOrdersCompanion extends UpdateCompanion<MaintenanceOrder> {
+  final Value<String> id;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String> assetId;
+  final Value<String> kind;
+  final Value<String> status;
+  final Value<String?> contractRef;
+  final Value<DateTime> openedAt;
+  final Value<DateTime?> closedAt;
+  final Value<double?> hoursMeter;
+  final Value<double> laborCost;
+  final Value<double> partsCost;
+  final Value<double> otherCost;
+  final Value<double> depreciationCost;
+  final Value<double> totalCost;
+  final Value<String?> notes;
+  final Value<int> rowid;
+  const MaintenanceOrdersCompanion({
+    this.id = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.assetId = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.status = const Value.absent(),
+    this.contractRef = const Value.absent(),
+    this.openedAt = const Value.absent(),
+    this.closedAt = const Value.absent(),
+    this.hoursMeter = const Value.absent(),
+    this.laborCost = const Value.absent(),
+    this.partsCost = const Value.absent(),
+    this.otherCost = const Value.absent(),
+    this.depreciationCost = const Value.absent(),
+    this.totalCost = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MaintenanceOrdersCompanion.insert({
+    required String id,
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    required String assetId,
+    this.kind = const Value.absent(),
+    this.status = const Value.absent(),
+    this.contractRef = const Value.absent(),
+    required DateTime openedAt,
+    this.closedAt = const Value.absent(),
+    this.hoursMeter = const Value.absent(),
+    this.laborCost = const Value.absent(),
+    this.partsCost = const Value.absent(),
+    this.otherCost = const Value.absent(),
+    this.depreciationCost = const Value.absent(),
+    this.totalCost = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       assetId = Value(assetId),
+       openedAt = Value(openedAt);
+  static Insertable<MaintenanceOrder> custom({
+    Expression<String>? id,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? assetId,
+    Expression<String>? kind,
+    Expression<String>? status,
+    Expression<String>? contractRef,
+    Expression<DateTime>? openedAt,
+    Expression<DateTime>? closedAt,
+    Expression<double>? hoursMeter,
+    Expression<double>? laborCost,
+    Expression<double>? partsCost,
+    Expression<double>? otherCost,
+    Expression<double>? depreciationCost,
+    Expression<double>? totalCost,
+    Expression<String>? notes,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (assetId != null) 'asset_id': assetId,
+      if (kind != null) 'kind': kind,
+      if (status != null) 'status': status,
+      if (contractRef != null) 'contract_ref': contractRef,
+      if (openedAt != null) 'opened_at': openedAt,
+      if (closedAt != null) 'closed_at': closedAt,
+      if (hoursMeter != null) 'hours_meter': hoursMeter,
+      if (laborCost != null) 'labor_cost': laborCost,
+      if (partsCost != null) 'parts_cost': partsCost,
+      if (otherCost != null) 'other_cost': otherCost,
+      if (depreciationCost != null) 'depreciation_cost': depreciationCost,
+      if (totalCost != null) 'total_cost': totalCost,
+      if (notes != null) 'notes': notes,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MaintenanceOrdersCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<String>? assetId,
+    Value<String>? kind,
+    Value<String>? status,
+    Value<String?>? contractRef,
+    Value<DateTime>? openedAt,
+    Value<DateTime?>? closedAt,
+    Value<double?>? hoursMeter,
+    Value<double>? laborCost,
+    Value<double>? partsCost,
+    Value<double>? otherCost,
+    Value<double>? depreciationCost,
+    Value<double>? totalCost,
+    Value<String?>? notes,
+    Value<int>? rowid,
+  }) {
+    return MaintenanceOrdersCompanion(
+      id: id ?? this.id,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      assetId: assetId ?? this.assetId,
+      kind: kind ?? this.kind,
+      status: status ?? this.status,
+      contractRef: contractRef ?? this.contractRef,
+      openedAt: openedAt ?? this.openedAt,
+      closedAt: closedAt ?? this.closedAt,
+      hoursMeter: hoursMeter ?? this.hoursMeter,
+      laborCost: laborCost ?? this.laborCost,
+      partsCost: partsCost ?? this.partsCost,
+      otherCost: otherCost ?? this.otherCost,
+      depreciationCost: depreciationCost ?? this.depreciationCost,
+      totalCost: totalCost ?? this.totalCost,
+      notes: notes ?? this.notes,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (assetId.present) {
+      map['asset_id'] = Variable<String>(assetId.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (contractRef.present) {
+      map['contract_ref'] = Variable<String>(contractRef.value);
+    }
+    if (openedAt.present) {
+      map['opened_at'] = Variable<DateTime>(openedAt.value);
+    }
+    if (closedAt.present) {
+      map['closed_at'] = Variable<DateTime>(closedAt.value);
+    }
+    if (hoursMeter.present) {
+      map['hours_meter'] = Variable<double>(hoursMeter.value);
+    }
+    if (laborCost.present) {
+      map['labor_cost'] = Variable<double>(laborCost.value);
+    }
+    if (partsCost.present) {
+      map['parts_cost'] = Variable<double>(partsCost.value);
+    }
+    if (otherCost.present) {
+      map['other_cost'] = Variable<double>(otherCost.value);
+    }
+    if (depreciationCost.present) {
+      map['depreciation_cost'] = Variable<double>(depreciationCost.value);
+    }
+    if (totalCost.present) {
+      map['total_cost'] = Variable<double>(totalCost.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MaintenanceOrdersCompanion(')
+          ..write('id: $id, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('assetId: $assetId, ')
+          ..write('kind: $kind, ')
+          ..write('status: $status, ')
+          ..write('contractRef: $contractRef, ')
+          ..write('openedAt: $openedAt, ')
+          ..write('closedAt: $closedAt, ')
+          ..write('hoursMeter: $hoursMeter, ')
+          ..write('laborCost: $laborCost, ')
+          ..write('partsCost: $partsCost, ')
+          ..write('otherCost: $otherCost, ')
+          ..write('depreciationCost: $depreciationCost, ')
+          ..write('totalCost: $totalCost, ')
+          ..write('notes: $notes, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $MaintenancePlansTable extends MaintenancePlans
+    with TableInfo<$MaintenancePlansTable, MaintenancePlan> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $MaintenancePlansTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _toolModelIdMeta = const VerificationMeta(
+    'toolModelId',
+  );
+  @override
+  late final GeneratedColumn<String> toolModelId = GeneratedColumn<String>(
+    'tool_model_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _everyDaysMeta = const VerificationMeta(
+    'everyDays',
+  );
+  @override
+  late final GeneratedColumn<int> everyDays = GeneratedColumn<int>(
+    'every_days',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _everyHoursMeta = const VerificationMeta(
+    'everyHours',
+  );
+  @override
+  late final GeneratedColumn<double> everyHours = GeneratedColumn<double>(
+    'every_hours',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    updatedAt,
+    deletedAt,
+    toolModelId,
+    name,
+    everyDays,
+    everyHours,
+    notes,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'maintenance_plans';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<MaintenancePlan> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('tool_model_id')) {
+      context.handle(
+        _toolModelIdMeta,
+        toolModelId.isAcceptableOrUnknown(
+          data['tool_model_id']!,
+          _toolModelIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_toolModelIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('every_days')) {
+      context.handle(
+        _everyDaysMeta,
+        everyDays.isAcceptableOrUnknown(data['every_days']!, _everyDaysMeta),
+      );
+    }
+    if (data.containsKey('every_hours')) {
+      context.handle(
+        _everyHoursMeta,
+        everyHours.isAcceptableOrUnknown(data['every_hours']!, _everyHoursMeta),
+      );
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  MaintenancePlan map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MaintenancePlan(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      toolModelId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tool_model_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      everyDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}every_days'],
+      ),
+      everyHours: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}every_hours'],
+      ),
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
+    );
+  }
+
+  @override
+  $MaintenancePlansTable createAlias(String alias) {
+    return $MaintenancePlansTable(attachedDatabase, alias);
+  }
+}
+
+class MaintenancePlan extends DataClass implements Insertable<MaintenancePlan> {
+  final String id;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final String toolModelId;
+  final String name;
+  final int? everyDays;
+  final double? everyHours;
+  final String? notes;
+  const MaintenancePlan({
+    required this.id,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.toolModelId,
+    required this.name,
+    this.everyDays,
+    this.everyHours,
+    this.notes,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['tool_model_id'] = Variable<String>(toolModelId);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || everyDays != null) {
+      map['every_days'] = Variable<int>(everyDays);
+    }
+    if (!nullToAbsent || everyHours != null) {
+      map['every_hours'] = Variable<double>(everyHours);
+    }
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    return map;
+  }
+
+  MaintenancePlansCompanion toCompanion(bool nullToAbsent) {
+    return MaintenancePlansCompanion(
+      id: Value(id),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      toolModelId: Value(toolModelId),
+      name: Value(name),
+      everyDays: everyDays == null && nullToAbsent
+          ? const Value.absent()
+          : Value(everyDays),
+      everyHours: everyHours == null && nullToAbsent
+          ? const Value.absent()
+          : Value(everyHours),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
+    );
+  }
+
+  factory MaintenancePlan.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MaintenancePlan(
+      id: serializer.fromJson<String>(json['id']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      toolModelId: serializer.fromJson<String>(json['toolModelId']),
+      name: serializer.fromJson<String>(json['name']),
+      everyDays: serializer.fromJson<int?>(json['everyDays']),
+      everyHours: serializer.fromJson<double?>(json['everyHours']),
+      notes: serializer.fromJson<String?>(json['notes']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'toolModelId': serializer.toJson<String>(toolModelId),
+      'name': serializer.toJson<String>(name),
+      'everyDays': serializer.toJson<int?>(everyDays),
+      'everyHours': serializer.toJson<double?>(everyHours),
+      'notes': serializer.toJson<String?>(notes),
+    };
+  }
+
+  MaintenancePlan copyWith({
+    String? id,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    String? toolModelId,
+    String? name,
+    Value<int?> everyDays = const Value.absent(),
+    Value<double?> everyHours = const Value.absent(),
+    Value<String?> notes = const Value.absent(),
+  }) => MaintenancePlan(
+    id: id ?? this.id,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    toolModelId: toolModelId ?? this.toolModelId,
+    name: name ?? this.name,
+    everyDays: everyDays.present ? everyDays.value : this.everyDays,
+    everyHours: everyHours.present ? everyHours.value : this.everyHours,
+    notes: notes.present ? notes.value : this.notes,
+  );
+  MaintenancePlan copyWithCompanion(MaintenancePlansCompanion data) {
+    return MaintenancePlan(
+      id: data.id.present ? data.id.value : this.id,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      toolModelId: data.toolModelId.present
+          ? data.toolModelId.value
+          : this.toolModelId,
+      name: data.name.present ? data.name.value : this.name,
+      everyDays: data.everyDays.present ? data.everyDays.value : this.everyDays,
+      everyHours: data.everyHours.present
+          ? data.everyHours.value
+          : this.everyHours,
+      notes: data.notes.present ? data.notes.value : this.notes,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MaintenancePlan(')
+          ..write('id: $id, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('toolModelId: $toolModelId, ')
+          ..write('name: $name, ')
+          ..write('everyDays: $everyDays, ')
+          ..write('everyHours: $everyHours, ')
+          ..write('notes: $notes')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    updatedAt,
+    deletedAt,
+    toolModelId,
+    name,
+    everyDays,
+    everyHours,
+    notes,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MaintenancePlan &&
+          other.id == this.id &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.toolModelId == this.toolModelId &&
+          other.name == this.name &&
+          other.everyDays == this.everyDays &&
+          other.everyHours == this.everyHours &&
+          other.notes == this.notes);
+}
+
+class MaintenancePlansCompanion extends UpdateCompanion<MaintenancePlan> {
+  final Value<String> id;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String> toolModelId;
+  final Value<String> name;
+  final Value<int?> everyDays;
+  final Value<double?> everyHours;
+  final Value<String?> notes;
+  final Value<int> rowid;
+  const MaintenancePlansCompanion({
+    this.id = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.toolModelId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.everyDays = const Value.absent(),
+    this.everyHours = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  MaintenancePlansCompanion.insert({
+    required String id,
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    required String toolModelId,
+    required String name,
+    this.everyDays = const Value.absent(),
+    this.everyHours = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       toolModelId = Value(toolModelId),
+       name = Value(name);
+  static Insertable<MaintenancePlan> custom({
+    Expression<String>? id,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? toolModelId,
+    Expression<String>? name,
+    Expression<int>? everyDays,
+    Expression<double>? everyHours,
+    Expression<String>? notes,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (toolModelId != null) 'tool_model_id': toolModelId,
+      if (name != null) 'name': name,
+      if (everyDays != null) 'every_days': everyDays,
+      if (everyHours != null) 'every_hours': everyHours,
+      if (notes != null) 'notes': notes,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  MaintenancePlansCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<String>? toolModelId,
+    Value<String>? name,
+    Value<int?>? everyDays,
+    Value<double?>? everyHours,
+    Value<String?>? notes,
+    Value<int>? rowid,
+  }) {
+    return MaintenancePlansCompanion(
+      id: id ?? this.id,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      toolModelId: toolModelId ?? this.toolModelId,
+      name: name ?? this.name,
+      everyDays: everyDays ?? this.everyDays,
+      everyHours: everyHours ?? this.everyHours,
+      notes: notes ?? this.notes,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (toolModelId.present) {
+      map['tool_model_id'] = Variable<String>(toolModelId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (everyDays.present) {
+      map['every_days'] = Variable<int>(everyDays.value);
+    }
+    if (everyHours.present) {
+      map['every_hours'] = Variable<double>(everyHours.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MaintenancePlansCompanion(')
+          ..write('id: $id, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('toolModelId: $toolModelId, ')
+          ..write('name: $name, ')
+          ..write('everyDays: $everyDays, ')
+          ..write('everyHours: $everyHours, ')
           ..write('notes: $notes, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -15386,6 +16904,11 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $ToolModelConsumablesTable(this);
   late final $InventoryMovementsTable inventoryMovements =
       $InventoryMovementsTable(this);
+  late final $MaintenanceOrdersTable maintenanceOrders =
+      $MaintenanceOrdersTable(this);
+  late final $MaintenancePlansTable maintenancePlans = $MaintenancePlansTable(
+    this,
+  );
   late final $CustomersTable customers = $CustomersTable(this);
   late final $PostalCodesTable postalCodes = $PostalCodesTable(this);
   late final $CustomerSitesTable customerSites = $CustomerSitesTable(this);
@@ -15422,6 +16945,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     consumables,
     toolModelConsumables,
     inventoryMovements,
+    maintenanceOrders,
+    maintenancePlans,
     customers,
     postalCodes,
     customerSites,
@@ -17757,6 +19282,8 @@ typedef $$AssetsTableCreateCompanionBuilder =
       Value<String?> photoPath,
       Value<String?> photoLocalPath,
       Value<DateTime?> photoUploadedAt,
+      Value<double> hoursMeter,
+      Value<DateTime?> lastMaintenanceAt,
       Value<int> rowid,
     });
 typedef $$AssetsTableUpdateCompanionBuilder =
@@ -17781,6 +19308,8 @@ typedef $$AssetsTableUpdateCompanionBuilder =
       Value<String?> photoPath,
       Value<String?> photoLocalPath,
       Value<DateTime?> photoUploadedAt,
+      Value<double> hoursMeter,
+      Value<DateTime?> lastMaintenanceAt,
       Value<int> rowid,
     });
 
@@ -17890,6 +19419,16 @@ class $$AssetsTableFilterComposer
 
   ColumnFilters<DateTime> get photoUploadedAt => $composableBuilder(
     column: $table.photoUploadedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get hoursMeter => $composableBuilder(
+    column: $table.hoursMeter,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastMaintenanceAt => $composableBuilder(
+    column: $table.lastMaintenanceAt,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -18002,6 +19541,16 @@ class $$AssetsTableOrderingComposer
     column: $table.photoUploadedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<double> get hoursMeter => $composableBuilder(
+    column: $table.hoursMeter,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastMaintenanceAt => $composableBuilder(
+    column: $table.lastMaintenanceAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$AssetsTableAnnotationComposer
@@ -18090,6 +19639,16 @@ class $$AssetsTableAnnotationComposer
     column: $table.photoUploadedAt,
     builder: (column) => column,
   );
+
+  GeneratedColumn<double> get hoursMeter => $composableBuilder(
+    column: $table.hoursMeter,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get lastMaintenanceAt => $composableBuilder(
+    column: $table.lastMaintenanceAt,
+    builder: (column) => column,
+  );
 }
 
 class $$AssetsTableTableManager
@@ -18140,6 +19699,8 @@ class $$AssetsTableTableManager
                 Value<String?> photoPath = const Value.absent(),
                 Value<String?> photoLocalPath = const Value.absent(),
                 Value<DateTime?> photoUploadedAt = const Value.absent(),
+                Value<double> hoursMeter = const Value.absent(),
+                Value<DateTime?> lastMaintenanceAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => AssetsCompanion(
                 id: id,
@@ -18162,6 +19723,8 @@ class $$AssetsTableTableManager
                 photoPath: photoPath,
                 photoLocalPath: photoLocalPath,
                 photoUploadedAt: photoUploadedAt,
+                hoursMeter: hoursMeter,
+                lastMaintenanceAt: lastMaintenanceAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -18186,6 +19749,8 @@ class $$AssetsTableTableManager
                 Value<String?> photoPath = const Value.absent(),
                 Value<String?> photoLocalPath = const Value.absent(),
                 Value<DateTime?> photoUploadedAt = const Value.absent(),
+                Value<double> hoursMeter = const Value.absent(),
+                Value<DateTime?> lastMaintenanceAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => AssetsCompanion.insert(
                 id: id,
@@ -18208,6 +19773,8 @@ class $$AssetsTableTableManager
                 photoPath: photoPath,
                 photoLocalPath: photoLocalPath,
                 photoUploadedAt: photoUploadedAt,
+                hoursMeter: hoursMeter,
+                lastMaintenanceAt: lastMaintenanceAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -19261,6 +20828,719 @@ typedef $$InventoryMovementsTableProcessedTableManager =
         >,
       ),
       InventoryMovement,
+      PrefetchHooks Function()
+    >;
+typedef $$MaintenanceOrdersTableCreateCompanionBuilder =
+    MaintenanceOrdersCompanion Function({
+      required String id,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      required String assetId,
+      Value<String> kind,
+      Value<String> status,
+      Value<String?> contractRef,
+      required DateTime openedAt,
+      Value<DateTime?> closedAt,
+      Value<double?> hoursMeter,
+      Value<double> laborCost,
+      Value<double> partsCost,
+      Value<double> otherCost,
+      Value<double> depreciationCost,
+      Value<double> totalCost,
+      Value<String?> notes,
+      Value<int> rowid,
+    });
+typedef $$MaintenanceOrdersTableUpdateCompanionBuilder =
+    MaintenanceOrdersCompanion Function({
+      Value<String> id,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<String> assetId,
+      Value<String> kind,
+      Value<String> status,
+      Value<String?> contractRef,
+      Value<DateTime> openedAt,
+      Value<DateTime?> closedAt,
+      Value<double?> hoursMeter,
+      Value<double> laborCost,
+      Value<double> partsCost,
+      Value<double> otherCost,
+      Value<double> depreciationCost,
+      Value<double> totalCost,
+      Value<String?> notes,
+      Value<int> rowid,
+    });
+
+class $$MaintenanceOrdersTableFilterComposer
+    extends Composer<_$AppDatabase, $MaintenanceOrdersTable> {
+  $$MaintenanceOrdersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get assetId => $composableBuilder(
+    column: $table.assetId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get contractRef => $composableBuilder(
+    column: $table.contractRef,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get openedAt => $composableBuilder(
+    column: $table.openedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get closedAt => $composableBuilder(
+    column: $table.closedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get hoursMeter => $composableBuilder(
+    column: $table.hoursMeter,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get laborCost => $composableBuilder(
+    column: $table.laborCost,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get partsCost => $composableBuilder(
+    column: $table.partsCost,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get otherCost => $composableBuilder(
+    column: $table.otherCost,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get depreciationCost => $composableBuilder(
+    column: $table.depreciationCost,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get totalCost => $composableBuilder(
+    column: $table.totalCost,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$MaintenanceOrdersTableOrderingComposer
+    extends Composer<_$AppDatabase, $MaintenanceOrdersTable> {
+  $$MaintenanceOrdersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get assetId => $composableBuilder(
+    column: $table.assetId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get contractRef => $composableBuilder(
+    column: $table.contractRef,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get openedAt => $composableBuilder(
+    column: $table.openedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get closedAt => $composableBuilder(
+    column: $table.closedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get hoursMeter => $composableBuilder(
+    column: $table.hoursMeter,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get laborCost => $composableBuilder(
+    column: $table.laborCost,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get partsCost => $composableBuilder(
+    column: $table.partsCost,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get otherCost => $composableBuilder(
+    column: $table.otherCost,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get depreciationCost => $composableBuilder(
+    column: $table.depreciationCost,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get totalCost => $composableBuilder(
+    column: $table.totalCost,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$MaintenanceOrdersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MaintenanceOrdersTable> {
+  $$MaintenanceOrdersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get assetId =>
+      $composableBuilder(column: $table.assetId, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get contractRef => $composableBuilder(
+    column: $table.contractRef,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get openedAt =>
+      $composableBuilder(column: $table.openedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get closedAt =>
+      $composableBuilder(column: $table.closedAt, builder: (column) => column);
+
+  GeneratedColumn<double> get hoursMeter => $composableBuilder(
+    column: $table.hoursMeter,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get laborCost =>
+      $composableBuilder(column: $table.laborCost, builder: (column) => column);
+
+  GeneratedColumn<double> get partsCost =>
+      $composableBuilder(column: $table.partsCost, builder: (column) => column);
+
+  GeneratedColumn<double> get otherCost =>
+      $composableBuilder(column: $table.otherCost, builder: (column) => column);
+
+  GeneratedColumn<double> get depreciationCost => $composableBuilder(
+    column: $table.depreciationCost,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get totalCost =>
+      $composableBuilder(column: $table.totalCost, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+}
+
+class $$MaintenanceOrdersTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $MaintenanceOrdersTable,
+          MaintenanceOrder,
+          $$MaintenanceOrdersTableFilterComposer,
+          $$MaintenanceOrdersTableOrderingComposer,
+          $$MaintenanceOrdersTableAnnotationComposer,
+          $$MaintenanceOrdersTableCreateCompanionBuilder,
+          $$MaintenanceOrdersTableUpdateCompanionBuilder,
+          (
+            MaintenanceOrder,
+            BaseReferences<
+              _$AppDatabase,
+              $MaintenanceOrdersTable,
+              MaintenanceOrder
+            >,
+          ),
+          MaintenanceOrder,
+          PrefetchHooks Function()
+        > {
+  $$MaintenanceOrdersTableTableManager(
+    _$AppDatabase db,
+    $MaintenanceOrdersTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MaintenanceOrdersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MaintenanceOrdersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MaintenanceOrdersTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> assetId = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String?> contractRef = const Value.absent(),
+                Value<DateTime> openedAt = const Value.absent(),
+                Value<DateTime?> closedAt = const Value.absent(),
+                Value<double?> hoursMeter = const Value.absent(),
+                Value<double> laborCost = const Value.absent(),
+                Value<double> partsCost = const Value.absent(),
+                Value<double> otherCost = const Value.absent(),
+                Value<double> depreciationCost = const Value.absent(),
+                Value<double> totalCost = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MaintenanceOrdersCompanion(
+                id: id,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                assetId: assetId,
+                kind: kind,
+                status: status,
+                contractRef: contractRef,
+                openedAt: openedAt,
+                closedAt: closedAt,
+                hoursMeter: hoursMeter,
+                laborCost: laborCost,
+                partsCost: partsCost,
+                otherCost: otherCost,
+                depreciationCost: depreciationCost,
+                totalCost: totalCost,
+                notes: notes,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required String assetId,
+                Value<String> kind = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String?> contractRef = const Value.absent(),
+                required DateTime openedAt,
+                Value<DateTime?> closedAt = const Value.absent(),
+                Value<double?> hoursMeter = const Value.absent(),
+                Value<double> laborCost = const Value.absent(),
+                Value<double> partsCost = const Value.absent(),
+                Value<double> otherCost = const Value.absent(),
+                Value<double> depreciationCost = const Value.absent(),
+                Value<double> totalCost = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MaintenanceOrdersCompanion.insert(
+                id: id,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                assetId: assetId,
+                kind: kind,
+                status: status,
+                contractRef: contractRef,
+                openedAt: openedAt,
+                closedAt: closedAt,
+                hoursMeter: hoursMeter,
+                laborCost: laborCost,
+                partsCost: partsCost,
+                otherCost: otherCost,
+                depreciationCost: depreciationCost,
+                totalCost: totalCost,
+                notes: notes,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$MaintenanceOrdersTable, MaintenanceOrder>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $MaintenanceOrdersTable,
+                    MaintenanceOrder
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$MaintenanceOrdersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MaintenanceOrdersTable,
+      MaintenanceOrder,
+      $$MaintenanceOrdersTableFilterComposer,
+      $$MaintenanceOrdersTableOrderingComposer,
+      $$MaintenanceOrdersTableAnnotationComposer,
+      $$MaintenanceOrdersTableCreateCompanionBuilder,
+      $$MaintenanceOrdersTableUpdateCompanionBuilder,
+      (
+        MaintenanceOrder,
+        BaseReferences<
+          _$AppDatabase,
+          $MaintenanceOrdersTable,
+          MaintenanceOrder
+        >,
+      ),
+      MaintenanceOrder,
+      PrefetchHooks Function()
+    >;
+typedef $$MaintenancePlansTableCreateCompanionBuilder =
+    MaintenancePlansCompanion Function({
+      required String id,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      required String toolModelId,
+      required String name,
+      Value<int?> everyDays,
+      Value<double?> everyHours,
+      Value<String?> notes,
+      Value<int> rowid,
+    });
+typedef $$MaintenancePlansTableUpdateCompanionBuilder =
+    MaintenancePlansCompanion Function({
+      Value<String> id,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<String> toolModelId,
+      Value<String> name,
+      Value<int?> everyDays,
+      Value<double?> everyHours,
+      Value<String?> notes,
+      Value<int> rowid,
+    });
+
+class $$MaintenancePlansTableFilterComposer
+    extends Composer<_$AppDatabase, $MaintenancePlansTable> {
+  $$MaintenancePlansTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get toolModelId => $composableBuilder(
+    column: $table.toolModelId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get everyDays => $composableBuilder(
+    column: $table.everyDays,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get everyHours => $composableBuilder(
+    column: $table.everyHours,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$MaintenancePlansTableOrderingComposer
+    extends Composer<_$AppDatabase, $MaintenancePlansTable> {
+  $$MaintenancePlansTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get toolModelId => $composableBuilder(
+    column: $table.toolModelId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get everyDays => $composableBuilder(
+    column: $table.everyDays,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get everyHours => $composableBuilder(
+    column: $table.everyHours,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$MaintenancePlansTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MaintenancePlansTable> {
+  $$MaintenancePlansTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get toolModelId => $composableBuilder(
+    column: $table.toolModelId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get everyDays =>
+      $composableBuilder(column: $table.everyDays, builder: (column) => column);
+
+  GeneratedColumn<double> get everyHours => $composableBuilder(
+    column: $table.everyHours,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+}
+
+class $$MaintenancePlansTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $MaintenancePlansTable,
+          MaintenancePlan,
+          $$MaintenancePlansTableFilterComposer,
+          $$MaintenancePlansTableOrderingComposer,
+          $$MaintenancePlansTableAnnotationComposer,
+          $$MaintenancePlansTableCreateCompanionBuilder,
+          $$MaintenancePlansTableUpdateCompanionBuilder,
+          (
+            MaintenancePlan,
+            BaseReferences<
+              _$AppDatabase,
+              $MaintenancePlansTable,
+              MaintenancePlan
+            >,
+          ),
+          MaintenancePlan,
+          PrefetchHooks Function()
+        > {
+  $$MaintenancePlansTableTableManager(
+    _$AppDatabase db,
+    $MaintenancePlansTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$MaintenancePlansTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$MaintenancePlansTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$MaintenancePlansTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> toolModelId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<int?> everyDays = const Value.absent(),
+                Value<double?> everyHours = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MaintenancePlansCompanion(
+                id: id,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                toolModelId: toolModelId,
+                name: name,
+                everyDays: everyDays,
+                everyHours: everyHours,
+                notes: notes,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required String toolModelId,
+                required String name,
+                Value<int?> everyDays = const Value.absent(),
+                Value<double?> everyHours = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MaintenancePlansCompanion.insert(
+                id: id,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                toolModelId: toolModelId,
+                name: name,
+                everyDays: everyDays,
+                everyHours: everyHours,
+                notes: notes,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$MaintenancePlansTable, MaintenancePlan>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $MaintenancePlansTable,
+                    MaintenancePlan
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$MaintenancePlansTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $MaintenancePlansTable,
+      MaintenancePlan,
+      $$MaintenancePlansTableFilterComposer,
+      $$MaintenancePlansTableOrderingComposer,
+      $$MaintenancePlansTableAnnotationComposer,
+      $$MaintenancePlansTableCreateCompanionBuilder,
+      $$MaintenancePlansTableUpdateCompanionBuilder,
+      (
+        MaintenancePlan,
+        BaseReferences<_$AppDatabase, $MaintenancePlansTable, MaintenancePlan>,
+      ),
+      MaintenancePlan,
       PrefetchHooks Function()
     >;
 typedef $$CustomersTableCreateCompanionBuilder =
@@ -23235,6 +25515,10 @@ class $AppDatabaseManager {
       $$ToolModelConsumablesTableTableManager(_db, _db.toolModelConsumables);
   $$InventoryMovementsTableTableManager get inventoryMovements =>
       $$InventoryMovementsTableTableManager(_db, _db.inventoryMovements);
+  $$MaintenanceOrdersTableTableManager get maintenanceOrders =>
+      $$MaintenanceOrdersTableTableManager(_db, _db.maintenanceOrders);
+  $$MaintenancePlansTableTableManager get maintenancePlans =>
+      $$MaintenancePlansTableTableManager(_db, _db.maintenancePlans);
   $$CustomersTableTableManager get customers =>
       $$CustomersTableTableManager(_db, _db.customers);
   $$PostalCodesTableTableManager get postalCodes =>

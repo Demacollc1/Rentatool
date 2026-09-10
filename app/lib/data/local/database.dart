@@ -114,6 +114,39 @@ class Assets extends Table with SyncColumns {
   TextColumn get photoPath => text().nullable()();
   TextColumn get photoLocalPath => text().nullable()();
   DateTimeColumn get photoUploadedAt => dateTime().nullable()();
+
+  /// Horómetro acumulado (horas de trabajo) y última revisión.
+  RealColumn get hoursMeter => real().withDefault(const Constant(0))();
+  DateTimeColumn get lastMaintenanceAt => dateTime().nullable()();
+}
+
+/// Orden de mantenimiento sobre una unidad: revisión post-renta,
+/// preventivo o correctivo, con costos y lectura de horómetro.
+class MaintenanceOrders extends Table with SyncColumns {
+  TextColumn get assetId => text()();
+  TextColumn get kind =>
+      text().withDefault(const Constant('revision'))();
+  TextColumn get status => text().withDefault(const Constant('open'))();
+  TextColumn get contractRef => text().nullable()();
+  DateTimeColumn get openedAt => dateTime()();
+  DateTimeColumn get closedAt => dateTime().nullable()();
+  RealColumn get hoursMeter => real().nullable()();
+  RealColumn get laborCost => real().withDefault(const Constant(0))();
+  RealColumn get partsCost => real().withDefault(const Constant(0))();
+  RealColumn get otherCost => real().withDefault(const Constant(0))();
+  RealColumn get depreciationCost =>
+      real().withDefault(const Constant(0))();
+  RealColumn get totalCost => real().withDefault(const Constant(0))();
+  TextColumn get notes => text().nullable()();
+}
+
+/// Plan preventivo por producto: cada N días y/o cada N horas.
+class MaintenancePlans extends Table with SyncColumns {
+  TextColumn get toolModelId => text()();
+  TextColumn get name => text()();
+  IntColumn get everyDays => integer().nullable()();
+  RealColumn get everyHours => real().nullable()();
+  TextColumn get notes => text().nullable()();
 }
 
 /// Consumibles y accesorios (stock por cantidad).
@@ -402,6 +435,8 @@ class SyncState extends Table {
   Consumables,
   ToolModelConsumables,
   InventoryMovements,
+  MaintenanceOrders,
+  MaintenancePlans,
   Customers,
   PostalCodes,
   CustomerSites,
@@ -420,7 +455,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 17; // v16 foto unidad · v17 reglas de renta
+  int get schemaVersion => 18; // v17 reglas de renta · v18 mantenimiento
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -478,6 +513,10 @@ class AppDatabase extends _$AppDatabase {
                 toolModelConsumables, toolModelConsumables.kind);
             await m.addColumn(toolModelConsumables,
                 toolModelConsumables.extraPrice);
+          }
+          if (from < 18) {
+            await m.addColumn(assets, assets.hoursMeter);
+            await m.addColumn(assets, assets.lastMaintenanceAt);
           }
           if (from >= 9 && from < 17) {
             await m.addColumn(customers, customers.qualification);

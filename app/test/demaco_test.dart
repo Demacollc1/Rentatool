@@ -10,6 +10,7 @@ import 'package:demaco/data/ocr/label_parser.dart';
 import 'package:demaco/data/repositories/catalog_repository.dart';
 import 'package:demaco/data/repositories/category_repository.dart';
 import 'package:demaco/data/repositories/location_repository.dart';
+import 'package:demaco/data/repositories/maintenance_repository.dart';
 import 'package:demaco/data/repositories/rental_repository.dart';
 import 'package:demaco/data/seed/portfolio_importer.dart';
 import 'package:demaco/data/sync/adapters.dart';
@@ -599,6 +600,156 @@ BOSCH GWS14-125
       expect(await rentals.deliver(contractId), isNull);
       expect(await rentals.deliver(contractId),
           contains('ya fue entregado'));
+    });
+  });
+
+  group('mantenimiento y cuarentena (F4)', () {
+    late AppDatabase db;
+    late CatalogRepository catalog;
+    late LocationRepository locations;
+    late MaintenanceRepository mant;
+
+    setUp(() {
+      db = _db();
+      final sync = SyncService(db, buildSyncAdapters());
+      catalog = CatalogRepository(db, sync);
+      locations = LocationRepository(db, sync);
+      mant = MaintenanceRepository(db, sync, catalog);
+    });
+
+    tearDown(() => db.close());
+
+    Future<(String modelId, String assetId)> unidad(
+        {double costo = 300}) async {
+      final modelId = await catalog.saveModel(
+          name: 'Compactadora', listCost: costo, rateDay: 60);
+      final assetId = await catalog.createAsset(
+          toolModelId: modelId,
+          assetTag: await catalog.nextAssetTag(),
+          purchaseCost: costo);
+      return (modelId, assetId);
+    }
+
+    test('cuarentena → orden → cierre con costos y ubicación',
+        () async {
+      final (_, assetId) = await unidad();
+      await catalog.setAssetStatus(assetId, 'quarantine');
+
+      expect(await mant.openOrder(assetId: assetId), isNull);
+      var asset = await catalog.getAsset(assetId);
+      expect(asset!.status, 'maintenance');
+      // No permite una segunda orden abierta sobre la misma unidad.
+      expect(await mant.openOrder(assetId: assetId),
+          contains('ya tiene una orden abierta'));
+
+      final destino = await locations.save(name: 'B87 Planta alta');
+      final orden = (await mant.openOrderFor(assetId))!;
+      expect(
+          await mant.closeOrder(orden.id,
+              laborCost: 10,
+              partsCost: 25.5,
+              otherCost: 4.5,
+              depreciationCost: 3,
+              hoursMeter: 120,
+              locationId: destino,
+              condition: 'good'),
+          isNull);
+
+      final cerrada = await (db.select(db.maintenanceOrders)
+            ..where((o) => o.id.equals(orden.id)))
+          .getSingle();
+      expect(cerrada.status, 'done');
+      expect(cerrada.totalCost, 43.0);
+
+      asset = await catalog.getAsset(assetId);
+      expect(asset!.status, 'available');
+      expect(asset.locationId, destino);
+      expect(asset.hoursMeter, 120);
+      expect(asset.lastMaintenanceAt, isNotNull);
+
+      // Kardex: entró y salió de cuarentena y mantenimiento.
+      final kinds = (await db.select(db.inventoryMovements).get())
+          .map((m) => m.kind)
+          .toList();
+      expect(kinds, contains('quarantine_in'));
+      expect(kinds, contains('maintenance_out'));
+      expect(kinds, contains('maintenance_return'));
+    });
+
+    test('el horómetro no puede retroceder', () async {
+      final (_, assetId) = await unidad();
+      await (db.update(db.assets)
+            ..where((a) => a.id.equals(assetId)))
+          .write(const AssetsCompanion(hoursMeter: Value(200)));
+      await mant.openOrder(assetId: assetId);
+      final orden = (await mant.openOrderFor(assetId))!;
+      expect(await mant.closeOrder(orden.id, hoursMeter: 150),
+          contains('no puede retroceder'));
+      expect(await mant.closeOrder(orden.id, hoursMeter: 210), isNull);
+    });
+
+    test('unidad rentada no admite orden; retiro da de baja',
+        () async {
+      final (_, assetId) = await unidad();
+      await catalog.setAssetStatus(assetId, 'rented');
+      expect(await mant.openOrder(assetId: assetId),
+          contains('rentada'));
+      await catalog.setAssetStatus(assetId, 'available');
+      await mant.openOrder(assetId: assetId, kind: 'correctivo');
+      final orden = (await mant.openOrderFor(assetId))!;
+      expect(
+          await mant.closeOrder(orden.id,
+              retire: true, notes: 'motor quemado'),
+          isNull);
+      expect((await catalog.getAsset(assetId))!.status, 'retired');
+    });
+
+    test('preventivos vencen por días o por horas de trabajo',
+        () async {
+      final (modelId, assetId) = await unidad();
+      await mant.savePlan(
+          toolModelId: modelId, name: 'Engrase', everyDays: 30);
+      await mant.savePlan(
+          toolModelId: modelId,
+          name: 'Carbones',
+          everyHours: 100);
+
+      // Recién revisada y sin horas: nada vence.
+      await (db.update(db.assets)
+            ..where((a) => a.id.equals(assetId)))
+          .write(AssetsCompanion(
+              lastMaintenanceAt: Value(DateTime.now())));
+      expect(await mant.duePreventives(), isEmpty);
+
+      // 40 días sin revisión y 120 h acumuladas: vencen ambos.
+      await (db.update(db.assets)
+            ..where((a) => a.id.equals(assetId)))
+          .write(AssetsCompanion(
+        lastMaintenanceAt: Value(
+            DateTime.now().subtract(const Duration(days: 40))),
+        hoursMeter: const Value(120),
+      ));
+      final due = await mant.duePreventives();
+      expect(due.map((d) => d.plan.name).toSet(),
+          {'Engrase', 'Carbones'});
+
+      // Con una orden abierta la unidad deja de aparecer.
+      await mant.openOrder(assetId: assetId, kind: 'preventivo');
+      expect(await mant.duePreventives(), isEmpty);
+    });
+
+    test('horas estimadas por fórmula: acumulado + días × 6',
+        () async {
+      final (_, assetId) = await unidad();
+      await (db.update(db.assets)
+            ..where((a) => a.id.equals(assetId)))
+          .write(AssetsCompanion(
+        hoursMeter: const Value(50),
+        lastMaintenanceAt: Value(
+            DateTime.now().subtract(const Duration(days: 10))),
+      ));
+      final asset = await catalog.getAsset(assetId);
+      expect(mant.estimatedHours(asset!), 50 + 10 * 6);
     });
   });
 }

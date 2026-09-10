@@ -13,6 +13,7 @@ import '../../data/local/database.dart';
 import '../../data/repositories/catalog_repository.dart';
 import '../../data/repositories/category_repository.dart';
 import '../../data/repositories/location_repository.dart';
+import '../../data/repositories/maintenance_repository.dart';
 import '../../data/repositories/supplier_repository.dart';
 import '../../data/sync/sync_service.dart';
 import '../dashboard/dashboard_screen.dart' show statusLabels;
@@ -137,6 +138,8 @@ class ModelDetailScreen extends ConsumerWidget {
               _RatesCard(model: m),
               const SizedBox(height: 8),
               _ConsumablesConfigCard(modelId: modelId),
+              const SizedBox(height: 8),
+              _MaintenancePlansCard(modelId: modelId),
               const SizedBox(height: 8),
               units.when(
                 loading: () => const LinearProgressIndicator(),
@@ -977,7 +980,7 @@ class _ConsumablesConfigCard extends ConsumerWidget {
     final links =
         ref.watch(modelConsumableLinksProvider(modelId)).value ??
             const [];
-    final money = NumberFormat.currency(symbol: r'\$');
+    final money = NumberFormat.currency(symbol: r'$');
     return Card(
       child: Column(children: [
         ListTile(
@@ -1124,5 +1127,120 @@ class _ConsumablesConfigCard extends ConsumerWidget {
     await ref
         .read(catalogRepositoryProvider)
         .linkConsumable(modelId, elegido.id);
+  }
+}
+
+class _MaintenancePlansCard extends ConsumerWidget {
+  const _MaintenancePlansCard({required this.modelId});
+
+  final String modelId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final plans =
+        ref.watch(modelPlansProvider(modelId)).value ?? const [];
+    return Card(
+      child: Column(children: [
+        ListTile(
+          dense: true,
+          title: const Text('Planes de mantenimiento preventivo',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          subtitle: const Text(
+              'Cada N días y/o N horas de trabajo; las unidades '
+              'vencidas aparecen en Mantenimiento',
+              style: TextStyle(fontSize: 10)),
+          trailing: IconButton(
+            icon: const Icon(Icons.add),
+            tooltip: 'Nuevo plan',
+            onPressed: () => _edit(context, ref, null),
+          ),
+        ),
+        for (final p in plans)
+          ListTile(
+            dense: true,
+            leading: const Icon(Icons.build_outlined, size: 18),
+            title: Text(p.name, style: const TextStyle(fontSize: 13)),
+            subtitle: Text(
+                [
+                  if (p.everyDays != null) 'cada ${p.everyDays} días',
+                  if (p.everyHours != null)
+                    'cada ${p.everyHours!.toStringAsFixed(0)} h',
+                ].join(' · '),
+                style: const TextStyle(fontSize: 11)),
+            trailing: PopupMenuButton<String>(
+              onSelected: (v) async {
+                if (v == 'editar') {
+                  await _edit(context, ref, p);
+                } else if (v == 'quitar') {
+                  await ref
+                      .read(maintenanceRepositoryProvider)
+                      .deletePlan(p.id);
+                }
+              },
+              itemBuilder: (_) => const [
+                PopupMenuItem(value: 'editar', child: Text('Editar')),
+                PopupMenuItem(value: 'quitar', child: Text('Quitar')),
+              ],
+            ),
+          ),
+      ]),
+    );
+  }
+
+  Future<void> _edit(BuildContext context, WidgetRef ref,
+      MaintenancePlan? plan) async {
+    final name = TextEditingController(text: plan?.name ?? '');
+    final dias = TextEditingController(
+        text: plan?.everyDays?.toString() ?? '');
+    final horas = TextEditingController(
+        text: plan?.everyHours?.toStringAsFixed(0) ?? '');
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(plan == null ? 'Nuevo plan' : 'Editar plan'),
+        content: Column(mainAxisSize: MainAxisSize.min, children: [
+          TextField(
+              controller: name,
+              decoration: const InputDecoration(
+                  labelText: 'Nombre (ej. Cambio de carbones)')),
+          TextField(
+              controller: dias,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                  labelText: 'Cada N días (vacío = no aplica)')),
+          TextField(
+              controller: horas,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                  labelText: 'Cada N horas (vacío = no aplica)')),
+        ]),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancelar')),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Guardar')),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    final nombre = name.text.trim();
+    final d = int.tryParse(dias.text.trim());
+    final h = double.tryParse(horas.text.replaceAll(',', '.').trim());
+    if (nombre.isEmpty || (d == null && h == null)) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content:
+                Text('El plan necesita nombre y días u horas')));
+      }
+      return;
+    }
+    await ref.read(maintenanceRepositoryProvider).savePlan(
+        id: plan?.id,
+        toolModelId: modelId,
+        name: nombre,
+        everyDays: d,
+        everyHours: h);
   }
 }

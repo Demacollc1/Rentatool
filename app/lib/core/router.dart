@@ -10,6 +10,7 @@ import '../features/dashboard/dashboard_screen.dart';
 import '../features/import/import_screen.dart';
 import '../features/locations/items_by_location_screen.dart';
 import '../features/locations/locations_screen.dart';
+import '../features/maintenance/maintenance_screen.dart';
 import '../features/rentals/contract_detail_screen.dart';
 import '../features/rentals/rentals_screen.dart';
 import '../features/scan/scan_screen.dart';
@@ -68,6 +69,9 @@ final routerProvider = Provider<GoRouter>((ref) {
                 GoRoute(
                     path: 'settings',
                     builder: (_, _) => const SettingsScreen()),
+                GoRoute(
+                    path: 'maintenance',
+                    builder: (_, _) => const MaintenanceScreen()),
               ],
             ),
           ]),

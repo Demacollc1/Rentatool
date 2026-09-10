@@ -57,7 +57,7 @@ class _KpiPill extends ConsumerWidget {
           _kpi(context, '$quarantine', 'Herramientas\nen cuarentena',
               Icons.gpp_maybe_outlined,
               quarantine > 0 ? Colors.orange : Colors.white70,
-              '/catalog'),
+              '/maintenance'),
         ]),
       ),
     );
