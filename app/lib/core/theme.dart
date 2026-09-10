@@ -59,7 +59,7 @@ class AppTheme {
         backgroundColor: Colors.white,
         side: const BorderSide(color: border),
         shape: const RoundedRectangleBorder(borderRadius: r8),
-        labelStyle: const TextStyle(fontSize: 12),
+        labelStyle: const TextStyle(fontSize: 12, color: ink),
       ),
       inputDecorationTheme: const InputDecorationTheme(
         filled: true,
